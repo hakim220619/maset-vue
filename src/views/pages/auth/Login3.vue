@@ -3,8 +3,6 @@ import { AuthApi } from '@/service/Api';
 import { ref, watch } from 'vue';
 import { useRouter } from 'vue-router';
 import { z } from 'zod';
-import { Helper } from '@/service/Helper';
-import axios from 'axios';
 
 const router = useRouter();
 
@@ -33,13 +31,7 @@ const schema = z.object({
 async function onFormSubmit() {
     try {
         schema.parse(form.value.data);
-
-
-        const response = await axios.post('http://192.168.88.101:3000/auth/login', form.value.data, {
-
-        });
-
-
+        const response = await AuthApi.login(form.value.data);
         if (response.data.success) {
             localStorage.setItem('token', response.data.data.token);
             router.push('/');
@@ -132,6 +124,12 @@ for (const key in form.value.errors) {
                                     <Button type="submit" label="Sign In" :disabled="form.loading"
                                         :loading="form.loading"></Button>
                                 </div>
+                                <div class="col-span-12 text-center mt-4">
+                                    <span class="text-sm text-surface-500 dark:text-surface-400">Don't have an
+                                        account?</span>
+                                    <Button label="Register" link class="ml-2" @click="router.push('/auth/register')" />
+                                </div>
+
                             </div>
                         </form>
                     </Fluid>

@@ -7,8 +7,9 @@ const menu = ref([]);
 
 onMounted(async () => {
     try {
-        const response = await AuthApi.client().get('gateway/idp/menu/');
+        const response = await AuthApi.client().get('/menus');
         if (response.data.success) {
+
             const apiMenu = response.data.data;
             menu.value = transformMenu(apiMenu);
         }
@@ -26,6 +27,8 @@ function transformMenu(apiMenu) {
 
     function createMenuItems(parentId) {
         const items = (grouped[parentId] || []).sort((a, b) => a.order_list - b.order_list);
+
+
         return items.map(item => {
             const transformedItem = {
                 label: item.name,

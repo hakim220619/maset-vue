@@ -364,6 +364,33 @@ const routes = [
                     breadcrumb: [{ parent: 'Utilities', label: 'Customer', item: 'Add Customer' }]
                 }
             },
+            {
+                path: 'pages/users',
+                name: 'Users-list',
+                component: () => import('@/views/pages/users/index.vue'),
+                meta: {
+                    requiresAuth: true,
+                    breadcrumb: [{ parent: 'Utilities', label: 'Users' }]
+                }
+            },
+            {
+                path: 'pages/users/create',
+                name: 'Users-create',
+                component: () => import('@/views/pages/users/form.vue'),
+                meta: {
+                    requiresAuth: true,
+                    breadcrumb: [{ parent: 'Utilities', label: 'Users', item: 'Add Users' }]
+                }
+            },
+            {
+                path: 'pages/users/:id/edit',
+                name: 'users-edit',
+                component: () => import('@/views/pages/users/form.vue'),
+                meta: {
+                    requiresAuth: true,
+                    breadcrumb: [{ parent: 'Utilities', label: 'Users', item: 'Edit Users' }]
+                }
+            },
 
 
 
@@ -664,6 +691,11 @@ const routes = [
         component: () => import('@/views/pages/auth/Login3.vue')
     },
     {
+        path: '/auth/register',
+        name: 'register',
+        component: () => import('@/views/pages/auth/register.vue')
+    },
+    {
         path: '/auth/forgot-password',
         name: 'forgot-password',
         component: () => import('@/views/pages/auth/ForgotPassword.vue')
@@ -734,8 +766,6 @@ router.beforeEach(async (to, from, next) => {
     const response = await AuthApi.checkAuth();
 
     if (to.matched.some((record) => record.meta.requiresAuth)) {
-        console.log(response);
-
         if (response) {
             next();
         } else {
