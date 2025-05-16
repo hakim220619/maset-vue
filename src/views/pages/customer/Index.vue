@@ -144,7 +144,6 @@ onMounted(async () => {
         </div>
 
         <div class="mt-8" v-if="visible">
-            <Divider class="mt-12" />
             <div class="font-semibold text-xl mb-2">List of Data</div>
             <div class="card mt-4">
                 <DataTable :value="data" paginator :rows="10" :rowsPerPageOptions="[5, 10, 20, 50]"

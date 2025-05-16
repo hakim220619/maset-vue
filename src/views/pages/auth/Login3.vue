@@ -29,15 +29,27 @@ const schema = z.object({
 });
 
 async function onFormSubmit() {
+    form.value.loading = true;
     try {
+        form.value.errors.email = '';
+        form.value.errors.password = '';
+        visivleErrorMessage.value = false;
+
         schema.parse(form.value.data);
+
         const response = await AuthApi.login(form.value.data);
+
         if (response.data.success) {
-            localStorage.setItem('token', response.data.data.token);
+            const { token, data } = response.data.data;
+
+            localStorage.setItem('token', token);
+            localStorage.setItem('userData', JSON.stringify(data));
+
             router.push('/');
         } else {
             visivleErrorMessage.value = true;
-            errorMessage.value = response.data.message;
+            errorMessage.value = response.data.message || 'Login failed';
+            form.value.data.password = ''; // clear password on error
         }
     } catch (err) {
         if (err instanceof z.ZodError) {
@@ -46,13 +58,18 @@ async function onFormSubmit() {
             }
         } else {
             console.error('An error occurred during login:', err);
+            visivleErrorMessage.value = true;
+            errorMessage.value = 'Something went wrong. Please try again.';
         }
+    } finally {
+        form.value.loading = false;
     }
 }
 
+// Clear errors on input
 for (const key in form.value.errors) {
     watch(
-        () => form.value.errors[key],
+        () => form.value.data[key],
         () => {
             form.value.errors[key] = '';
         }
@@ -61,22 +78,20 @@ for (const key in form.value.errors) {
 </script>
 
 <template>
-    <div class="overflow-hidden margin-0 relative h-screen bg-surface-100">
+    <div class="overflow-hidden relative h-screen bg-surface-100">
         <div class="grid sm:grid-cols-3 lg:grid-cols-2 h-full">
-            <div class="hidden sm:block bg-gradient-to-br from-[#536976] to-[#292E49] overflow-hidden">
-                <!-- <img src="https://images.unsplash.com/photo-1506620101082-6d82db519896?q=80&w=2071&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D"
-                    alt="" srcset="" class="w-full h-full object-cover" /> -->
-            </div>
+            <div class="hidden sm:block bg-gradient-to-br from-[#536976] to-[#292E49] overflow-hidden"></div>
 
             <div class="col-span-2 lg:col-span-1 flex items-center justify-center">
                 <div>
                     <Fluid class="w-full text-center">
-                        <form class="px-12 md:p-0 w-[29rem] relative" style="" @submit.prevent="onFormSubmit">
-                            <div class="col-span-9 text-left mb-8">
+                        <form class="px-12 md:p-0 w-[29rem]" @submit.prevent="onFormSubmit">
+                            <div class="text-left mb-8">
                                 <h2 class="mb-1 text-3xl font-serif text-surface-700 dark:text-surface-900">Welcome Back
                                 </h2>
-                                <span class="text-surface-500 dark:text-surface-300">Enter your email and password to
-                                    access your account</span>
+                                <span class="text-surface-500 dark:text-surface-300">
+                                    Enter your email and password to access your account
+                                </span>
                             </div>
 
                             <div class="grid grid-cols-12 gap-4">
@@ -88,48 +103,49 @@ for (const key in form.value.errors) {
                                 </div>
 
                                 <div class="col-span-12 text-left">
-                                    <label class="text-surface-400 dark:text-surface-400 mb-1">email</label>
+                                    <label class="text-surface-400 mb-1">Email</label>
                                     <div class="mt-1">
                                         <InputText v-model="form.data.email" type="text" placeholder="Email"
                                             class="w-full" :invalid="!!form.errors.email" />
-                                        <span class="mt-1 inline-block text-red-600 text-sm" v-if="form.errors.email">{{
-                                            errors.email }}</span>
+                                        <span v-if="form.errors.email" class="mt-1 text-red-600 text-sm">{{
+                                            form.errors.email }}</span>
                                     </div>
                                 </div>
 
                                 <div class="col-span-12 text-left">
-                                    <label class="text-surface-400 dark:text-surface-400 mb-1">Password</label>
+                                    <label class="text-surface-400 mb-1">Password</label>
                                     <div class="mt-1">
                                         <Password v-model="form.data.password" type="password" placeholder="Password"
                                             :feedback="false" :invalid="!!form.errors.password" toggleMask />
-                                        <span class="mt-1 inline-block text-red-600 text-sm"
-                                            v-if="form.errors.password">{{ errors.password }}</span>
+                                        <span v-if="form.errors.password" class="mt-1 text-red-600 text-sm">{{
+                                            form.errors.password }}</span>
                                     </div>
                                 </div>
 
                                 <div class="col-span-12 flex justify-between">
                                     <div class="flex items-center gap-2">
-                                        <Checkbox v-model="form.remember_me" inputId="remember_me" name="remember_me"
-                                            value="1" />
+                                        <Checkbox v-model="form.data.remember_me" inputId="remember_me"
+                                            name="remember_me" :binary="true" />
                                         <label for="remember_me" class="text-surface-500"> Remember me </label>
                                     </div>
-
-                                    <div>
-                                        <Button class="text-gray-300 flex justify-center" text
-                                            @click="router.push('/auth/forgot-password')">Forgot Password?</Button>
-                                    </div>
+                                    <Button class="text-gray-300" text @click="router.push('/auth/forgot-password')">
+                                        Forgot Password?
+                                    </Button>
                                 </div>
 
                                 <div class="col-span-12">
-                                    <Button type="submit" label="Sign In" :disabled="form.loading"
-                                        :loading="form.loading"></Button>
-                                </div>
-                                <div class="col-span-12 text-center mt-4">
-                                    <span class="text-sm text-surface-500 dark:text-surface-400">Don't have an
-                                        account?</span>
-                                    <Button label="Register" link class="ml-2" @click="router.push('/auth/register')" />
+                                    <Button type="submit" :disabled="form.loading" class="w-full">
+                                        <template #default>
+                                            <span v-if="form.loading" class="pi pi-spin pi-spinner mr-2"></span>
+                                            Sign In
+                                        </template>
+                                    </Button>
                                 </div>
 
+                                <div class="col-span-12 text-center mt-4">
+                                    <span class="text-sm text-surface-500">Don't have an account?</span>
+                                    <Button label="Register" link class="ml-2" @click="router.push('/auth/register')" />
+                                </div>
                             </div>
                         </form>
                     </Fluid>

@@ -15,13 +15,13 @@ const errorMessage = ref('');
 const form = ref({
     data: {
         nik: '',
-        name: 'sdasdasd',
-        email: 'asdasd@gmail.com',
-        password: '12345678',
+        name: '',
+        email: '',
+        password: '',
         entitas: '',
         image: null,
-        kontak: '234234234245234',
-        alamat: 'sdfsdfsfsdf',
+        contact: '',
+        address: '',
     },
     errors: {
         nik: '',
@@ -30,8 +30,8 @@ const form = ref({
         password: '',
         entitas: '',
         image: '',
-        kontak: '',
-        alamat: '',
+        contact: '',
+        address: '',
     },
 });
 
@@ -49,8 +49,8 @@ const schema = z.object({
         .refine((file) => !file || file.size <= 2 * 1024 * 1024, {
             message: 'Image must be smaller than 2MB',
         }),
-    kontak: z.string().min(1, { message: 'Kontak is required' }),
-    alamat: z.string().min(1, { message: 'Alamat is required' }),
+    contact: z.string().min(1, { message: 'contact is required' }),
+    address: z.string().min(1, { message: 'address is required' }),
 });
 
 
@@ -198,21 +198,21 @@ for (const key in form.value.data) {
                     </div>
 
 
-                    <!-- Kontak -->
+                    <!-- contact -->
                     <div class="col-span-6">
-                        <label for="kontak" class="block mb-1 text-gray-700">Kontak</label>
-                        <InputText v-model="form.data.kontak" id="kontak" class="w-full"
-                            :invalid="!!form.errors.kontak" />
-                        <InputError :message="form.errors.kontak" />
+                        <label for="contact" class="block mb-1 text-gray-700">contact</label>
+                        <InputText v-model="form.data.contact" id="contact" class="w-full"
+                            :invalid="!!form.errors.contact" />
+                        <InputError :message="form.errors.contact" />
                     </div>
 
-                    <!-- Alamat -->
+                    <!-- address -->
                     <div class="col-span-6">
-                        <label for="alamat" class="block mb-1 text-gray-700">Alamat</label>
-                        <InputText v-model="form.data.alamat" id="alamat" rows="3"
+                        <label for="address" class="block mb-1 text-gray-700">address</label>
+                        <InputText v-model="form.data.address" id="address" rows="3"
                             class="w-full border border-gray-300 rounded p-2"
-                            :class="{ 'border-red-600': !!form.errors.alamat }" placeholder="Alamat"></InputText>
-                        <InputError :message="form.errors.alamat" />
+                            :class="{ 'border-red-600': !!form.errors.address }" placeholder="address"></InputText>
+                        <InputError :message="form.errors.address" />
                     </div>
 
                     <div class="col-span-12 mt-6 flex justify-center gap-4">
