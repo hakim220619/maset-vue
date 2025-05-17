@@ -1,39 +1,47 @@
 <script setup>
 import { AuthApi } from '@/service/Api';
+import { Helper } from '@/service/Helper';
 import { FilterMatchMode, FilterOperator } from '@primevue/core/api';
-import { onMounted, ref } from 'vue';
+import { inject, onMounted, ref } from 'vue';
 import { useRouter } from 'vue-router';
 
-const customers = ref();
+const data = ref();
 const filters = ref();
+const swal = inject('$swal');
+
 
 const loading = ref(true);
 const router = useRouter();
-onMounted(async () => {
+
+const fetchUsers = async () => {
     try {
         const response = await AuthApi.client().get('/users');
         const allUsers = getUsers(response.data.data);
 
-        const currentUser = JSON.parse(localStorage.getItem('userData'));
+        const { rs_name, role_structure } = await Helper.getUserLocalStorage();
 
-        if (currentUser.role_structure !== 4) {
-            if ([32, 33, 34].includes(currentUser.role_structure)) {
-                customers.value = allUsers.filter(user =>
-                    user.rs_name?.toLowerCase().includes(currentUser.rs_name?.toLowerCase())
+        if (role_structure !== 1) {
+            if ([33, 34, 35].includes(role_structure)) {
+                data.value = allUsers.filter(user =>
+                    user.rs_name?.toLowerCase().includes(rs_name?.toLowerCase())
                 );
             } else {
-                customers.value = allUsers.filter(user =>
-                    user.role_structure === currentUser.role_structure
+                data.value = allUsers.filter(user =>
+                    user.role_structure === role_structure && user.role_access !== 1
                 );
             }
         } else {
-            customers.value = allUsers;
+            data.value = allUsers;
         }
     } catch (error) {
         console.error('Failed to fetch users:', error);
     } finally {
         loading.value = false;
     }
+};
+
+onMounted(() => {
+    fetchUsers();
 });
 const initFilters = () => {
     filters.value = {
@@ -70,6 +78,56 @@ const getUsers = (data) => {
 };
 
 
+
+const items = [
+    {
+        label: 'Ubah',
+        command: (e) => {
+            router.push({ name: 'Users-edit', params: { id: e.item.data.id } });
+        }
+    },
+    {
+        label: 'Hapus',
+        command: (e) => {
+            destroy(e.item.data.id, e.item.data.name);
+        }
+    }
+];
+
+
+const destroy = (id, name) => {
+    swal.mixin({
+        customClass: {
+            confirmButton: 'p-button p-component p-button-danger !mr-2',
+            cancelButton: 'p-button p-component p-button-secondary'
+        },
+        buttonsStyling: false
+    })
+        .fire({
+            icon: 'warning',
+            title: 'Peringatan',
+            text: `Apakah anda yakin ingin menghapus data ${name}?`,
+            showCancelButton: true,
+            confirmButtonText: 'Ya, Hapus Data!'
+        })
+        .then(async (result) => {
+            if (result.isConfirmed) {
+                const response = await AuthApi.client().delete('users/' + id);
+
+                if (response.data.success) {
+                    swal.fire({
+                        title: 'Success',
+                        text: 'Menu Management deleted successfully',
+                        icon: 'success'
+                    });
+
+                    fetchUsers();
+                }
+            }
+        });
+};
+
+
 const add = () => {
     router.push('/pages/users/create');
     isRedirect.value = true;
@@ -92,7 +150,7 @@ const add = () => {
 
     <div class="mt-4">
         <div class="card space-y-4 mt-2 p-4 rounded-lg shadow-md bg-white dark:bg-gray-900">
-            <div class="grid grid-cols-1 gap-4 md:grid-cols-3">
+            <div class="grid grid-cols-1 gap-4 md:grid-cols-5">
 
                 <!-- Total Users -->
                 <div class="p-4 bg-white rounded-lg shadow dark:bg-gray-800 flex items-center">
@@ -105,9 +163,7 @@ const add = () => {
                     </div>
                     <div class="ml-4">
                         <div class="text-sm text-gray-500 dark:text-gray-300">Total Users</div>
-                        <div class="text-2xl font-bold text-gray-900 dark:text-white">
-                            {{ customers?.length || 0 }}
-                        </div>
+                        <div class="text-2xl font-bold text-gray-900 dark:text-white">{{ data?.length || 0 }}</div>
                     </div>
                 </div>
 
@@ -122,7 +178,7 @@ const add = () => {
                     <div class="ml-4">
                         <div class="text-sm text-gray-500 dark:text-gray-300">Active Users</div>
                         <div class="text-2xl font-bold text-green-600 dark:text-green-400">
-                            {{customers?.filter(user => user.status === 'ACTIVE').length || 0}}
+                            {{data?.filter(user => user.status_name === 'ACTIVE').length || 0}}
                         </div>
                     </div>
                 </div>
@@ -138,7 +194,40 @@ const add = () => {
                     <div class="ml-4">
                         <div class="text-sm text-gray-500 dark:text-gray-300">Inactive Users</div>
                         <div class="text-2xl font-bold text-red-600 dark:text-red-400">
-                            {{customers?.filter(user => user.status === 'INACTIVE').length || 0}}
+                            {{data?.filter(user => user.status_name === 'INACTIVE').length || 0}}
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Suspended Users -->
+                <div class="p-4 bg-white rounded-lg shadow dark:bg-gray-800 flex items-center">
+                    <div class="p-3 bg-yellow-100 dark:bg-yellow-900 rounded-full">
+                        <svg class="w-6 h-6 text-yellow-600 dark:text-yellow-400" fill="none" stroke="currentColor"
+                            stroke-width="2" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M12 8v4m0 4h.01" />
+                        </svg>
+                    </div>
+                    <div class="ml-4">
+                        <div class="text-sm text-gray-500 dark:text-gray-300">Suspended Users</div>
+                        <div class="text-2xl font-bold text-yellow-600 dark:text-yellow-400">
+                            {{data?.filter(user => user.status_name === 'SUSPENDED').length || 0}}
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Verification Users -->
+                <div class="p-4 bg-white rounded-lg shadow dark:bg-gray-800 flex items-center">
+                    <div class="p-3 bg-blue-100 dark:bg-blue-900 rounded-full">
+                        <svg class="w-6 h-6 text-blue-600 dark:text-blue-400" fill="none" stroke="currentColor"
+                            stroke-width="2" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round"
+                                d="M12 11c0-1.104-.896-2-2-2s-2 .896-2 2 0 3 2 3 2-1.896 2-3zM12 15h0" />
+                        </svg>
+                    </div>
+                    <div class="ml-4">
+                        <div class="text-sm text-gray-500 dark:text-gray-300">Verification Users</div>
+                        <div class="text-2xl font-bold text-blue-600 dark:text-blue-400">
+                            {{data?.filter(user => user.status_name === 'VERIFICATION').length || 0}}
                         </div>
                     </div>
                 </div>
@@ -146,15 +235,15 @@ const add = () => {
             </div>
         </div>
 
+
         <div class="card mt-5">
             <div class="font-semibold text-xl mb-2">List of Data</div>
             <div class="card mt-4">
-                <DataTable v-model:filters="filters" :value="customers" paginator showGridlines :rows="10" dataKey="id"
-                    filterDisplay="menu" :loading="loading" :globalFilterFields="['name',]">
+                <DataTable v-model:filters="filters" :value="data" paginator showGridlines :rows="10" dataKey="id"
+                    filterDisplay="menu" :loading="loading" :globalFilterFields="['name', 'email', 'nik']">
                     <template #header>
                         <div class="flex justify-between">
-                            <Button type="button" icon="pi pi-filter-slash" label="Clear" outlined
-                                @click="clearFilter()" />
+                            <p></p>
                             <IconField>
                                 <InputIcon>
                                     <i class="pi pi-search" />
@@ -163,8 +252,8 @@ const add = () => {
                             </IconField>
                         </div>
                     </template>
-                    <template #empty> No customers found. </template>
-                    <template #loading> Loading customers data. Please wait. </template>
+                    <template #empty> No data found. </template>
+                    <template #loading> Loading data data. Please wait. </template>
 
                     <Column field="no" header="No" style="min-width: 6rem">
                         <template #body="{ index }">{{ index + 1 }}</template>
@@ -219,31 +308,22 @@ const add = () => {
                         </template>
                     </Column>
 
-                    <Column field="status" header="Status" style="min-width: 10rem">
-                        <template #body="{ data }">{{ data.status }}</template>
+
+                    <Column field="status_name" header="Status" style="min-width: 10rem">
+                        <template #body="{ data }">
+                            <Tag :value="data.status_name" :severity="Helper.getStatusSeverity(data.status_name)" />
+                        </template>
                         <template #filter="{ filterModel }">
-                            <InputText v-model="filterModel.value" type="text" placeholder="Search by Status" />
+                            <Dropdown v-model="filterModel.value" :options="statusOptions" placeholder="Filter Status"
+                                optionLabel="label" optionValue="value" />
                         </template>
                     </Column>
 
-                    <Column field="active" header="Active" style="min-width: 8rem">
+                    <Column>
                         <template #body="{ data }">
-                            <Tag :value="data.active ? 'Active' : 'Inactive'"
-                                :severity="data.active ? 'success' : 'danger'" />
-                        </template>
-                        <template #filter="{ filterModel }">
-                            <Dropdown v-model="filterModel.value" :options="[true, false]" placeholder="Filter Active"
-                                optionLabel="label" optionValue="value">
-                                <template #option="{ option }">
-                                    {{ option ? 'Active' : 'Inactive' }}
-                                </template>
-                            </Dropdown>
-                        </template>
-                    </Column>
-                    <Column headerStyle="width: 5rem; text-align: center"
-                        bodyStyle="text-align: center; overflow: visible">
-                        <template #body>
-                            <Button type="button" icon="pi pi-cog" rounded />
+                            <div class="flex gap-1 justify-end">
+                                <DropdownButton :items="items" :data="data" :menu-key="data.id" />
+                            </div>
                         </template>
                     </Column>
                 </DataTable>

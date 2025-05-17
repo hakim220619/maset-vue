@@ -105,8 +105,9 @@ export const Helper = {
         const router = useRouter();
         try {
             const response = await AuthApi.client().get(`${endpoint}/${id}`);
+
             if (response.data.success) {
-                return response.data.data[0]; // Return the first data element if success
+                return response.data.data; // Return the first data element if success
             }
         } catch (error) {
             if ([400, 404].includes(error.status)) {
@@ -114,6 +115,141 @@ export const Helper = {
             }
         }
     },
+
+    async getUserLocalStorage() {
+        const raw = localStorage.getItem('userData');
+
+        if (!raw) return {};
+
+        try {
+            const parsed = JSON.parse(raw);
+            return {
+                ...parsed,
+                role_structure: parseInt(parsed.role_structure) || null,
+                role_access: parseInt(parsed.role_access) || null,
+                rs_name: (parsed.rs_name || ''),
+            };
+        } catch (e) {
+            console.error('Invalid JSON in localStorage.userData');
+            return {};
+        }
+    },
+    async getRoleJson() {
+        return [1, 2, 3, 4]
+
+    },
+
+    async getRoleStructures() {
+        try {
+            const { role_structure, rs_name } = await Helper.getUserLocalStorage();
+            const roleJson = await Helper.getRoleJson();
+
+            const response = await AuthApi.client().get('/role_structure');
+            let data = response.data.data;
+
+            if (role_structure === roleJson[0]) {
+                data = response.data.data;
+            } else {
+                if ([33, 34, 35].includes(role_structure)) {
+                    data = data.filter(item =>
+                        item.rs_name.includes(rs_name)
+                    )
+                } else {
+                    data = data.filter(item =>
+                        item.rs_id === role_structure
+                    )
+                }
+            }
+
+
+            return data.map(item => ({
+                name: item.rs_name,
+                id: item.rs_id,
+            }));
+        } catch (error) {
+            console.error('Failed to fetch role structures:', error);
+            return [];
+        }
+    },
+    async getRoleAccess() {
+        try {
+            const { role_access, role_structure } = await Helper.getUserLocalStorage();
+            const roleJson = await Helper.getRoleJson();
+
+            const response = await AuthApi.client().get('/role_access');
+            let data = response.data.data;
+
+            if (role_structure == roleJson[0]) {
+                data = response.data.data;
+            } else {
+                data = data.filter(item =>
+                    item.ra_id !== roleJson[0]
+                );
+            }
+
+            return data.map(item => ({
+                name: item.ra_name,
+                id: item.ra_id,
+            }));
+        } catch (error) {
+            console.error('Failed to fetch role structures:', error);
+            return [];
+        }
+    },
+    async getRole() {
+        try {
+            const { role_access, role_structure } = await Helper.getUserLocalStorage();
+            const roleJson = await Helper.getRoleJson();
+
+            const response = await AuthApi.client().get('/role');
+            let data = response.data.data;
+
+            if (role_structure == roleJson[0]) {
+                data = response.data.data;
+            } else {
+                data = data.filter(item =>
+                    item.role_id !== roleJson[0]
+                );
+            }
+
+            return data.map(item => ({
+                name: item.role_name,
+                id: item.role_id,
+            }));
+        } catch (error) {
+            console.error('Failed to fetch role structures:', error);
+            return [];
+        }
+    },
+    async getStatus() {
+        try {
+
+            const response = await AuthApi.client().get('/status');
+            let data = response.data.data;
+
+            return data.map(item => ({
+                name: item.status_name,
+                id: item.id,
+            }));
+        } catch (error) {
+            console.error('Failed to fetch role structures:', error);
+            return [];
+        }
+    },
+    getStatusSeverity(status) {
+        try {
+            const map = {
+                ACTIVE: 'success',
+                INACTIVE: 'danger',
+                SUSPENDED: 'warning',
+                VERIFICATION: 'info'
+            };
+            return map[status] || null;
+        } catch (error) {
+            console.error('Failed to fetch status:', error);
+            return null;
+        }
+    }
 
 
 

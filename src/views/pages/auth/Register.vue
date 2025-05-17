@@ -1,9 +1,11 @@
 <script setup>
 import InputError from '@/components/InputError.vue';
+import Label from '@/components/Label.vue';
 import { AuthApi } from '@/service/Api';
 import { onMounted, ref, watch } from 'vue';
 import { useRouter } from 'vue-router';
 import { z } from 'zod';
+
 
 
 const router = useRouter();
@@ -78,7 +80,6 @@ async function onFormSubmit() {
                 formData.append(key, form.value.data[key]);
             }
         }
-        console.log(formData);
 
         const response = await AuthApi.client().post('/auth/register/users', formData, {
             headers: { 'Content-Type': 'multipart/form-data' },
@@ -150,21 +151,21 @@ for (const key in form.value.data) {
 
                     <!-- NIK -->
                     <div class="col-span-6">
-                        <label for="nik" class="block mb-1 text-gray-700">NIK</label>
+                        <Label for="nik" class="block mb-1 text-gray-700">NIK</Label>
                         <InputText v-model="form.data.nik" id="nik" class="w-full" :invalid="!!form.errors.nik" />
                         <InputError :message="form.errors.nik" />
                     </div>
 
                     <!-- Full Name -->
                     <div class="col-span-6">
-                        <label for="name" class="block mb-1 text-gray-700">Full Name</label>
+                        <Label for="name" class="block mb-1 text-gray-700">Full Name</Label>
                         <InputText v-model="form.data.name" id="name" class="w-full" :invalid="!!form.errors.name" />
                         <InputError :message="form.errors.name" />
                     </div>
 
                     <!-- Email -->
                     <div class="col-span-6">
-                        <label for="email" class="block mb-1 text-gray-700">Email</label>
+                        <Label for="email" class="block mb-1 text-gray-700">Email</Label>
                         <InputText v-model="form.data.email" id="email" type="email" class="w-full"
                             :invalid="!!form.errors.email" />
                         <InputError :message="form.errors.email" />
@@ -172,7 +173,7 @@ for (const key in form.value.data) {
 
                     <!-- Password -->
                     <div class="col-span-6">
-                        <label for="password" class="block mb-1 text-gray-700">Password</label>
+                        <Label for="password" class="block mb-1 text-gray-700">Password</Label>
 
                         <InputText v-model="form.data.password" id="password" type="password" class="w-full"
                             :invalid="!!form.errors.password" />
@@ -182,7 +183,7 @@ for (const key in form.value.data) {
 
                     <!-- Entitas -->
                     <div class="col-span-6">
-                        <label for="entitas" class="block mb-1 text-gray-700">Entitas</label>
+                        <Label for="entitas" class="block mb-1 text-gray-700">Entitas</Label>
                         <Select v-model="form.data.entitas" :options=entitasOptions show-clear option-label="name"
                             filter option-value="id" :virtualScrollerOptions="{ itemSize: 38 }"
                             placeholder="Select a category" class="w-full" :invalid="!!form.errors.entitas" />
@@ -191,16 +192,15 @@ for (const key in form.value.data) {
 
                     <!-- Image -->
                     <div class="col-span-6">
-                        <label for="image" class="block mb-1 text-gray-700">Upload Image</label>
-                        <input id="image" type="file" accept="image/*" @change="onImageChange"
-                            class="w-full border border-gray-300 rounded px-3 py-2 file:mr-4  hover:file:bg-surface-300" />
+                        <Label for="image" class="block mb-1 text-gray-700">Image</Label>
+                        <InputText id="image" type="file" accept="image/*" @change="onImageChange" class="w-full" />
                         <InputError :message="form.errors.image" />
                     </div>
 
 
                     <!-- contact -->
                     <div class="col-span-6">
-                        <label for="contact" class="block mb-1 text-gray-700">contact</label>
+                        <Label for="contact" class="block mb-1 text-gray-700">Contact</Label>
                         <InputText v-model="form.data.contact" id="contact" class="w-full"
                             :invalid="!!form.errors.contact" />
                         <InputError :message="form.errors.contact" />
@@ -208,7 +208,7 @@ for (const key in form.value.data) {
 
                     <!-- address -->
                     <div class="col-span-6">
-                        <label for="address" class="block mb-1 text-gray-700">address</label>
+                        <Label for="address" class="block mb-1 text-gray-700">address</Label>
                         <InputText v-model="form.data.address" id="address" rows="3"
                             class="w-full border border-gray-300 rounded p-2"
                             :class="{ 'border-red-600': !!form.errors.address }" placeholder="address"></InputText>

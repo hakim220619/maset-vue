@@ -384,7 +384,7 @@ const routes = [
             },
             {
                 path: 'pages/users/:id/edit',
-                name: 'users-edit',
+                name: 'Users-edit',
                 component: () => import('@/views/pages/users/form.vue'),
                 meta: {
                     requiresAuth: true,

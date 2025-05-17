@@ -9,7 +9,7 @@ defineProps({
 </script>
 
 <template>
-    <label class="font-medium">
+    <label class="font-medium text-black dark:text-white">
         <slot>
             <span>{{ value }}</span>
         </slot>
