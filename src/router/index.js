@@ -12,10 +12,10 @@ const routes = [
                 path: '/',
                 name: 'dashboard',
                 exact: true,
-                component: () => import('@/views/dashboards/E-commerce.vue'),
+                component: () => import('@/views/dashboards/Index.vue'),
                 meta: {
                     requiresAuth: true,
-                    breadcrumb: [{ parent: 'E-Commerce Dashboard' }]
+                    breadcrumb: [{ parent: 'Dashboard' }]
                 }
             },
             {
@@ -392,6 +392,15 @@ const routes = [
                 }
             },
 
+            {
+                path: 'pages/broadcast/whatsapp',
+                name: 'Whatsapp-list',
+                component: () => import('@/views/pages/broadcast/whatsapp/Index.vue'),
+                meta: {
+                    requiresAuth: true,
+                    breadcrumb: [{ parent: 'Utilities', label: 'Whatsapp' }]
+                }
+            },
 
 
             {
@@ -510,7 +519,7 @@ const routes = [
             {
                 path: 'pages/menu_management/create',
                 name: 'menuManagement-create',
-                component: () => import('@/views/pages/menu_management/menuManagementForm.vue'),
+                component: () => import('@/views/pages/menu_management/Form.vue'),
                 meta: {
                     requiresAuth: true,
                     breadcrumb: [{ parent: 'Setting', label: 'Menu Management', item: 'Add Menu Management' }]
@@ -519,10 +528,37 @@ const routes = [
             {
                 path: 'pages/menu_management/:id/edit',
                 name: 'menuManagement-edit',
-                component: () => import('@/views/pages/menu_management/menuManagementForm.vue'),
+                component: () => import('@/views/pages/menu_management/Form.vue'),
                 meta: {
                     requiresAuth: true,
                     breadcrumb: [{ parent: 'Setting', label: 'Menu Management', item: 'Edit Menu Management' }]
+                }
+            },
+            {
+                path: 'pages/role_structure',
+                name: 'roleStructure-list',
+                component: () => import('@/views/pages/role_structure/Index.vue'),
+                meta: {
+                    requiresAuth: true,
+                    breadcrumb: [{ parent: 'Setting', label: 'Role Structure' }]
+                }
+            },
+            {
+                path: 'pages/role_structure/create',
+                name: 'roleStructure-create',
+                component: () => import('@/views/pages/role_structure/Form.vue'),
+                meta: {
+                    requiresAuth: true,
+                    breadcrumb: [{ parent: 'Setting', label: 'Role Structure', item: 'Add Role Structure' }]
+                }
+            },
+            {
+                path: 'pages/role_structure/:id/edit',
+                name: 'roleStructure-edit',
+                component: () => import('@/views/pages/role_structure/Form.vue'),
+                meta: {
+                    requiresAuth: true,
+                    breadcrumb: [{ parent: 'Setting', label: 'Role Structure', item: 'Edit Role Structure' }]
                 }
             },
 

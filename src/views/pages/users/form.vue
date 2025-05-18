@@ -124,56 +124,28 @@ onBeforeMount(async () => {
     }
 });
 
-const getRoleStructures = async () => {
-    try {
 
-        const data = await Helper.getRoleStructures();
-        roleStructureOptions.value = data;
+const fetchOptions = async () => {
+    try {
+        const [roleStructures, roleAccess, roles, statuses] = await Promise.all([
+            Helper.getRoleStructures(),
+            Helper.getRoleAccess(),
+            Helper.getRole(),
+            Helper.getStatus()
+        ]);
+
+        roleStructureOptions.value = roleStructures;
+        roleAccessOptions.value = roleAccess;
+        roleOptions.value = roles;
+        statusOptions.value = statuses;
 
     } catch (error) {
-        console.error('Failed to fetch role structures:', error);
+        console.error('Failed to fetch options:', error);
     }
 };
 
-const getRoleAccess = async () => {
-    try {
+onMounted(fetchOptions);
 
-        const data = await Helper.getRoleAccess();
-        roleAccessOptions.value = data;
-
-    } catch (error) {
-        console.error('Failed to fetch role structures:', error);
-    }
-};
-
-const getRole = async () => {
-    try {
-
-        const data = await Helper.getRole();
-        roleOptions.value = data;
-
-    } catch (error) {
-        console.error('Failed to fetch role structures:', error);
-    }
-};
-
-const getStatus = async () => {
-    try {
-
-        const data = await Helper.getStatus();
-        statusOptions.value = data;
-
-    } catch (error) {
-        console.error('Failed to fetch role structures:', error);
-    }
-};
-
-onMounted(async () => {
-    await getRoleStructures();
-    await getRoleAccess();
-    await getRole();
-    await getStatus();
-});
 
 
 for (const key in form.value.data) {

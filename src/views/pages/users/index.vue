@@ -8,6 +8,7 @@ import { useRouter } from 'vue-router';
 const data = ref();
 const filters = ref();
 const swal = inject('$swal');
+const isRedirect = ref(false);
 
 
 const loading = ref(true);
@@ -235,99 +236,97 @@ const add = () => {
             </div>
         </div>
 
+        <div class="card mt-4">
+            <DataTable v-model:filters="filters" :value="data" paginator showGridlines :rows="10" dataKey="id"
+                filterDisplay="menu" :loading="loading" :globalFilterFields="['name', 'email', 'nik']">
+                <template #header>
+                    <div class="flex justify-between">
+                        <p></p>
+                        <IconField>
+                            <InputIcon>
+                                <i class="pi pi-search" />
+                            </InputIcon>
+                            <InputText v-model="filters['global'].value" placeholder="Keyword Search" />
+                        </IconField>
+                    </div>
+                </template>
+                <template #empty> No data found. </template>
+                <template #loading> Loading data data. Please wait. </template>
 
-        <div class="card mt-5">
-            <div class="font-semibold text-xl mb-2">List of Data</div>
-            <div class="card mt-4">
-                <DataTable v-model:filters="filters" :value="data" paginator showGridlines :rows="10" dataKey="id"
-                    filterDisplay="menu" :loading="loading" :globalFilterFields="['name', 'email', 'nik']">
-                    <template #header>
-                        <div class="flex justify-between">
-                            <p></p>
-                            <IconField>
-                                <InputIcon>
-                                    <i class="pi pi-search" />
-                                </InputIcon>
-                                <InputText v-model="filters['global'].value" placeholder="Keyword Search" />
-                            </IconField>
+                <Column field="no" header="No" style="min-width: 6rem">
+                    <template #body="{ index }">{{ index + 1 }}</template>
+                </Column>
+
+                <Column field="nik" header="NIK" style="min-width: 12rem">
+                    <template #body="{ data }">{{ data.nik }}</template>
+                    <template #filter="{ filterModel }">
+                        <InputText v-model="filterModel.value" type="text" placeholder="Search by NIK" />
+                    </template>
+                </Column>
+
+                <Column field="name" header="User" style="min-width: 12rem">
+                    <template #body="{ data }">{{ data.name }}</template>
+                    <template #filter="{ filterModel }">
+                        <InputText v-model="filterModel.value" type="text" placeholder="Search by name" />
+                    </template>
+                </Column>
+
+                <Column field="email" header="Email" style="min-width: 12rem">
+                    <template #body="{ data }">{{ data.email }}</template>
+                    <template #filter="{ filterModel }">
+                        <InputText v-model="filterModel.value" type="text" placeholder="Search by Email" />
+                    </template>
+                </Column>
+
+                <Column field="rs_name" header="Role Structure" style="min-width: 20rem">
+                    <template #body="{ data }">{{ data.rs_name }}</template>
+                    <template #filter="{ filterModel }">
+                        <InputText v-model="filterModel.value" type="text" placeholder="Search by Role Structure" />
+                    </template>
+                </Column>
+
+                <Column field="ra_name" header="Role Access" style="min-width: 14rem">
+                    <template #body="{ data }">{{ data.ra_name }}</template>
+                    <template #filter="{ filterModel }">
+                        <InputText v-model="filterModel.value" type="text" placeholder="Search by Role Access" />
+                    </template>
+                </Column>
+
+                <Column field="role_name" header="Role Users" style="min-width: 14rem">
+                    <template #body="{ data }">{{ data.role_name }}</template>
+                    <template #filter="{ filterModel }">
+                        <InputText v-model="filterModel.value" type="text" placeholder="Search by Role Users" />
+                    </template>
+                </Column>
+
+                <Column field="contact" header="Contact" style="min-width: 12rem">
+                    <template #body="{ data }">{{ data.contact }}</template>
+                    <template #filter="{ filterModel }">
+                        <InputText v-model="filterModel.value" type="text" placeholder="Search by Contact" />
+                    </template>
+                </Column>
+
+                <Column field="status" header="Status" style="min-width: 10rem">
+                    <template #body="{ data }">
+                        <Tag :value="Helper.getStatusLabel(data.status)"
+                            :severity="Helper.getStatusSeverity(data.status)" />
+                    </template>
+                    <template #filter="{ filterModel }">
+                        <Dropdown v-model="filterModel.value" :options="statusOptions" placeholder="Filter Status"
+                            optionLabel="label" optionValue="value" />
+                    </template>
+                </Column>
+
+
+                <Column header="Action">
+                    <template #body="{ data }">
+                        <div class="flex gap-1 justify-end">
+                            <DropdownButton :items="items" :data="data" :menu-key="data.id" />
                         </div>
                     </template>
-                    <template #empty> No data found. </template>
-                    <template #loading> Loading data data. Please wait. </template>
-
-                    <Column field="no" header="No" style="min-width: 6rem">
-                        <template #body="{ index }">{{ index + 1 }}</template>
-                    </Column>
-
-                    <Column field="nik" header="NIK" style="min-width: 12rem">
-                        <template #body="{ data }">{{ data.nik }}</template>
-                        <template #filter="{ filterModel }">
-                            <InputText v-model="filterModel.value" type="text" placeholder="Search by NIK" />
-                        </template>
-                    </Column>
-
-                    <Column field="name" header="User" style="min-width: 12rem">
-                        <template #body="{ data }">{{ data.name }}</template>
-                        <template #filter="{ filterModel }">
-                            <InputText v-model="filterModel.value" type="text" placeholder="Search by name" />
-                        </template>
-                    </Column>
-
-                    <Column field="email" header="Email" style="min-width: 12rem">
-                        <template #body="{ data }">{{ data.email }}</template>
-                        <template #filter="{ filterModel }">
-                            <InputText v-model="filterModel.value" type="text" placeholder="Search by Email" />
-                        </template>
-                    </Column>
-
-                    <Column field="rs_name" header="Role Structure" style="min-width: 20rem">
-                        <template #body="{ data }">{{ data.rs_name }}</template>
-                        <template #filter="{ filterModel }">
-                            <InputText v-model="filterModel.value" type="text" placeholder="Search by Role Structure" />
-                        </template>
-                    </Column>
-
-                    <Column field="ra_name" header="Role Access" style="min-width: 14rem">
-                        <template #body="{ data }">{{ data.ra_name }}</template>
-                        <template #filter="{ filterModel }">
-                            <InputText v-model="filterModel.value" type="text" placeholder="Search by Role Access" />
-                        </template>
-                    </Column>
-
-                    <Column field="role_name" header="Role Users" style="min-width: 14rem">
-                        <template #body="{ data }">{{ data.role_name }}</template>
-                        <template #filter="{ filterModel }">
-                            <InputText v-model="filterModel.value" type="text" placeholder="Search by Role Users" />
-                        </template>
-                    </Column>
-
-                    <Column field="contact" header="Contact" style="min-width: 12rem">
-                        <template #body="{ data }">{{ data.contact }}</template>
-                        <template #filter="{ filterModel }">
-                            <InputText v-model="filterModel.value" type="text" placeholder="Search by Contact" />
-                        </template>
-                    </Column>
-
-
-                    <Column field="status_name" header="Status" style="min-width: 10rem">
-                        <template #body="{ data }">
-                            <Tag :value="data.status_name" :severity="Helper.getStatusSeverity(data.status_name)" />
-                        </template>
-                        <template #filter="{ filterModel }">
-                            <Dropdown v-model="filterModel.value" :options="statusOptions" placeholder="Filter Status"
-                                optionLabel="label" optionValue="value" />
-                        </template>
-                    </Column>
-
-                    <Column>
-                        <template #body="{ data }">
-                            <div class="flex gap-1 justify-end">
-                                <DropdownButton :items="items" :data="data" :menu-key="data.id" />
-                            </div>
-                        </template>
-                    </Column>
-                </DataTable>
-            </div>
+                </Column>
+            </DataTable>
         </div>
+
     </div>
 </template>

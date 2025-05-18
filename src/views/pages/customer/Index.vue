@@ -7,6 +7,7 @@ import { useTitle } from '@vueuse/core';
 import { inject, onMounted, ref } from 'vue';
 import { useRouter } from 'vue-router';
 
+
 const swal = inject('$swal');
 const title = useTitle();
 const router = useRouter();

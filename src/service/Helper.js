@@ -236,20 +236,60 @@ export const Helper = {
             return [];
         }
     },
-    getStatusSeverity(status) {
+
+
+    async fetchUsers() {
         try {
-            const map = {
-                ACTIVE: 'success',
-                INACTIVE: 'danger',
-                SUSPENDED: 'warning',
-                VERIFICATION: 'info'
-            };
-            return map[status] || null;
+            const response = await AuthApi.client().get('/users');
+            const allUsers = response.data.data;
+
+            const { rs_name = '', role_structure } = await Helper.getUserLocalStorage();
+
+            if (role_structure === 1) {
+                return allUsers;
+            }
+
+            if ([33, 34, 35].includes(role_structure)) {
+                const name = rs_name.toLowerCase();
+                return allUsers.filter(user =>
+                    user.rs_name?.toLowerCase().includes(name)
+                );
+            }
+
+            return allUsers.filter(user =>
+                user.role_structure === role_structure && user.role_access !== 1
+            );
+
         } catch (error) {
-            console.error('Failed to fetch status:', error);
-            return null;
+            console.error('Failed to fetch users:', error);
+            return [];
         }
+    },
+    getStatusLabel(status) {
+        const statusMap = {
+            1: 'ACTIVE',
+            2: 'INACTIVE',
+            3: 'SUSPENDED',
+            4: 'VERIFICATION',
+            ACTIVE: 'ACTIVE',
+            INACTIVE: 'INACTIVE',
+            SUSPENDED: 'SUSPENDED',
+            VERIFICATION: 'VERIFICATION'
+        };
+        return statusMap[status] || 'UNKNOWN';
+    },
+
+    getStatusSeverity(status) {
+        const severityMap = {
+            ACTIVE: 'success',
+            INACTIVE: 'danger',
+            SUSPENDED: 'warning',
+            VERIFICATION: 'info'
+        };
+        const normalized = this.getStatusLabel(status); // gunakan label yang telah dinormalisasi
+        return severityMap[normalized] || null;
     }
+
 
 
 
