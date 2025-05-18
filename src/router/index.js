@@ -561,6 +561,60 @@ const routes = [
                     breadcrumb: [{ parent: 'Setting', label: 'Role Structure', item: 'Edit Role Structure' }]
                 }
             },
+            {
+                path: 'pages/role_access',
+                name: 'roleAccess-list',
+                component: () => import('@/views/pages/role_access/Index.vue'),
+                meta: {
+                    requiresAuth: true,
+                    breadcrumb: [{ parent: 'Setting', label: 'Role Access' }]
+                }
+            },
+            {
+                path: 'pages/role_access/create',
+                name: 'roleAccess-create',
+                component: () => import('@/views/pages/role_access/Form.vue'),
+                meta: {
+                    requiresAuth: true,
+                    breadcrumb: [{ parent: 'Setting', label: 'Role Access', item: 'Add Role Access' }]
+                }
+            },
+            {
+                path: 'pages/role_access/:id/edit',
+                name: 'roleAccess-edit',
+                component: () => import('@/views/pages/role_access/Form.vue'),
+                meta: {
+                    requiresAuth: true,
+                    breadcrumb: [{ parent: 'Setting', label: 'Role Access', item: 'Edit Role Access' }]
+                }
+            },
+            {
+                path: 'pages/role',
+                name: 'role-list',
+                component: () => import('@/views/pages/role/Index.vue'),
+                meta: {
+                    requiresAuth: true,
+                    breadcrumb: [{ parent: 'Setting', label: 'Role' }]
+                }
+            },
+            {
+                path: 'pages/role/create',
+                name: 'role-create',
+                component: () => import('@/views/pages/role/Form.vue'),
+                meta: {
+                    requiresAuth: true,
+                    breadcrumb: [{ parent: 'Setting', label: 'Role', item: 'Add Role' }]
+                }
+            },
+            {
+                path: 'pages/role/:id/edit',
+                name: 'role-edit',
+                component: () => import('@/views/pages/role/Form.vue'),
+                meta: {
+                    requiresAuth: true,
+                    breadcrumb: [{ parent: 'Setting', label: 'Role', item: 'Edit Role' }]
+                }
+            },
 
             {
                 path: 'pages/ms_corporate',
