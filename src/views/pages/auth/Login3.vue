@@ -122,16 +122,22 @@ for (const key in form.value.errors) {
                                     </div>
                                 </div>
 
-                                <div class="col-span-12 flex justify-between">
+                                <div class="col-span-12 flex justify-between items-center">
                                     <div class="flex items-center gap-2">
                                         <Checkbox v-model="form.data.remember_me" inputId="remember_me"
                                             name="remember_me" :binary="true" />
-                                        <label for="remember_me" class="text-surface-500"> Remember me </label>
+                                        <label for="remember_me"
+                                            class="text-surface-500 select-none cursor-pointer">Remember me</label>
                                     </div>
-                                    <Button class="text-gray-300" text @click="router.push('/auth/forgot-password')">
+                                    <Button class="text-gray-500 whitespace-nowrap px-1 py-0.5 text-sm" text
+                                        style="min-width: unset; max-width: max-content;"
+                                        @click="router.push('/auth/forgot-password')">
                                         Forgot Password?
                                     </Button>
+
                                 </div>
+
+
 
                                 <div class="col-span-12">
                                     <Button type="submit" :disabled="form.loading" class="w-full">

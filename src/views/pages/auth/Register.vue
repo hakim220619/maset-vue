@@ -110,6 +110,7 @@ async function onFormSubmit() {
 onMounted(async () => {
     try {
         const response = await AuthApi.client().get('/role_structure_public');
+        console.log(response);
 
         entitasOptions.value = response.data.data.map(item => ({
             name: item.rs_name,
@@ -150,21 +151,21 @@ for (const key in form.value.data) {
                     </div>
 
                     <!-- NIK -->
-                    <div class="col-span-6">
+                    <div class="col-span-12 sm:col-span-6">
                         <Label for="nik" class="block mb-1 text-gray-700">NIK</Label>
                         <InputText v-model="form.data.nik" id="nik" class="w-full" :invalid="!!form.errors.nik" />
                         <InputError :message="form.errors.nik" />
                     </div>
 
                     <!-- Full Name -->
-                    <div class="col-span-6">
+                    <div class="col-span-12 sm:col-span-6">
                         <Label for="name" class="block mb-1 text-gray-700">Full Name</Label>
                         <InputText v-model="form.data.name" id="name" class="w-full" :invalid="!!form.errors.name" />
                         <InputError :message="form.errors.name" />
                     </div>
 
                     <!-- Email -->
-                    <div class="col-span-6">
+                    <div class="col-span-12 sm:col-span-6">
                         <Label for="email" class="block mb-1 text-gray-700">Email</Label>
                         <InputText v-model="form.data.email" id="email" type="email" class="w-full"
                             :invalid="!!form.errors.email" />
@@ -172,7 +173,7 @@ for (const key in form.value.data) {
                     </div>
 
                     <!-- Password -->
-                    <div class="col-span-6">
+                    <div class="col-span-12 sm:col-span-6">
                         <Label for="password" class="block mb-1 text-gray-700">Password</Label>
 
                         <InputText v-model="form.data.password" id="password" type="password" class="w-full"
@@ -182,7 +183,7 @@ for (const key in form.value.data) {
                     </div>
 
                     <!-- Entitas -->
-                    <div class="col-span-6">
+                    <div class="col-span-12 sm:col-span-6">
                         <Label for="entitas" class="block mb-1 text-gray-700">Entitas</Label>
                         <Select v-model="form.data.entitas" :options=entitasOptions show-clear option-label="name"
                             filter option-value="id" :virtualScrollerOptions="{ itemSize: 38 }"
@@ -191,7 +192,7 @@ for (const key in form.value.data) {
                     </div>
 
                     <!-- Image -->
-                    <div class="col-span-6">
+                    <div class="col-span-12 sm:col-span-6">
                         <Label for="image" class="block mb-1 text-gray-700">Image</Label>
                         <InputText id="image" type="file" accept="image/*" @change="onImageChange" class="w-full" />
                         <InputError :message="form.errors.image" />
@@ -199,7 +200,7 @@ for (const key in form.value.data) {
 
 
                     <!-- contact -->
-                    <div class="col-span-6">
+                    <div class="col-span-12 sm:col-span-6">
                         <Label for="contact" class="block mb-1 text-gray-700">Contact</Label>
                         <InputText v-model="form.data.contact" id="contact" class="w-full"
                             :invalid="!!form.errors.contact" />
@@ -207,7 +208,7 @@ for (const key in form.value.data) {
                     </div>
 
                     <!-- address -->
-                    <div class="col-span-6">
+                    <div class="col-span-12 sm:col-span-6">
                         <Label for="address" class="block mb-1 text-gray-700">address</Label>
                         <InputText v-model="form.data.address" id="address" rows="3"
                             class="w-full border border-gray-300 rounded p-2"

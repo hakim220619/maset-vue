@@ -30,7 +30,7 @@ const form = ref({
         role_access: '',
         role: '',
         status: '',
-        image: null,
+        image: '',
         contact: '',
         address: ''
     },
@@ -60,29 +60,29 @@ const save = async () => {
     form.value.loading = true;
 
     const isEdit = !!route.params.id;
-    const url = isEdit ? 'users/' + route.params.id : 'users';
+    const url = isEdit ? 'users/' + route.params.id + '/users' : 'users';
 
     try {
         storeSchema.parse(form.value.data);
 
         const formData = new FormData();
         for (const key in form.value.data) {
-            if (key === 'image') {
-                if (form.value.data.image) {
-                    formData.append('image', form.value.data.image);
-                }
-            } else if (key === 'password' && isEdit && !form.value.data.password) {
+            if (key === 'password' && isEdit && !form.value.data.password) {
                 // Jangan kirim password jika kosong saat edit
                 continue;
             } else {
                 formData.append(key, form.value.data[key]);
             }
         }
+        console.log(formData);
 
         const response = await AuthApi.client()({
             url: url,
             method: isEdit ? 'put' : 'post',
-            data: formData
+            data: formData,
+            headers: {
+                'Content-Type': 'multipart/form-data'
+            }
         });
 
         if (response.data.success) {
@@ -117,9 +117,9 @@ onBeforeMount(async () => {
     if (route.params.id) {
         const userData = await Helper.getDataById('users', route.params.id);
 
-        if (userData) {
-            userData.password = ''
-            form.value.assign(userData);
+        if (userData.data) {
+            userData.data.password = ''
+            form.value.assign(userData.data);
         }
     }
 });

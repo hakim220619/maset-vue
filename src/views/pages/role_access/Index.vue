@@ -2,12 +2,10 @@
 import DropdownButton from '@/components/DropdownButton.vue';
 import { AuthApi } from '@/service/Api';
 import { Helper } from '@/service/Helper';
-import { useTitle } from '@vueuse/core';
 import { inject, onMounted, ref } from 'vue';
 import { useRouter } from 'vue-router';
 
 const swal = inject('$swal');
-const title = useTitle();
 const router = useRouter();
 
 const data = ref([]);
@@ -15,8 +13,8 @@ const visible = ref(false);
 const isFiltering = ref(false);
 const isExport = ref(false);
 const isRedirect = ref(false);
-const showSearchFields = ref(false);
-const first = ref(0);
+const firstRowIndex = ref(0);
+const rows = ref(10);
 const loading = ref(true);
 
 const filters = ref({
@@ -110,7 +108,6 @@ const add = () => {
 };
 
 onMounted(() => {
-    title.value = 'Role Access';
     getRoleAccess();
 });
 </script>
@@ -160,60 +157,63 @@ onMounted(() => {
             </div>
         </div>
 
-        <div class="card mt-5">
-            <div class="font-semibold text-xl mb-2">List of Role Access</div>
-            <div class="card mt-4">
-                <DataTable v-model:filters="filters" :value="data" paginator showGridlines :rows="10" dataKey="ra_id"
-                    filterDisplay="menu" :loading="loading" :globalFilterFields="['ra_name']">
-                    <template #header>
-                        <div class="flex justify-between">
-                            <p></p>
-                            <IconField>
-                                <InputIcon>
-                                    <i class="pi pi-search" />
-                                </InputIcon>
-                                <InputText v-model="filters['global'].value" placeholder="Keyword Search" />
-                            </IconField>
+        <div class="card mt-4">
+
+            <DataTable ref="dt" :value="data" dataKey="id" :paginator="true" v-model:first="firstRowIndex"
+                v-model:rows="rows" :filters="filters"
+                paginatorTemplate="FirstPageLink PrevPageLink PageLinks NextPageLink LastPageLink CurrentPageReport RowsPerPageDropdown"
+                :rowsPerPageOptions="[10, 20, 50]" currentPageReportTemplate="{first} to {last} of {totalRecords}">
+                <template #header>
+                    <div class="flex justify-between">
+                        <p></p>
+                        <IconField>
+                            <InputIcon>
+                                <i class="pi pi-search" />
+                            </InputIcon>
+                            <InputText v-model="filters['global'].value" placeholder="Keyword Search" />
+                        </IconField>
+                    </div>
+                </template>
+                <template #empty> No data found. </template>
+                <template #loading> Loading data. Please wait. </template>
+
+                <Column field="no" header="No" style="min-width: 6rem">
+                    <template #body="{ index }">
+                        {{ firstRowIndex + index + 1 }}
+                    </template>
+                </Column>
+
+                <Column field="ra_name" sortable header="Access Name" style="min-width: 12rem">
+                    <template #body="{ data }">{{ data.ra_name }}</template>
+                    <template #filter="{ filterModel }">
+                        <InputText v-model="filterModel.value" placeholder="Search by Access Name" />
+                    </template>
+                </Column>
+
+                <Column field="ra_status" sortable header="Status" style="min-width: 10rem">
+                    <template #body="{ data }">
+                        <Tag :value="Helper.getStatusLabel(data.ra_status)"
+                            :severity="Helper.getStatusSeverity(data.ra_status)" />
+                    </template>
+                    <template #filter="{ filterModel }">
+                        <Dropdown v-model="filterModel.value" :options="statusOptions" placeholder="Filter Status"
+                            optionLabel="label" optionValue="value" />
+                    </template>
+                </Column>
+
+                <Column field="ra_created_at" sortable header="Created At" style="min-width: 14rem">
+                    <template #body="{ data }">{{ new Date(data.ra_created_at).toLocaleString() }}</template>
+                </Column>
+
+                <Column>
+                    <template #body="{ data }">
+                        <div class="flex gap-1 justify-end">
+                            <DropdownButton :items="items" :data="data" :menu-key="data.ra_id" />
                         </div>
                     </template>
-                    <template #empty> No data found. </template>
-                    <template #loading> Loading data. Please wait. </template>
-
-                    <Column field="no" header="No" style="min-width: 6rem">
-                        <template #body="{ index }">{{ index + 1 }}</template>
-                    </Column>
-
-                    <Column field="ra_name" header="Access Name" style="min-width: 12rem">
-                        <template #body="{ data }">{{ data.ra_name }}</template>
-                        <template #filter="{ filterModel }">
-                            <InputText v-model="filterModel.value" placeholder="Search by Access Name" />
-                        </template>
-                    </Column>
-
-                    <Column field="ra_status" header="Status" style="min-width: 10rem">
-                        <template #body="{ data }">
-                            <Tag :value="Helper.getStatusLabel(data.ra_status)"
-                                :severity="Helper.getStatusSeverity(data.ra_status)" />
-                        </template>
-                        <template #filter="{ filterModel }">
-                            <Dropdown v-model="filterModel.value" :options="statusOptions" placeholder="Filter Status"
-                                optionLabel="label" optionValue="value" />
-                        </template>
-                    </Column>
-
-                    <Column field="ra_created_at" header="Created At" style="min-width: 14rem">
-                        <template #body="{ data }">{{ new Date(data.ra_created_at).toLocaleString() }}</template>
-                    </Column>
-
-                    <Column>
-                        <template #body="{ data }">
-                            <div class="flex gap-1 justify-end">
-                                <DropdownButton :items="items" :data="data" :menu-key="data.ra_id" />
-                            </div>
-                        </template>
-                    </Column>
-                </DataTable>
-            </div>
+                </Column>
+            </DataTable>
         </div>
+
     </div>
 </template>

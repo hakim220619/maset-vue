@@ -1,15 +1,11 @@
 <script setup>
+import Label from '@/components/Label.vue';
 import { AuthApi } from '@/service/Api';
 import { Helper } from '@/service/Helper';
-import { useTitle } from '@vueuse/core';
 import { inject, onMounted, ref, watch } from 'vue';
-import { useRouter } from 'vue-router';
-import Label from '@/components/Label.vue';
 
 
 const swal = inject('$swal');
-const title = useTitle();
-const router = useRouter();
 
 const data = ref([]);
 const loading = ref(true);
@@ -108,7 +104,6 @@ function clearAll() {
     broadcastMessage.value = '';
 }
 onMounted(() => {
-    title.value = 'Menu Management';
     getMenuManagement();
     fetchOptions();
 });

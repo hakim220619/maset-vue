@@ -2,12 +2,11 @@
 import DropdownButton from '@/components/DropdownButton.vue';
 import { AuthApi } from '@/service/Api';
 import { Helper } from '@/service/Helper';
-import { useTitle } from '@vueuse/core';
 import { inject, onMounted, ref } from 'vue';
 import { useRouter } from 'vue-router';
 
 const swal = inject('$swal');
-const title = useTitle();
+
 const router = useRouter();
 
 const data = ref([]);
@@ -123,7 +122,6 @@ const add = () => {
 };
 
 onMounted(() => {
-    title.value = 'Menu Management';
     getMenuManagement();
 });
 </script>

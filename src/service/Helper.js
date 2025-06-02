@@ -6,7 +6,17 @@ import { AuthApi } from './Api';
 
 
 const title = useTitle();
-const appName = import.meta.env.VITE_APP_NAME;
+const storedApp = localStorage.getItem('aplikasi');
+
+// if (JSON.parse(storedApp) !== null) {
+const appName = storedApp ? JSON.parse(storedApp).title : 'APP';
+// } else {
+//     const router = useRouter();
+//     router.push({ name: 'notfound' });
+
+// }
+
+
 
 const objectToFormData = (obj = {}, form = new FormData(), namespace = '') => {
     for (const key in obj) {
@@ -24,6 +34,31 @@ const objectToFormData = (obj = {}, form = new FormData(), namespace = '') => {
 
 export const Helper = {
     objectToFormData,
+    getAppLocalStorage() {
+        const raw = localStorage.getItem('aplikasi');
+
+        if (!raw) return {};
+
+        try {
+            return JSON.parse(raw);
+        } catch (e) {
+            console.error('Invalid JSON in localStorage.aplikasi');
+            return {};
+        }
+    },
+    getUsersLocalStorage() {
+        const raw = localStorage.getItem('userData');
+
+        if (!raw) return {};
+
+        try {
+            return JSON.parse(raw);
+        } catch (e) {
+            console.error('Invalid JSON in localStorage.aplikasi');
+            return {};
+        }
+    },
+
 
     parseFormdata(data = {}) {
         const formData = new FormData();
@@ -115,6 +150,7 @@ export const Helper = {
             }
         }
     },
+
 
     async getUserLocalStorage() {
         const raw = localStorage.getItem('userData');

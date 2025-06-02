@@ -617,36 +617,6 @@ const routes = [
             },
 
             {
-                path: 'pages/ms_corporate',
-                name: 'Corporate FOP List',
-                component: () => import('@/views/pages/ms_corporate/Index.vue'),
-                meta: {
-                    requiresAuth: true,
-                    breadcrumb: [{ parent: 'Utilities', label: 'Corporate FOP' }]
-                }
-            },
-            {
-                path: 'pages/ms_corporate/create',
-                name: 'Corporate FOP Create',
-                component: () => import('@/views/pages/ms_corporate/msCorporateForm.vue'),
-                meta: {
-                    requiresAuth: true,
-                    breadcrumb: [{ parent: 'Utilities', label: 'Corporate FOP', item: 'Add Corporate FOP' }]
-                }
-            },
-            {
-                path: 'pages/ms_corporate/:id/edit',
-                name: 'Corporate FOP Edit',
-                component: () => import('@/views/pages/ms_corporate/msCorporateForm.vue'),
-                meta: {
-                    requiresAuth: true,
-                    breadcrumb: [{ parent: 'Utilities', label: 'Corporate FOP', item: 'Edit Corporate FOP' }]
-                }
-            },
-
-
-
-            {
                 path: '/ecommerce/product-overview',
                 name: 'product-overview',
                 meta: {
@@ -756,6 +726,24 @@ const routes = [
                 }
             },
             {
+                path: 'pages/profile',
+                name: 'profile',
+                component: () => import('@/views/pages/profile/Index.vue'),
+                meta: {
+                    requiresAuth: true,
+                    breadcrumb: [{ parent: 'User Management', label: 'Profile' }]
+                }
+            },
+            {
+                path: 'pages/aplikasi',
+                name: 'aplikasi',
+                component: () => import('@/views/pages/aplikasi/Index.vue'),
+                meta: {
+                    requiresAuth: true,
+                    breadcrumb: [{ parent: 'User Management', label: 'Aplikasi' }]
+                }
+            },
+            {
                 path: '/profile/list',
                 name: 'profile-list',
                 component: () => import('@/views/user-management/UserList.vue'),
@@ -783,7 +771,7 @@ const routes = [
     {
         path: '/auth/register',
         name: 'register',
-        component: () => import('@/views/pages/auth/register.vue')
+        component: () => import('@/views/pages/auth/Register.vue')
     },
     {
         path: '/auth/forgot-password',

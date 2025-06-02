@@ -9,7 +9,8 @@ const data = ref();
 const filters = ref();
 const swal = inject('$swal');
 const isRedirect = ref(false);
-
+const firstRowIndex = ref(0);
+const rows = ref(10);
 
 const loading = ref(true);
 const router = useRouter();
@@ -237,8 +238,12 @@ const add = () => {
         </div>
 
         <div class="card mt-4">
-            <DataTable v-model:filters="filters" :value="data" paginator showGridlines :rows="10" dataKey="id"
-                filterDisplay="menu" :loading="loading" :globalFilterFields="['name', 'email', 'nik']">
+            <DataTable ref="dt" :value="data" dataKey="id" :paginator="true" v-model:first="firstRowIndex"
+                v-model:rows="rows" :filters="filters"
+                paginatorTemplate="FirstPageLink PrevPageLink PageLinks NextPageLink LastPageLink CurrentPageReport RowsPerPageDropdown"
+                :rowsPerPageOptions="[10, 20, 50]" currentPageReportTemplate="{first} to {last} of {totalRecords}">
+
+
                 <template #header>
                     <div class="flex justify-between">
                         <p></p>
@@ -252,61 +257,64 @@ const add = () => {
                 </template>
                 <template #empty> No data found. </template>
                 <template #loading> Loading data data. Please wait. </template>
-
+                <!-- <Column selectionMode="multiple" style="width: 3rem" :exportable="false"></Column> -->
                 <Column field="no" header="No" style="min-width: 6rem">
-                    <template #body="{ index }">{{ index + 1 }}</template>
+                    <template #body="{ index }">
+                        {{ firstRowIndex + index + 1 }}
+                    </template>
                 </Column>
 
-                <Column field="nik" header="NIK" style="min-width: 12rem">
+
+                <Column field="nik" sortable header="NIK" style="min-width: 12rem">
                     <template #body="{ data }">{{ data.nik }}</template>
                     <template #filter="{ filterModel }">
                         <InputText v-model="filterModel.value" type="text" placeholder="Search by NIK" />
                     </template>
                 </Column>
 
-                <Column field="name" header="User" style="min-width: 12rem">
+                <Column field="name" sortable header="User" style="min-width: 12rem">
                     <template #body="{ data }">{{ data.name }}</template>
                     <template #filter="{ filterModel }">
                         <InputText v-model="filterModel.value" type="text" placeholder="Search by name" />
                     </template>
                 </Column>
 
-                <Column field="email" header="Email" style="min-width: 12rem">
+                <Column field="email" sortable header="Email" style="min-width: 12rem">
                     <template #body="{ data }">{{ data.email }}</template>
                     <template #filter="{ filterModel }">
                         <InputText v-model="filterModel.value" type="text" placeholder="Search by Email" />
                     </template>
                 </Column>
 
-                <Column field="rs_name" header="Role Structure" style="min-width: 20rem">
+                <Column field="rs_name" sortable header="Role Structure" style="min-width: 20rem">
                     <template #body="{ data }">{{ data.rs_name }}</template>
                     <template #filter="{ filterModel }">
                         <InputText v-model="filterModel.value" type="text" placeholder="Search by Role Structure" />
                     </template>
                 </Column>
 
-                <Column field="ra_name" header="Role Access" style="min-width: 14rem">
+                <Column field="ra_name" sortable header="Role Access" style="min-width: 14rem">
                     <template #body="{ data }">{{ data.ra_name }}</template>
                     <template #filter="{ filterModel }">
                         <InputText v-model="filterModel.value" type="text" placeholder="Search by Role Access" />
                     </template>
                 </Column>
 
-                <Column field="role_name" header="Role Users" style="min-width: 14rem">
+                <Column field="role_name" sortable header="Role Users" style="min-width: 14rem">
                     <template #body="{ data }">{{ data.role_name }}</template>
                     <template #filter="{ filterModel }">
                         <InputText v-model="filterModel.value" type="text" placeholder="Search by Role Users" />
                     </template>
                 </Column>
 
-                <Column field="contact" header="Contact" style="min-width: 12rem">
+                <Column field="contact" sortable header="Contact" style="min-width: 12rem">
                     <template #body="{ data }">{{ data.contact }}</template>
                     <template #filter="{ filterModel }">
                         <InputText v-model="filterModel.value" type="text" placeholder="Search by Contact" />
                     </template>
                 </Column>
 
-                <Column field="status" header="Status" style="min-width: 10rem">
+                <Column field="status" sortable header="Status" style="min-width: 10rem">
                     <template #body="{ data }">
                         <Tag :value="Helper.getStatusLabel(data.status)"
                             :severity="Helper.getStatusSeverity(data.status)" />

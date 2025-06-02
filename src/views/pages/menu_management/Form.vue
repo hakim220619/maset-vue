@@ -67,6 +67,8 @@ const save = async () => {
             formData.append(key, form.value.data[key]);
 
         }
+        console.log(formData);
+
         const response = await AuthApi.client()({
             url: url,
             method: route.params.id ? 'put' : 'post',
@@ -140,8 +142,7 @@ onBeforeMount(async () => {
 
 
 onMounted(async () => {
-    const title = route.params.id ? 'Edit Menu Management' : 'Add Menu Management';
-    Helper.setTitle(title);
+
     getMenuManagement()
     fetchOptions()
 
@@ -167,6 +168,11 @@ const formattedName = computed({
             .replace(/\b\w/g, char => char.toUpperCase());
     }
 });
+
+const parentIdOptions = computed(() => [
+    { id: null, name: '— No Parent —' },
+    ...parentIdDataHeader.value
+]);
 
 
 const goBack = () => {
@@ -208,7 +214,7 @@ const goBack = () => {
                 <!-- Parent ID -->
                 <div class="col-span-6">
                     <Label for="parent_id" class="block mb-1 text-gray-700 dark:text-white">Parent ID</Label>
-                    <Select v-model="form.data.parent_id" :options="parentIdDataHeader" show-clear option-label="name"
+                    <Select v-model="form.data.parent_id" :options="parentIdOptions" show-clear option-label="name"
                         option-value="id" :virtualScrollerOptions="{ itemSize: 38 }" filter
                         placeholder="Select a parent name" class="w-full" :invalid="!!form.errors.parent_id" />
                     <InputError :message="form.errors.parent_id" />

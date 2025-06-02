@@ -94,8 +94,6 @@ onBeforeMount(async () => {
 });
 
 onMounted(() => {
-    const title = route.params.id ? 'Edit Role Access' : 'Add Role Access';
-    Helper.setTitle(title);
     fetchOptions();
 });
 

@@ -95,8 +95,6 @@ onBeforeMount(async () => {
 });
 
 onMounted(() => {
-    const title = route.params.id ? 'Edit Role Structure' : 'Add Role Structure';
-    Helper.setTitle(title);
     fetchOptions();
 });
 
