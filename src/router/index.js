@@ -402,6 +402,33 @@ const routes = [
                 }
             },
 
+            {
+                path: 'pages/object/tanah',
+                name: 'Tanah List',
+                component: () => import('@/views/pages/object/tanah/Index.vue'),
+                meta: {
+                    requiresAuth: true,
+                    breadcrumb: [{ parent: 'Utilities', label: 'Tanah' }]
+                }
+            },
+            {
+                path: 'pages/object/tanah/create',
+                name: 'Tanah Create',
+                component: () => import('@/views/pages/object/tanah/Form.vue'),
+                meta: {
+                    requiresAuth: true,
+                    breadcrumb: [{ parent: 'Utilities', label: 'Tanah', item: 'Add Tanah' }]
+                }
+            },
+            {
+                path: 'pages/object/tanah/:id/edit',
+                name: 'Tanah Edit',
+                component: () => import('@/views/pages/object/tanah/Form.vue'),
+                meta: {
+                    requiresAuth: true,
+                    breadcrumb: [{ parent: 'Utilities', label: 'Tanah', item: 'Edit Tanah' }]
+                }
+            },
 
             {
                 path: 'pages/ms_icons',
