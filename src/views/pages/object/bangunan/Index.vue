@@ -19,22 +19,21 @@ const loading = ref(true);
 
 const filters = ref({
     global: { value: '', matchMode: 'contains' },
-    judul_penilaian: { value: '', matchMode: 'contains' },
-    tanggal_penilaian: { value: '', matchMode: 'contains' }
+    nama_bangunan: { value: '', matchMode: 'contains' }
 });
 
 const search = ref({
-    judul_penilaian: ''
+    nama_bangunan: ''
 });
 
-async function getTanahData() {
+async function getBangunanData() {
     isFiltering.value = true;
     const params = Helper.formatSearchParams(search.value);
     try {
-        const response = await AuthApi.client().get('/tanah/?' + new URLSearchParams(params));
+        const response = await AuthApi.client().get('/bangunan/?' + new URLSearchParams(params));
         const filteredData = response.data.data;
         const sortedData = filteredData.sort((a, b) => {
-            return new Date(b.tanggal_penilaian) - new Date(a.tanggal_penilaian);
+            return new Date(b.tahun_dibangun) - new Date(a.tahun_dibangun);
         });
         data.value = sortedData;
     } catch (error) {
@@ -48,13 +47,13 @@ const items = [
     {
         label: 'Ubah',
         command: (e) => {
-            router.push({ name: 'Tanah Edit', params: { id: e.item.data.id } });
+            router.push({ name: 'Bangunan Edit', params: { id: e.item.data.id } });
         }
     },
     {
         label: 'Hapus',
         command: (e) => {
-            destroy(e.item.data.id, e.item.data.judul_penilaian);
+            destroy(e.item.data.id, e.item.data.nama_bangunan);
         }
     }
 ];
@@ -77,16 +76,14 @@ const destroy = (id, name) => {
         })
         .then(async (result) => {
             if (result.isConfirmed) {
-                const response = await AuthApi.client().delete('tanah/' + id);
-                console.log(response);
-
+                const response = await AuthApi.client().delete('bangunan/' + id);
                 if (response.data.success) {
                     swal.fire({
                         title: 'Success',
-                        text: 'Data tanah berhasil dihapus',
+                        text: 'Data bangunan berhasil dihapus',
                         icon: 'success'
                     });
-                    getTanahData();
+                    getBangunanData();
                 }
             }
         });
@@ -94,16 +91,16 @@ const destroy = (id, name) => {
 
 const exportExcel = async () => {
     const params = Helper.formatSearchParams(search.value);
-    await Helper.exportExcelFromApi('gateway/idp/tanah/export', 'tanah.xlsx', params);
+    await Helper.exportExcelFromApi('gateway/idp/bangunan/export', 'bangunan.xlsx', params);
 };
 
 const add = () => {
-    router.push('/pages/object/tanah/create');
+    router.push('/pages/object/bangunan/create');
     isRedirect.value = true;
 };
 
 onMounted(() => {
-    getTanahData();
+    getBangunanData();
 });
 </script>
 
@@ -143,33 +140,40 @@ onMounted(() => {
                     </template>
                 </Column>
 
-                <Column field="judul_penilaian" sortable header="Judul Penilaian" style="min-width: 14rem">
-                    <template #body="{ data }">{{ data.judul_penilaian }}</template>
+                <Column field="nama_bangunan" sortable header="Nama Bangunan" style="min-width: 14rem">
+                    <template #body="{ data }">{{ data.nama_bangunan }}</template>
                     <template #filter="{ filterModel }">
-                        <InputText v-model="filterModel.value" placeholder="Cari Judul Penilaian" />
+                        <InputText v-model="filterModel.value" placeholder="Cari Nama Bangunan" />
                     </template>
                 </Column>
 
-                <Column field="nama_entitas" sortable header="Nama Entitas" style="min-width: 14rem">
-                    <template #body="{ data }">{{ data.nama_entitas }}</template>
+                <Column field="bentuk_bangunan" header="Bentuk" style="min-width: 10rem">
+                    <template #body="{ data }">{{ data.bentuk_bangunan }}</template>
                 </Column>
 
-                <Column field="tanggal_inspeksi" sortable header="Tanggal Inspeksi" style="min-width: 14rem">
-                    <template #body="{ data }">{{ new Date(data.tanggal_inspeksi).toLocaleDateString() }}</template>
+                <Column field="grade_gudang" header="Grade" style="min-width: 8rem">
+                    <template #body="{ data }">{{ data.grade_gudang }}</template>
                 </Column>
 
-                <Column field="tanggal_penilaian" sortable header="Tanggal Penilaian" style="min-width: 14rem">
-                    <template #body="{ data }">{{ new Date(data.tanggal_penilaian).toLocaleDateString() }}</template>
+                <Column field="jumlah_lantai" header="Lantai" style="min-width: 8rem">
+                    <template #body="{ data }">{{ data.jumlah_lantai }}</template>
                 </Column>
 
-                <Column field="penilai_surveyor" header="Penilai / Surveyor" style="min-width: 14rem">
-                    <template #body="{ data }">{{ data.penilai_surveyor }}</template>
+                <Column field="basement" header="Basement" style="min-width: 8rem">
+                    <template #body="{ data }">{{ data.basement ? 'Ya' : 'Tidak' }}</template>
                 </Column>
 
-                <Column field="batas_utara" header="Batas Utara" style="min-width: 14rem" />
-                <Column field="batas_selatan" header="Batas Selatan" style="min-width: 14rem" />
-                <Column field="batas_timur" header="Batas Timur" style="min-width: 14rem" />
-                <Column field="batas_barat" header="Batas Barat" style="min-width: 14rem" />
+                <Column field="tahun_dibangun" header="Tahun Dibangun" style="min-width: 10rem">
+                    <template #body="{ data }">{{ data.tahun_dibangun }}</template>
+                </Column>
+
+                <Column field="tahun_renovasi" header="Tahun Renovasi" style="min-width: 10rem">
+                    <template #body="{ data }">{{ data.tahun_renovasi }}</template>
+                </Column>
+
+                <Column field="kondisi_visual" header="Kondisi" style="min-width: 10rem">
+                    <template #body="{ data }">{{ data.kondisi_visual }}</template>
+                </Column>
 
                 <Column>
                     <template #body="{ data }">

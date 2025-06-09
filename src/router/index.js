@@ -429,6 +429,33 @@ const routes = [
                     breadcrumb: [{ parent: 'Utilities', label: 'Tanah', item: 'Edit Tanah' }]
                 }
             },
+            {
+                path: 'pages/object/bangunan',
+                name: 'Bangunan List',
+                component: () => import('@/views/pages/object/bangunan/Index.vue'),
+                meta: {
+                    requiresAuth: true,
+                    breadcrumb: [{ parent: 'Utilities', label: 'Bangunan' }]
+                }
+            },
+            {
+                path: 'pages/object/bangunan/create',
+                name: 'Bangunan Create',
+                component: () => import('@/views/pages/object/bangunan/Form.vue'),
+                meta: {
+                    requiresAuth: true,
+                    breadcrumb: [{ parent: 'Utilities', label: 'Bangunan', item: 'Add Bangunan' }]
+                }
+            },
+            {
+                path: 'pages/object/bangunan/:id/edit',
+                name: 'Bangunan Edit',
+                component: () => import('@/views/pages/object/bangunan/Form.vue'),
+                meta: {
+                    requiresAuth: true,
+                    breadcrumb: [{ parent: 'Utilities', label: 'Bangunan', item: 'Edit Bangunan' }]
+                }
+            },
 
             {
                 path: 'pages/ms_icons',

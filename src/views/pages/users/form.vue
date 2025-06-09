@@ -31,6 +31,7 @@ const form = ref({
         role: '',
         status: '',
         image: '',
+        old_image: '',
         contact: '',
         address: ''
     },
@@ -68,13 +69,11 @@ const save = async () => {
         const formData = new FormData();
         for (const key in form.value.data) {
             if (key === 'password' && isEdit && !form.value.data.password) {
-                // Jangan kirim password jika kosong saat edit
                 continue;
             } else {
                 formData.append(key, form.value.data[key]);
             }
         }
-        console.log(formData);
 
         const response = await AuthApi.client()({
             url: url,
@@ -119,6 +118,8 @@ onBeforeMount(async () => {
 
         if (userData.data) {
             userData.data.password = ''
+            userData.data.old_image = userData.data.image
+
             form.value.assign(userData.data);
         }
     }
