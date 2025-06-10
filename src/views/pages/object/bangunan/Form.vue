@@ -1,39 +1,215 @@
 <script setup>
 import { AuthApi } from '@/service/Api';
+import { Helper } from '@/service/Helper';
 import swal from 'sweetalert2';
-import { ref } from 'vue';
+import { onBeforeMount, ref } from 'vue';
+
 import { useRoute, useRouter } from 'vue-router';
+import { z } from 'zod';
+
 import { storeSchema } from './schema.js';
 
 const router = useRouter();
 const route = useRoute();
-
 const jsonFields = [
-    { key: 'luas_nama_pintu_jendela', label: 'Luas Nama Pintu Jendela' },
-    { key: 'luas_bobot_pintu_jendela', label: 'Luas Bobot Pintu Jendela' },
-    { key: 'luas_nama_dinding', label: 'Luas Nama Dinding' },
-    { key: 'luas_bobot_dinding', label: 'Luas Bobot Dinding' },
-    { key: 'luas_nama_rangka_atap_datar', label: 'Luas Nama Rangka Atap Datar' },
-    { key: 'luas_bobot_rangka_atap_datar', label: 'Luas Bobot Rangka Atap Datar' },
-    { key: 'luas_nama_atap_datar', label: 'Luas Nama Atap Datar' },
-    { key: 'luas_bobot_atap_datar', label: 'Luas Bobot Atap Datar' },
-    { key: 'tipe_pondasi_existing', label: 'Tipe Pondasi Existing' },
-    { key: 'bobot_tipe_pondasi_existing', label: 'Bobot Tipe Pondasi Existing' },
-    { key: 'tipe_struktur_existing', label: 'Tipe Struktur Existing' },
-    { key: 'bobot_tipe_struktur_existing', label: 'Bobot Tipe Struktur Existing' },
-    { key: 'tipe_rangka_atap_existing', label: 'Tipe Rangka Atap Existing' },
-    { key: 'bobot_rangka_atap_existing', label: 'Bobot Rangka Atap Existing' },
-    { key: 'tipe_penutup_atap_existing', label: 'Tipe Penutup Atap Existing' },
-    { key: 'bobot_penutup_atap_existing', label: 'Bobot Penutup Atap Existing' },
-    { key: 'tipe_tipe_dinding_existing', label: 'Tipe Tipe Dinding Existing' },
-    { key: 'bobot_tipe_dinding_existing', label: 'Bobot Tipe Dinding Existing' },
-    { key: 'tipe_tipe_pelapis_dinding_existing', label: 'Tipe Pelapis Dinding Existing' },
-    { key: 'bobot_tipe_pelapis_dinding_existing', label: 'Bobot Pelapis Dinding Existing' },
-    { key: 'tipe_tipe_pintu_jendela_existing', label: 'Tipe Pintu Jendela Existing' },
-    { key: 'bobot_tipe_pintu_jendela_existing', label: 'Bobot Pintu Jendela Existing' },
-    { key: 'tipe_tipe_lantai_existing', label: 'Tipe Lantai Existing' },
-    { key: 'bobot_tipe_lantai_existing', label: 'Bobot Lantai Existing' },
-]
+    {
+        key: 'luas_nama_pintu_jendela',
+        label: 'Luas Nama Pintu Jendela',
+        options: [
+            { id: 1, name: 'Kaca Geser' },
+            { id: 2, name: 'Kayu Solid' }
+        ]
+    },
+    {
+        key: 'luas_bobot_pintu_jendela',
+        label: 'Luas Bobot Pintu Jendela',
+        options: [
+            { id: 1, name: 'Ringan' },
+            { id: 2, name: 'Sedang' },
+            { id: 3, name: 'Berat' }
+        ]
+    },
+    {
+        key: 'luas_nama_dinding',
+        label: 'Luas Nama Dinding',
+        options: [
+            { id: 1, name: 'Bata Merah' },
+            { id: 2, name: 'Batako' }
+        ]
+    },
+    {
+        key: 'luas_bobot_dinding',
+        label: 'Luas Bobot Dinding',
+        options: [
+            { id: 1, name: 'Tipis' },
+            { id: 2, name: 'Tebal' }
+        ]
+    },
+    {
+        key: 'luas_nama_rangka_atap_datar',
+        label: 'Luas Nama Rangka Atap Datar',
+        options: [
+            { id: 1, name: 'Besi Hollow' },
+            { id: 2, name: 'Kayu Jati' }
+        ]
+    },
+    {
+        key: 'luas_bobot_rangka_atap_datar',
+        label: 'Luas Bobot Rangka Atap Datar',
+        options: [
+            { id: 1, name: 'Ringan' },
+            { id: 2, name: 'Sedang' },
+            { id: 3, name: 'Berat' }
+        ]
+    },
+    {
+        key: 'luas_nama_atap_datar',
+        label: 'Luas Nama Atap Datar',
+        options: [
+            { id: 1, name: 'Galvalum' },
+            { id: 2, name: 'Dak Beton' }
+        ]
+    },
+    {
+        key: 'luas_bobot_atap_datar',
+        label: 'Luas Bobot Atap Datar',
+        options: [
+            { id: 1, name: 'Ringan' },
+            { id: 2, name: 'Berat' }
+        ]
+    },
+    {
+        key: 'tipe_pondasi_existing',
+        label: 'Tipe Pondasi Existing',
+        options: [
+            { id: 1, name: 'Batu Kali' },
+            { id: 2, name: 'Pancang Beton' }
+        ]
+    },
+    {
+        key: 'bobot_tipe_pondasi_existing',
+        label: 'Bobot Tipe Pondasi Existing',
+        options: [
+            { id: 1, name: 'Rendah' },
+            { id: 2, name: 'Tinggi' }
+        ]
+    },
+    {
+        key: 'tipe_struktur_existing',
+        label: 'Tipe Struktur Existing',
+        options: [
+            { id: 1, name: 'Beton Bertulang' },
+            { id: 2, name: 'Baja Ringan' }
+        ]
+    },
+    {
+        key: 'bobot_tipe_struktur_existing',
+        label: 'Bobot Tipe Struktur Existing',
+        options: [
+            { id: 1, name: 'Kuat' },
+            { id: 2, name: 'Sedang' }
+        ]
+    },
+    {
+        key: 'tipe_rangka_atap_existing',
+        label: 'Tipe Rangka Atap Existing',
+        options: [
+            { id: 1, name: 'Kayu' },
+            { id: 2, name: 'Besi Hollow' }
+        ]
+    },
+    {
+        key: 'bobot_rangka_atap_existing',
+        label: 'Bobot Rangka Atap Existing',
+        options: [
+            { id: 1, name: 'Ringan' },
+            { id: 2, name: 'Sedang' }
+        ]
+    },
+    {
+        key: 'tipe_penutup_atap_existing',
+        label: 'Tipe Penutup Atap Existing',
+        options: [
+            { id: 1, name: 'Genteng' },
+            { id: 2, name: 'Asbes' }
+        ]
+    },
+    {
+        key: 'bobot_penutup_atap_existing',
+        label: 'Bobot Penutup Atap Existing',
+        options: [
+            { id: 1, name: 'Sedang' },
+            { id: 2, name: 'Berat' }
+        ]
+    },
+    {
+        key: 'tipe_tipe_dinding_existing',
+        label: 'Tipe Tipe Dinding Existing',
+        options: [
+            { id: 1, name: 'Hebel' },
+            { id: 2, name: 'Gypsum' }
+        ]
+    },
+    {
+        key: 'bobot_tipe_dinding_existing',
+        label: 'Bobot Tipe Dinding Existing',
+        options: [
+            { id: 1, name: 'Tebal' },
+            { id: 2, name: 'Tipis' }
+        ]
+    },
+    {
+        key: 'tipe_tipe_pelapis_dinding_existing',
+        label: 'Tipe Pelapis Dinding Existing',
+        options: [
+            { id: 1, name: 'Cat' },
+            { id: 2, name: 'Wallpaper' }
+        ]
+    },
+    {
+        key: 'bobot_tipe_pelapis_dinding_existing',
+        label: 'Bobot Pelapis Dinding Existing',
+        options: [
+            { id: 1, name: 'Ringan' },
+            { id: 2, name: 'Berat' }
+        ]
+    },
+    {
+        key: 'tipe_tipe_pintu_jendela_existing',
+        label: 'Tipe Pintu Jendela Existing',
+        options: [
+            { id: 1, name: 'Aluminium' },
+            { id: 2, name: 'Kayu' }
+        ]
+    },
+    {
+        key: 'bobot_tipe_pintu_jendela_existing',
+        label: 'Bobot Pintu Jendela Existing',
+        options: [
+            { id: 1, name: 'Ringan' },
+            { id: 2, name: 'Sedang' },
+            { id: 3, name: 'Berat' }
+        ]
+    },
+    {
+        key: 'tipe_tipe_lantai_existing',
+        label: 'Tipe Lantai Existing',
+        options: [
+            { id: 1, name: 'Keramik' },
+            { id: 2, name: 'Granit' },
+            { id: 3, name: 'Vinyl' }
+        ]
+    },
+    {
+        key: 'bobot_tipe_lantai_existing',
+        label: 'Bobot Lantai Existing',
+        options: [
+            { id: 1, name: 'Ringan' },
+            { id: 2, name: 'Berat' }
+        ]
+    }
+];
+
 
 const form = ref({
     data: {
@@ -88,18 +264,25 @@ const form = ref({
         bobot_tipe_dinding_existing: null, // JSON
         tipe_tipe_pelapis_dinding_existing: null, // JSON
         bobot_tipe_pelapis_dinding_existing: null, // JSON
-        tahun_pemakaian_pondasi: null,
-        tahun_pemakaian_struktur: null,
-        tahun_pemakaian_rangka_atap: null,
-        tahun_pemakaian_penutup_atap: null,
-        bobot_tahun_pemakaian_pondasi: null,
-        bobot_tahun_pemakaian_struktur: null,
-        bobot_tahun_pemakaian_rangka_atap: null,
-        bobot_tahun_pemakaian_penutup_atap: null,
-        bobot_bangunan: null,
+        // tahun_pemakaian_pondasi: null,
+        // tahun_pemakaian_struktur: null,
+        // tahun_pemakaian_rangka_atap: null,
+        // tahun_pemakaian_penutup_atap: null,
+        // bobot_tahun_pemakaian_pondasi: null,
+        // bobot_tahun_pemakaian_struktur: null,
+        // bobot_tahun_pemakaian_rangka_atap: null,
+        // bobot_tahun_pemakaian_penutup_atap: null,
+        // bobot_bangunan: null,
         status_data: 'draft',
     },
     errors: {},
+    assign: (data = {}) => {
+        for (const key in data) {
+            if (key in form.value.data) {
+                form.value.data[key] = data[key];
+            }
+        }
+    },
     loading: false,
 });
 
@@ -112,82 +295,162 @@ const onFileChange = (event, fieldName) => {
         form.value.data[fieldName] = null;
     }
 };
-
-
 const save = async () => {
     form.value.loading = true;
     form.value.errors = {};
 
+    const isEdit = !!route.params.id;
+    const url = isEdit ? `bangunan/${route.params.id}/object` : 'bangunan/object';
+    const method = isEdit ? 'put' : 'post';
+
     try {
+        // Validasi schema
         storeSchema.parse(form.value.data);
 
         const formData = new FormData();
 
-        // Append text/number/json (stringify JSON where needed)
-        Object.entries(form.value.data).forEach(([key, value]) => {
-            if (value !== null && value !== undefined) {
-                if (
-                    ['foto_depan', 'foto_sisi_kiri', 'foto_sisi_kanan'].includes(key) &&
-                    value instanceof File
-                ) {
-                    // handled separately
-                    return;
-                }
+        // Append field biasa
+        for (const key in form.value.data) {
+            const value = form.value.data[key];
 
-                // JSON stringify for JSON fields (arrays or objects)
-                if (
-                    [
-                        'foto_lainnya', 'canvas_data',
-                        'luas_nama_pintu_jendela', 'luas_bobot_pintu_jendela',
-                        'luas_nama_dinding', 'luas_bobot_dinding',
-                        'luas_nama_rangka_atap_datar', 'luas_bobot_rangka_atap_datar',
-                        'luas_nama_atap_datar', 'luas_bobot_atap_datar',
-                        'tipe_pondasi_existing', 'bobot_tipe_pondasi_existing',
-                        'tipe_struktur_existing', 'bobot_tipe_struktur_existing',
-                        'tipe_rangka_atap_existing', 'bobot_rangka_atap_existing',
-                        'tipe_penutup_atap_existing', 'bobot_penutup_atap_existing',
-                        'tipe_tipe_dinding_existing', 'bobot_tipe_dinding_existing',
-                        'tipe_tipe_pelapis_dinding_existing', 'bobot_tipe_pelapis_dinding_existing',
-                    ].includes(key)
-                ) {
-                    formData.append(key, JSON.stringify(value));
-                } else {
-                    formData.append(key, value.toString());
-                }
+            // Skip foto_lainnya karena ditangani terpisah di bawah
+            if (key === 'foto_lainnya') continue;
+
+            // Handle File khusus (foto_depan, sisi_kiri, sisi_kanan)
+            if (
+                ['foto_depan', 'foto_sisi_kiri', 'foto_sisi_kanan'].includes(key) &&
+                value instanceof File
+            ) {
+                formData.append(key, value);
+            } else if (typeof value === 'object') {
+                formData.append(key, JSON.stringify(value)); // misalnya canvas_data atau json
+            } else if (value !== null && value !== undefined) {
+                formData.append(key, value.toString());
+            }
+        }
+
+        // Tangani foto_lainnya (array file dan keterangan)
+        form.value.data.foto_lainnya.forEach((item, index) => {
+            if (item.file) {
+                formData.append('foto_lainnya', item.file);
+            }
+            if (item.keterangan) {
+                formData.append(`foto_lainnya[${index}]`, item.keterangan);
             }
         });
 
-        // Append files
-        ['foto_depan', 'foto_sisi_kiri', 'foto_sisi_kanan'].forEach((field) => {
-            const file = form.value.data[field];
-            if (file instanceof File) {
-                formData.append(field, file);
+        // Kirim ke backend
+        const response = await AuthApi.client()({
+            url,
+            method,
+            data: formData,
+            headers: {
+                'Content-Type': 'multipart/form-data',
             }
         });
 
-        // Kirim ke backend (ganti URL sesuai endpoint)
-        const url = '/api/bangunan'; // contoh endpoint
-        const res = await AuthApi.post(url, formData, {
-            headers: { 'Content-Type': 'multipart/form-data' },
-        });
-
-        swal.fire('Berhasil', 'Data bangunan berhasil disimpan', 'success');
-        router.push('/bangunan');
-    } catch (e) {
-        if (e.errors) {
-            // dari zod
-            const errors = {};
-            for (const issue of e.errors) {
-                errors[issue.path[0]] = issue.message;
-            }
-            form.value.errors = errors;
+        if (response.data.success) {
+            swal.fire({
+                title: 'Success',
+                text: `Data Bangunan berhasil ${isEdit ? 'diperbarui' : 'disimpan'}`,
+                icon: 'success'
+            });
+            router.push({ name: 'Bangunan List' });
+        }
+    } catch (error) {
+        if (error instanceof z.ZodError) {
+            error.errors.forEach(err => {
+                form.value.errors[err.path[0]] = err.message;
+            });
         } else {
-            swal.fire('Error', e.message || 'Terjadi kesalahan', 'error');
+            console.error(error);
+            swal.fire({
+                title: 'Error',
+                text: 'Terjadi kesalahan saat menyimpan data',
+                icon: 'error'
+            });
         }
     } finally {
         form.value.loading = false;
     }
 };
+
+
+
+// Initialize with one empty photo if array is empty
+if (form.value.data.foto_lainnya.length === 0) {
+    form.value.data.foto_lainnya.push({ file: null, keterangan: '', url: '' });
+}
+
+function getPreviewUrl(file) {
+    return file ? URL.createObjectURL(file) : '';
+}
+
+function handleFileChange(event, index) {
+    if (event.target.files.length > 0) {
+        form.value.data.foto_lainnya[index].file = event.target.files[0];
+        form.value.data.foto_lainnya[index].url = getPreviewUrl(event.target.files[0]);
+    }
+}
+
+function addPhoto() {
+    form.value.data.foto_lainnya.push({ file: null, keterangan: '', url: '' });
+}
+
+function removePhoto(index) {
+    if (form.value.data.foto_lainnya.length > 1) {
+        form.value.data.foto_lainnya.splice(index, 1);
+    }
+}
+
+
+const statusOptions = [
+    { name: 'Draft', id: 'draft' },
+    { name: 'Publish', id: 'publish' }
+]
+onBeforeMount(async () => {
+    if (route.params.id) {
+        const data = await Helper.getDataById('bangunan', route.params.id);
+        if (data) {
+            // Set old_ untuk semua foto
+            const fotoFields = ['foto_depan', 'foto_sisi_kiri', 'foto_sisi_kanan'];
+            fotoFields.forEach(field => {
+                if (field in data) {
+                    data[`old_${field}`] = data[field];
+                }
+            });
+
+            // Jika keterangan_foto_lainnya ada dan berupa string JSON, parse ke foto_lainnya
+            if (data.foto_lainnya) {
+                try {
+                    const parsed = JSON.parse(data.foto_lainnya);
+                    if (Array.isArray(parsed)) {
+                        data.foto_lainnya = parsed.map(item => ({
+                            url: item.path || '',   // URL preview
+                            keterangan: item.keterangan || '',
+                            file: null              // untuk deteksi apakah file baru diupload
+                        }));
+                    }
+                } catch (err) {
+                    console.error('Gagal parse foto_lainnya:', err.message);
+                }
+            }
+
+            // Fallback jika tidak ada data foto_lainnya
+            if (!Array.isArray(data.foto_lainnya) || data.foto_lainnya.length === 0) {
+                data.foto_lainnya = [{
+                    url: '',
+                    keterangan: '',
+                    file: null
+                }];
+            }
+
+            form.value.assign(data);
+        }
+    }
+});
+
+
 const goBack = () => {
     router.push('/pages/object/bangunan');
 };
@@ -204,7 +467,6 @@ const goBack = () => {
             <InputError :message="form.errors.nama_bangunan" />
         </div>
 
-        <!-- foto_depan -->
         <div>
             <Label for="foto_depan" class="block font-medium">Foto Depan</Label>
             <InputText id="foto_depan" type="file" @change="e => onFileChange(e, 'foto_depan')" accept="image/*"
@@ -215,7 +477,7 @@ const goBack = () => {
         <!-- foto_sisi_kiri -->
         <div>
             <Label for="foto_sisi_kiri" class="block font-medium">Foto Sisi Kiri</Label>
-            <input id="foto_sisi_kiri" type="file" @change="e => onFileChange(e, 'foto_sisi_kiri')" accept="image/*"
+            <InputText id="foto_sisi_kiri" type="file" @change="e => onFileChange(e, 'foto_sisi_kiri')" accept="image/*"
                 class="w-full" />
             <p v-if="form.errors.foto_sisi_kiri" class="text-red-600 text-sm">{{ form.errors.foto_sisi_kiri }}</p>
         </div>
@@ -223,8 +485,8 @@ const goBack = () => {
         <!-- foto_sisi_kanan -->
         <div>
             <Label for="foto_sisi_kanan" class="block font-medium">Foto Sisi Kanan</Label>
-            <input id="foto_sisi_kanan" type="file" @change="e => onFileChange(e, 'foto_sisi_kanan')" accept="image/*"
-                class="w-full" />
+            <InputText id="foto_sisi_kanan" type="file" @change="e => onFileChange(e, 'foto_sisi_kanan')"
+                accept="image/*" class="w-full" />
             <p v-if="form.errors.foto_sisi_kanan" class="text-red-600 text-sm">{{ form.errors.foto_sisi_kanan }}</p>
         </div>
 
@@ -237,11 +499,39 @@ const goBack = () => {
 
         <!-- foto_lainnya -->
         <div>
-            <Label for="foto_lainnya" class="block font-medium">Foto Lainnya (JSON)</Label>
-            <textarea id="foto_lainnya" v-model="form.data.foto_lainnya"
-                placeholder='Contoh: [{"url":"...","keterangan":"..."}]' class="w-full border rounded p-2"
-                rows="4"></textarea>
-            <p v-if="form.errors.foto_lainnya" class="text-red-600 text-sm">{{ form.errors.foto_lainnya }}</p>
+            <Label class="block font-medium">Foto Lainnya</Label>
+
+            <div v-for="(photo, index) in form.data.foto_lainnya" :key="index" class="mb-4 flex items-center gap-2">
+                <div class="flex-1">
+                    <InputText type="file" @change="e => handleFileChange(e, index)" class="w-full" accept="image/*" />
+                    <InputText type="text" v-model="photo.keterangan" placeholder="Keterangan foto"
+                        class="w-full mt-2 border rounded p-2" />
+                    <!-- Preview for existing images -->
+                    <img v-if="photo.url && !photo.file" :src="photo.url" class="mt-2 h-20 object-cover" />
+                    <!-- Preview for newly uploaded images -->
+                    <img v-if="photo.file" :src="getPreviewUrl(photo.file)" class="mt-2 h-20 object-cover" />
+                </div>
+
+                <div class="flex flex-col space-y-2">
+                    <button type="button" @click="addPhoto"
+                        class="text-blue-600 hover:text-blue-800 text-2xl font-bold">
+                        +
+                    </button>
+                    <button type="button" @click="removePhoto(index)"
+                        class="text-red-600 hover:text-red-800 text-2xl font-bold"
+                        :disabled="form.data.foto_lainnya.length <= 1">
+                        -
+                    </button>
+                </div>
+
+
+            </div>
+
+
+
+            <p v-if="form.errors.foto_lainnya" class="text-red-600 text-sm">
+                {{ form.errors.foto_lainnya }}
+            </p>
         </div>
 
         <!-- bentuk_bangunan -->
@@ -444,11 +734,12 @@ const goBack = () => {
 
         <div v-for="field in jsonFields" :key="field.key">
             <Label :for="field.key" class="block font-medium">{{ field.label }}</Label>
-            <Select v-model="form.data[field.key]" :options="statusOptions" show-clear option-label="name" filter
-                option-value="id" :virtualScrollerOptions="{ itemSize: 38 }" :placeholder="`Select ${field.label}`"
-                class="w-full" :invalid="!!form.errors[field.key]" />
+            <Select v-model="form.data[field.key]" :options="field.options" show-clear option-label="name"
+                option-value="id" filter :virtualScrollerOptions="{ itemSize: 38 }"
+                :placeholder="`Pilih ${field.label}`" class="w-full" :invalid="!!form.errors[field.key]" />
             <InputError :message="form.errors[field.key]" />
         </div>
+
 
         <div>
             <Label for="jumlah_lantai_rumah_tinggal" class="block font-medium">Jumlah Lantai Rumah Tinggal</Label>
@@ -468,8 +759,7 @@ const goBack = () => {
         <div>
             <Label for="perlengkapan_bangunan" class="block font-medium">Perlengkapan Bangunan</Label>
             <Textarea id="perlengkapan_bangunan" v-model="form.data.perlengkapan_bangunan" rows="4"
-                :invalid="!!form.errors.perlengkapan_bangunan" class="w-full border rounded p-2"
-                @blur="validateJsonField('perlengkapan_bangunan')" />
+                :invalid="!!form.errors.perlengkapan_bangunan" class="w-full border rounded p-2" />
             <InputError :message="form.errors.perlengkapan_bangunan" />
         </div>
 
@@ -489,11 +779,9 @@ const goBack = () => {
 
         <!-- status_data -->
         <div>
-            <Label for="status_data" class="block font-medium">Status Data</Label>
-            <Select v-model="form.data.status_data" id="status_data" class="w-full border rounded p-2">
-                <option value="draft">Draft</option>
-                <option value="publish">Publish</option>
-            </Select>
+            <Select v-model="form.data.status_data" :options="statusOptions" option-label="name" option-value="id"
+                show-clear filter placeholder="Select a status" class="w-full" :invalid="!!form.errors.status_data" />
+            <InputError :message="form.errors.status_data" />
         </div>
 
         <div class="flex justify-end gap-2 mt-4">

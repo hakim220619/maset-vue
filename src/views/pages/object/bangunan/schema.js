@@ -2,9 +2,10 @@ import { z } from 'zod';
 
 export const storeSchema = z.object({
     nama_bangunan: z.string().min(1, 'Nama Bangunan wajib diisi'),
-    foto_depan: z.instanceof(File).optional().nullable(),
-    foto_sisi_kiri: z.instanceof(File).optional().nullable(),
-    foto_sisi_kanan: z.instanceof(File).optional().nullable(),
+    // foto_depan: z.union([z.instanceof(File), z.null()]).optional(),
+    // foto_sisi_kiri: z.union([z.instanceof(File), z.null()]).optional(),
+    // foto_sisi_kanan: z.union([z.instanceof(File), z.null()]).optional(),
+
     judul_foto: z.string().optional().nullable(),
     foto_lainnya: z.array(z.any()).optional().nullable(), // no deep validation for JSON here
     bentuk_bangunan: z.string().optional().nullable(),
@@ -30,8 +31,16 @@ export const storeSchema = z.object({
     bobot_renovasi: z.number().int().optional().nullable(),
     kondisi_visual: z.string().optional().nullable(),
     catatan_khusus: z.string().optional().nullable(),
-    luas_bangunan_terpotong: z.number().optional().nullable(),
-    luas_bangunan_imb: z.number().optional().nullable(),
+    luas_bangunan_terpotong: z
+        .string()
+        .regex(/^-?\d+(\.\d+)?$/, 'Harus berupa angka desimal')
+        .optional()
+        .nullable(),
+
+    luas_bangunan_imb: z.string()
+        .regex(/^-?\d+(\.\d+)?$/, 'Harus berupa angka desimal')
+        .optional()
+        .nullable(),
     luas_nama_pintu_jendela: z.any().optional().nullable(),
     luas_bobot_pintu_jendela: z.any().optional().nullable(),
     luas_nama_dinding: z.any().optional().nullable(),
