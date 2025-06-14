@@ -424,16 +424,16 @@ onMounted(() => {
         <table class="min-w-full border border-gray-300 text-sm mt-4 text-center">
             <tbody>
                 <tr>
-                    <td class="border p-2 text-left font-semibold  text-white">Deviasi:</td>
-                    <td class="border p-2 font-semibold">8,14%</td>
-                    <td class="border p-2 font-bold align-middle" rowspan="3">OK !!!</td>
+                    <td class="border p-2 text-left font-semibold dark:text-white">Deviasi:</td>
+                    <td class="border p-2 dark:text-white font-semibold">8,14%</td>
+                    <td class="border p-2 font-bold align-middle dark:text-white" rowspan="3">OK !!!</td>
                 </tr>
                 <tr>
-                    <td class="border p-2 text-left  text-white">Min</td>
+                    <td class="border p-2 text-left dark:text-white">Min</td>
                     <td class="border p-2">Rp612.000</td>
                 </tr>
                 <tr>
-                    <td class="border p-2 text-left  text-white">Max</td>
+                    <td class="border p-2 text-left ">Max</td>
                     <td class="border p-2">Rp661.833</td>
                 </tr>
             </tbody>
