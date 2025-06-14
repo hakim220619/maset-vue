@@ -48,11 +48,6 @@ const save = async () => {
 
     try {
         storeSchema.parse(form.value.data);
-        // console.log(form.value.data);
-        // console.log(objectOptions);
-
-
-        // Pisahkan object_id menjadi tanah_id dan bangunan_id
         const selectedObjects = objectOptions.value.filter(obj =>
             form.value.data.object_id.includes(obj.value)
         );
@@ -72,7 +67,6 @@ const save = async () => {
             bangunan_id,
             pembanding_id: form.value.data.pembanding_id
         };
-        console.log(payload);
 
         const response = await AuthApi.client()({
             url,

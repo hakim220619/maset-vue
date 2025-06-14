@@ -1,160 +1,23 @@
 <script setup>
 import { AuthApi } from '@/service/Api';
-import { onMounted, ref } from 'vue';
+import { Helper } from '@/service/Helper';
+import { onBeforeMount, onMounted, ref } from 'vue';
 import { useRoute } from 'vue-router';
 
 
+
 const data = ref({
-    object: null,
-    pembanding: null
-})
-const informasiUmumFields = [
-    {
-        label: 'Alamat',
-        key: 'alamat',
-        items: [
-            {
-                keterangan: 'Lokasi strategis',
-                object: 'Jl. Sudirman No. 1',
-                pembanding1: 'Jl. Melati No. 2',
-                pembanding2: 'Jl. Kenanga No. 3'
-            }
-        ]
-    },
-    {
-        label: 'Koordinat',
-        key: 'koordinat',
-        items: [
-            {
-                keterangan: 'GPS',
-                object: '-6.200, 106.816',
-                pembanding1: '-6.201, 106.817',
-                pembanding2: '-6.202, 106.818'
-            }
-        ]
-    },
-    {
-        label: 'Sumber Informasi',
-        key: 'sumber_informasi',
-        items: [
-            {
-                keterangan: 'Informasi agen',
-                object: 'Bpk. Agus',
-                pembanding1: 'Ibu Rina',
-                pembanding2: 'Pak Hadi'
-            }
-        ]
-    },
-    // Tambahkan field lain sesuai kebutuhan
-]
+    object: [],
+    pembanding: []
+});
+const informasiUmumFields = ref([]);
+const dataPropertiFields = ref([]);
+const dataUnitPerbandinganField = ref([]);
 
-
-const dataPropertiFields = [
-    {
-        label: 'Tahun Bangun',
-        key: 'tahun_bangun',
-        items: [
-            {
-                keterangan: 'Tahun dibangunnya properti',
-                object: '2015',
-                pembanding1: '2010',
-                pembanding2: '2012'
-            }
-        ]
-    },
-    {
-        label: 'Tahun Renovasi',
-        key: 'tahun_renovasi',
-        items: [
-            {
-                keterangan: 'Tahun terakhir renovasi',
-                object: '2020',
-                pembanding1: '2018',
-                pembanding2: '2019'
-            }
-        ]
-    },
-    // ... lanjutkan field lainnya
-]
-
-const unitPerbandinganFields = [
-    {
-        label: 'Unit',
-        key: 'unit',
-        items: [
-            {
-                keterangan: 'Jenis unit properti',
-                object: 'Ruko',
-                pembanding1: 'Ruko',
-                pembanding2: 'Ruko'
-            }
-        ]
-    },
-    {
-        label: 'Mata Uang',
-        key: 'mata_uang',
-        items: [
-            {
-                keterangan: 'Jenis mata uang yang digunakan',
-                object: 'IDR',
-                pembanding1: 'IDR',
-                pembanding2: 'IDR'
-            }
-        ]
-    },
-    {
-        label: 'Harga Penawaran / Transaksi',
-        key: 'tipe_penawaran',
-        items: [
-            {
-                keterangan: 'Harga sebelum negosiasi',
-                object: 'Rp 1.000.000',
-                pembanding1: 'Rp 950.000',
-                pembanding2: 'Rp 975.000'
-            }
-        ]
-    },
-    {
-        label: 'Diskon',
-        key: 'diskon',
-        items: [
-            {
-                keterangan: 'Potongan harga sewa',
-                object: '10%',
-                pembanding1: '5%',
-                pembanding2: '7%'
-            }
-        ]
-    },
-    {
-        label: 'Indikasi Nilai Sewa sebelum penyesuaian',
-        key: 'bentuk',
-        items: [
-            {
-                keterangan: 'Nilai sebelum faktor koreksi',
-                object: 'Rp 900.000',
-                pembanding1: 'Rp 902.000',
-                pembanding2: 'Rp 895.000'
-            }
-        ]
-    },
-    {
-        label: 'Indikasi Nilai Sewa sebelum penyesuaian / m²',
-        key: 'elevasi',
-        items: [
-            {
-                keterangan: 'Nilai sewa per meter persegi',
-                object: 'Rp 90.000/m²',
-                pembanding1: 'Rp 88.000/m²',
-                pembanding2: 'Rp 89.500/m²'
-            }
-        ]
-    },
-]
 
 const elemenPerbandinganFields = [
     {
-        kategori: 'Faktor Lokasi',
+        kategori: 'Lokasi',
         items: [
             {
                 label: 'Akses Jalan',
@@ -283,7 +146,6 @@ async function loadSewaDetail(id) {
 
     if (res.data.success) {
         const resData = res.data.data
-        // console.log(resData);
 
         data.value = {
             object: [
@@ -294,12 +156,24 @@ async function loadSewaDetail(id) {
                 ? resData.pembanding_id
                 : [resData.pembanding_id].filter(Boolean),
         }
-
-        // console.log(data);
     }
 }
 
+onBeforeMount(async () => {
+    if (route.params.id) {
+        const dataUnitPerbandingan = await Helper.getDataById('getDataUnitPerbandingan', route.params.id);
 
+        const dataInformasiUmum = await Helper.getDataById('getInformasiUmum', route.params.id);
+        const dataProperti = await Helper.getDataById('getDataProperti', route.params.id);
+
+
+        informasiUmumFields.value = dataInformasiUmum;
+        dataPropertiFields.value = dataProperti;
+        dataUnitPerbandinganField.value = dataUnitPerbandingan;
+        console.log(dataUnitPerbandinganField);
+        console.log(dataProperti);
+    }
+});
 onMounted(() => {
     loadSewaDetail(route.params.id)
 })
@@ -311,179 +185,169 @@ onMounted(() => {
             <thead>
                 <tr class="bg-gray-100 dark:bg-gray-800 text-left">
                     <th class="p-2 border dark:border-gray-600 dark:text-white">DESKRIPSI</th>
-
-                    <!-- Kolom dinamis untuk OBJEK PENILAIAN -->
                     <th v-for="(obj, index) in data.object" :key="'object-' + index"
-                        class="p-2 border dark:border-gray-600 dark:text-white">
+                        class="p-2 border dark:border-gray-600 dark:text-white" colspan="2">
                         OBJEK PENILAIAN {{ index + 1 }}
                     </th>
-
-                    <!-- Kolom dinamis untuk DATA PEMBANDING -->
                     <th v-for="(pb, index) in data.pembanding" :key="'pembanding-' + index"
-                        class="p-2 border dark:border-gray-600 dark:text-white">
+                        class="p-2 border dark:border-gray-600 dark:text-white text-center" colspan="3">
                         DATA PEMBANDING {{ index + 1 }}
                     </th>
                 </tr>
+
             </thead>
 
             <tbody>
                 <!-- Baris Foto -->
                 <tr class="h-32 text-center">
                     <td class="border p-2 align-top dark:border-gray-600 dark:text-white">Foto</td>
-
-                    <td v-for="(obj, i) in data.object" :key="'foto-object-' + i"
-                        class="border p-2 dark:border-gray-600">
-                        <img :src="obj?.foto" class="h-24 mx-auto" />
-                    </td>
-
-                    <td v-for="(pb, i) in data.pembanding" :key="'foto-pembanding-' + i"
-                        class="border p-2 dark:border-gray-600">
-                        <img :src="pb?.foto" class="h-24 mx-auto" />
-                    </td>
+                    <template v-for="(obj, i) in data.object" :key="'foto-object-' + i">
+                        <td colspan="2" class="border p-2 dark:border-gray-600">
+                            <img :src="obj?.foto" class="h-24 mx-auto" />
+                        </td>
+                    </template>
+                    <template v-for="(pb, i) in data.pembanding" :key="'foto-pembanding-' + i">
+                        <td colspan="3" class="border p-2 dark:border-gray-600">
+                            <img :src="pb?.foto" class="h-24 mx-auto" />
+                        </td>
+                    </template>
                 </tr>
 
                 <!-- INFORMASI UMUM -->
                 <tr class="bg-gray-100 dark:bg-gray-700 font-bold">
                     <td class="p-2 border dark:border-gray-600 dark:text-white"
-                        :colspan="1 + (data.object?.length || 0) + (data.pembanding?.length || 0)">
+                        :colspan="1 + (data.object.length * 2) + (data.pembanding.length * 3)">
                         INFORMASI UMUM
                     </td>
                 </tr>
-
                 <tr v-for="field in informasiUmumFields" :key="'inf-' + field.key">
                     <td class="p-2 border dark:border-gray-600 dark:text-white">{{ field.label }}</td>
-
-                    <!-- Kolom objek -->
-                    <td v-for="(obj, idx) in data.object" :key="'info-obj-' + field.key + '-' + idx"
-                        class="p-2 border dark:border-gray-600 dark:text-white">
-                        <div v-if="field.items?.[0]">
-                            <div class="font-medium">{{ field.items[0].keterangan }}</div>
-                            <div class="text-sm text-gray-600 dark:text-gray-400">
-                                {{ field.items[0].object || '-' }}
+                    <template v-for="(obj, idx) in data.object" :key="'info-obj-' + field.key + '-' + idx">
+                        <td colspan="2" class="p-2 border dark:border-gray-600 dark:text-white">
+                            <div v-if="field.items?.[0]">
+                                <div class="font-medium">{{ field.items[0].keterangan }}</div>
+                                <div class="text-sm text-gray-600 dark:text-gray-400">
+                                    {{ field.items[0].object || '-' }}
+                                </div>
                             </div>
-                        </div>
-                        <div v-else>-</div>
-                    </td>
-
-                    <!-- Kolom pembanding -->
-                    <td v-for="(pb, idx) in data.pembanding" :key="'info-pb-' + field.key + '-' + idx"
-                        class="p-2 border dark:border-gray-600 dark:text-white">
-                        <div v-if="field.items?.[0]">
-                            {{ field.items[0][`pembanding${idx + 1}`] || '-' }}
-                        </div>
-                        <div v-else>-</div>
-                    </td>
+                            <div v-else>-</div>
+                        </td>
+                    </template>
+                    <template v-for="(pb, idx) in data.pembanding" :key="'info-pb-' + field.key + '-' + idx">
+                        <td colspan="3" class="p-2 border dark:border-gray-600 dark:text-white">
+                            <div v-if="field.items?.[0]">
+                                {{ field.items[0][`pembanding${idx + 1}`] || '-' }}
+                            </div>
+                            <div v-else>-</div>
+                        </td>
+                    </template>
                 </tr>
-
 
                 <!-- DATA PROPERTI -->
                 <tr class="bg-gray-100 dark:bg-gray-700 font-bold">
                     <td class="p-2 border dark:border-gray-600 dark:text-white"
-                        :colspan="1 + (data.object?.length || 0) + (data.pembanding?.length || 0)">
+                        :colspan="1 + (data.object.length * 2) + (data.pembanding.length * 3)">
                         DATA PROPERTI
                     </td>
                 </tr>
-
                 <tr v-for="field in dataPropertiFields" :key="'prop-' + field.key">
                     <td class="p-2 border dark:border-gray-600 dark:text-white">{{ field.label }}</td>
-
-                    <!-- Kolom objek -->
-                    <td v-for="(obj, idx) in data.object" :key="'prop-obj-' + field.key + '-' + idx"
-                        class="p-2 border dark:border-gray-600 dark:text-white">
-                        <div class="font-medium">{{ field.items?.[0]?.keterangan || '-' }}</div>
-                        <div class="text-sm text-gray-600 dark:text-gray-400">{{ field.items?.[0]?.object || '-' }}
-                        </div>
-                    </td>
-
-                    <!-- Kolom pembanding -->
-                    <td v-for="(pb, idx) in data.pembanding" :key="'prop-pb-' + field.key + '-' + idx"
-                        class="p-2 border dark:border-gray-600 dark:text-white">
-                        {{ field.items?.[0]?.[`pembanding${idx + 1}`] || '-' }}
-                    </td>
+                    <template v-for="(obj, idx) in data.object" :key="'prop-obj-' + field.key + '-' + idx">
+                        <td colspan="2" class="p-2 border dark:border-gray-600 dark:text-white">
+                            <div class="font-medium">{{ field.items?.[0]?.keterangan || '-' }}</div>
+                            <div class="text-sm text-gray-600 dark:text-gray-400">{{ field.items?.[0]?.object || '-' }}
+                            </div>
+                        </td>
+                    </template>
+                    <template v-for="(pb, idx) in data.pembanding" :key="'prop-pb-' + field.key + '-' + idx">
+                        <td colspan="3" class="p-2 border dark:border-gray-600 dark:text-white">
+                            {{ field.items?.[0]?.[`pembanding${idx + 1}`] || '-' }}
+                        </td>
+                    </template>
                 </tr>
 
                 <!-- UNIT PERBANDINGAN -->
                 <tr class="bg-gray-100 dark:bg-gray-700 font-bold">
                     <td class="p-2 border dark:border-gray-600 dark:text-white"
-                        :colspan="1 + (data.object?.length || 0) + (data.pembanding?.length || 0)">
+                        :colspan="1 + (data.object.length * 2) + (data.pembanding.length * 3)">
                         UNIT PERBANDINGAN
                     </td>
                 </tr>
-
-                <tr v-for="field in unitPerbandinganFields" :key="'prop-' + field.key">
+                <tr v-for="field in dataUnitPerbandinganField" :key="'unit-' + field.key">
                     <td class="p-2 border dark:border-gray-600 dark:text-white">{{ field.label }}</td>
-
-                    <!-- Kolom objek -->
-                    <td v-for="(obj, idx) in data.object" :key="'prop-obj-' + field.key + '-' + idx"
-                        class="p-2 border dark:border-gray-600 dark:text-white">
-                        <div class="font-medium">{{ field.items?.[0]?.keterangan || '-' }}</div>
-                        <div class="text-sm text-gray-600 dark:text-gray-400">{{ field.items?.[0]?.object || '-' }}
-                        </div>
-                    </td>
-
-                    <!-- Kolom pembanding -->
-                    <td v-for="(pb, idx) in data.pembanding" :key="'prop-pb-' + field.key + '-' + idx"
-                        class="p-2 border dark:border-gray-600 dark:text-white">
-                        {{ field.items?.[0]?.[`pembanding${idx + 1}`] || '-' }}
-                    </td>
+                    <template v-for="(obj, idx) in data.object" :key="'unit-obj-' + field.key + '-' + idx">
+                        <td colspan="2" class="p-2 border dark:border-gray-600 dark:text-white">
+                            <div class="font-medium">{{ field.items?.[0]?.keterangan || '-' }}</div>
+                            <div class="text-sm text-gray-600 dark:text-gray-400">{{ field.items?.[0]?.object || '-' }}
+                            </div>
+                        </td>
+                    </template>
+                    <template v-for="(pb, idx) in data.pembanding" :key="'unit-pb-' + field.key + '-' + idx">
+                        <td colspan="3" class="p-2 border dark:border-gray-600 dark:text-white">
+                            {{ field.items?.[0]?.[`pembanding${idx + 1}`] || '-' }}
+                        </td>
+                    </template>
                 </tr>
+
                 <!-- ELEMEN PERBANDINGAN -->
-                <tr class="bg-gray-100 dark:bg-gray-700 font-bold text-sm">
-                    <td class="p-2 border dark:border-gray-600 dark:text-white">ELEMEN PERBANDINGAN</td>
-
-                    <!-- Header Objek Penilaian -->
-                    <td v-for="(obj, i) in data.object" :key="'elemen-obj-header-' + i"
-                        class="p-2 border dark:border-gray-600 dark:text-white">
-                        Objek Penilaian {{ i + 1 }}:<br />
-                        <span class="text-gray-400 dark:text-gray-300 font-normal">Keterangan, Deskripsi</span>
-                    </td>
-
-                    <!-- Header Pembanding -->
-                    <td v-for="(pb, i) in data.pembanding" :key="'elemen-pb-header-' + i"
-                        class="p-2 border dark:border-gray-600 dark:text-white">
-                        Data Pembanding {{ i + 1 }}:<br />
-                        <span class="text-gray-400 dark:text-gray-300 font-normal">Deskripsi, (%) Penyesuaian, ±
-                            Penyesuaian (Rp)</span>
-                    </td>
+                <!-- Sub-header hanya untuk elemen perbandingan -->
+                <tr class="bg-gray-200 dark:bg-gray-700 text-center text-sm">
+                    <th class="p-2 border dark:border-gray-600 dark:text-white">ELEMEN PERBANDINGAN</th>
+                    <template v-for="(obj, index) in data.object" :key="'object-sub-' + index">
+                        <th class="p-2 border dark:border-gray-600 dark:text-white">Keterangan</th>
+                        <th class="p-2 border dark:border-gray-600 dark:text-white">Deskripsi</th>
+                    </template>
+                    <template v-for="(pb, index) in data.pembanding" :key="'pembanding-sub-' + index">
+                        <th class="p-2 border dark:border-gray-600 dark:text-white">Deskripsi</th>
+                        <th class="p-2 border dark:border-gray-600 dark:text-white">(%)</th>
+                        <th class="p-2 border dark:border-gray-600 dark:text-white">+/- Penyesuaian (Rp)</th>
+                    </template>
                 </tr>
 
-                <!-- Loop Kategori dan Item -->
+                <!-- Elemen perbandingan -->
                 <template v-for="group in elemenPerbandinganFields" :key="group.kategori">
-                    <!-- Kategori -->
-                    <tr class="bg-gray-200 dark:bg-gray-800 font-semibold">
-                        <td :colspan="1 + (data.object?.length || 0) + (data.pembanding?.length || 0)"
-                            class="p-2 border dark:border-gray-600 dark:text-white">
+                    <!-- Baris kategori -->
+                    <tr class="bg-gray-200 dark:bg-gray-700 font-semibold">
+                        <td class="p-2 border dark:border-gray-600 dark:text-white"
+                            :colspan="1 + (data.object.length * 2) + (data.pembanding.length * 3)">
                             {{ group.kategori }}
                         </td>
                     </tr>
 
-                    <!-- Item per Elemen -->
-                    <tr v-for="item in group.items" :key="item.label">
-                        <td class="p-2 border dark:border-gray-600 dark:text-white">{{ item.label }}</td>
+                    <!-- Baris item -->
+                    <template v-for="item in group.items" :key="item.label">
+                        <tr>
+                            <td class="p-2 border dark:border-gray-600 dark:text-white align-top">{{ item.label }}</td>
 
-                        <!-- Data Objek -->
-                        <td v-for="(obj, i) in data.object" :key="'elemen-obj-' + item.label + '-' + i"
-                            class="p-2 border dark:border-gray-600 dark:text-white">
-                            <div class="font-medium">{{ item.keterangan }}</div>
-                            <div class="text-sm text-gray-600 dark:text-gray-400">{{ item.object }}</div>
-                        </td>
+                            <!-- Kolom objek -->
+                            <template v-for="(obj, idx) in data.object" :key="'el-obj-' + idx">
+                                <td class="p-2 border dark:border-gray-600 dark:text-white align-top">
+                                    {{ item.keterangan || '-' }}
+                                </td>
+                                <td class="p-2 border dark:border-gray-600 dark:text-white align-top">
+                                    {{ item.object || '-' }}
+                                </td>
+                            </template>
 
-                        <!-- Data Pembanding -->
-                        <td v-for="(pb, i) in data.pembanding" :key="'elemen-pb-' + item.label + '-' + i"
-                            class="p-2 border dark:border-gray-600 dark:text-white">
-                            <div>{{ item[`pembanding${i + 1}`]?.deskripsi || '-' }}</div>
-                            <div class="text-xs text-gray-500 dark:text-gray-300">
-                                {{ item[`pembanding${i + 1}`]?.persen || '-' }} |
-                                {{ item[`pembanding${i + 1}`]?.penyesuaian || '-' }}
-                            </div>
-                        </td>
-                    </tr>
+                            <!-- Kolom pembanding -->
+                            <template v-for="(pb, idx) in data.pembanding" :key="'el-pb-' + idx">
+                                <td class="p-2 border dark:border-gray-600 dark:text-white align-top">
+                                    {{ item[`pembanding${idx + 1}`]?.deskripsi || '-' }}
+                                </td>
+                                <td class="p-2 border dark:border-gray-600 dark:text-white align-top">
+                                    {{ item[`pembanding${idx + 1}`]?.persen || '0%' }}
+                                </td>
+                                <td class="p-2 border dark:border-gray-600 dark:text-white align-top">
+                                    {{ item[`pembanding${idx + 1}`]?.penyesuaian || 'Rp0' }}
+                                </td>
+                            </template>
+                        </tr>
+                    </template>
                 </template>
 
             </tbody>
-
-
         </table>
+
 
         <br><br>
         <table class="min-w-full border border-gray-300 text-sm dark:border-gray-600">
