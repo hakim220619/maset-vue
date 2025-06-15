@@ -485,6 +485,44 @@ const routes = [
                 }
             },
 
+
+            {
+                path: 'pages/sewa',
+                name: 'Sewa List',
+                component: () => import('@/views/pages/sewa/Index.vue'),
+                meta: {
+                    requiresAuth: true,
+                    breadcrumb: [{ parent: 'Utilities', label: 'Sewa' }]
+                }
+            },
+            {
+                path: 'pages/sewa/create',
+                name: 'Sewa Create',
+                component: () => import('@/views/pages/sewa/Form.vue'),
+                meta: {
+                    requiresAuth: true,
+                    breadcrumb: [{ parent: 'Utilities', label: 'Sewa', item: 'Add Sewa' }]
+                }
+            },
+            {
+                path: 'pages/sewa/:id/edit',
+                name: 'Sewa Edit',
+                component: () => import('@/views/pages/sewa/Form.vue'),
+                meta: {
+                    requiresAuth: true,
+                    breadcrumb: [{ parent: 'Utilities', label: 'Sewa', item: 'Edit Sewa' }]
+                }
+            },
+            {
+                path: 'pages/sewa/:id/detail',
+                name: 'Sewa Detail',
+                component: () => import('@/views/pages/sewa/Detail.vue'),
+                meta: {
+                    requiresAuth: true,
+                    breadcrumb: [{ parent: 'Utilities', label: 'Sewa', item: 'Detail Sewa' }]
+                }
+            },
+
             {
                 path: 'pages/ms_icons',
                 name: 'Icons List',

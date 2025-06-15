@@ -150,6 +150,19 @@ export const Helper = {
             }
         }
     },
+    async getAllData(endpoint) {
+        try {
+            const response = await AuthApi.client().get(endpoint);
+
+            if (response.data.success) {
+                return response.data.data; // Mengembalikan semua data jika berhasil
+            }
+        } catch (error) {
+            console.error('Gagal mengambil data:', error);
+            return []; // Kembalikan array kosong sebagai fallback
+        }
+    },
+
 
 
     async getUserLocalStorage() {
