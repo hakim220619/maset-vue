@@ -22,14 +22,14 @@ export default defineConfig({
             '@': fileURLToPath(new URL('./src', import.meta.url))
         }
     },
-    // publicPath: '/',
-    // server: {
-    //     proxy: {
-    //         '/auth': {
-    //             target: 'https://api-maset-dev.sppapp.my.id',
-    //             changeOrigin: true,
-    //             secure: false,
-    //         }
-    //     }
-    // }
+    publicPath: '/',
+    server: {
+        proxy: {
+            '/auth': {
+                target: 'https://api-maset-dev.sppapp.my.id',
+                changeOrigin: true,
+                secure: false,
+            }
+        }
+    }
 });
