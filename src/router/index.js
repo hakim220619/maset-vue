@@ -401,6 +401,34 @@ const routes = [
                     breadcrumb: [{ parent: 'Utilities', label: 'Whatsapp' }]
                 }
             },
+            {
+                path: 'pages/pembanding',
+                name: 'Pembanding List',
+                component: () => import('@/views/pages/pembanding/Index.vue'),
+                meta: {
+                    requiresAuth: true,
+                    breadcrumb: [{ parent: 'Utilities', label: 'Tanah' }]
+                }
+            },
+
+            {
+                path: 'pages/pembanding/create',
+                name: 'Pembanding Create',
+                component: () => import('@/views/pages/pembanding/Form.vue'),
+                meta: {
+                    requiresAuth: true,
+                    breadcrumb: [{ parent: 'Utilities', label: 'Pembanding', item: 'Add Pembanding' }]
+                }
+            },
+            {
+                path: 'pages/pembanding/:id/edit',
+                name: 'Tanah Edit',
+                component: () => import('@/views/pages/pembanding/Form.vue'),
+                meta: {
+                    requiresAuth: true,
+                    breadcrumb: [{ parent: 'Utilities', label: 'Pembanding', item: 'Edit Pembanding' }]
+                }
+            },
 
             {
                 path: 'pages/object/tanah',
@@ -551,8 +579,6 @@ const routes = [
                 }
             },
 
-
-
             {
                 path: 'pages/attribute',
                 name: 'Attribute',
@@ -571,7 +597,6 @@ const routes = [
                     breadcrumb: [{ parent: 'Utilities', label: 'Attribute', item: 'Add Attribute' }]
                 }
             },
-
 
             {
                 path: '/pages/ms_role',
