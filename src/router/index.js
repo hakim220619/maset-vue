@@ -582,7 +582,7 @@ const routes = [
             {
                 path: 'pages/attribute',
                 name: 'Attribute',
-                component: () => import('@/views/pages/attribute/index.vue'),
+                component: () => import('@/views/pages/attribute/Index.vue'),
                 meta: {
                     requiresAuth: true,
                     breadcrumb: [{ parent: 'Utilities', label: 'Attribute' }]

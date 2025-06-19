@@ -8,8 +8,19 @@ import { useRoute } from 'vue-router';
 
 const data = ref({
     object: [],
-    pembanding: []
+    pembanding: [],
+    pembandings: [],
+    tanahs: [],
+
 });
+const unitFieldDefinitions = [
+    { key: 'unit', label: 'Unit' },
+    { key: 'mata_uang', label: 'Mata Uang' },
+    { key: 'harga_penawaran', label: 'Harga Penawaran / Transaksi' },
+    { key: 'diskon', label: 'Diskon' },
+    { key: 'indikasi_sewa_rp', label: 'Indikasi Nilai Sewa sebelum penyesuaian' },
+    { key: 'indikasi_sewa_m2_rp', label: 'Indikasi Nilai Sewa sebelum penyesuaian / m²' }
+];
 const informasiUmumFields = ref([]);
 const dataPropertiFields = ref([]);
 const dataUnitPerbandinganField = ref([]);
@@ -137,6 +148,9 @@ const kesimpulanSewa = {
     }
 }
 
+function getValue(obj, key) {
+    return obj?.[key] ?? '-'
+}
 
 
 const route = useRoute();
@@ -149,12 +163,11 @@ async function loadSewaDetail(id) {
 
         data.value = {
             object: [
-                ...(Array.isArray(resData.tanah_id) ? resData.tanah_id : [resData.tanah_id]).filter(Boolean),
-                ...(Array.isArray(resData.bangunan_id) ? resData.bangunan_id : [resData.bangunan_id]).filter(Boolean)
+                1
             ],
-            pembanding: Array.isArray(resData.pembanding_id)
-                ? resData.pembanding_id
-                : [resData.pembanding_id].filter(Boolean),
+            pembanding: resData.pembandings || [],
+            pembandings: resData.pembandings || [],
+            tanahs: resData.tanahs || [],
         }
     }
 }
@@ -185,11 +198,12 @@ onMounted(() => {
             <thead>
                 <tr class="bg-gray-100 dark:bg-gray-800 text-left">
                     <th class="p-2 border dark:border-gray-600 dark:text-white">DESKRIPSI</th>
-                    <th v-for="(obj, index) in data.object" :key="'object-' + index"
-                        class="p-2 border dark:border-gray-600 dark:text-white" colspan="2">
+                    <th v-for="(obj, index) in data.tanahs" :key="'object-' + index"
+                        class="p-2 border dark:border-gray-600 dark:text-white" colspan="3">
                         OBJEK PENILAIAN {{ index + 1 }}
                     </th>
-                    <th v-for="(pb, index) in data.pembanding" :key="'pembanding-' + index"
+
+                    <th v-for="(pb, index) in data.pembandings" :key="'pembanding-' + index"
                         class="p-2 border dark:border-gray-600 dark:text-white text-center" colspan="3">
                         DATA PEMBANDING {{ index + 1 }}
                     </th>
@@ -201,9 +215,9 @@ onMounted(() => {
                 <!-- Baris Foto -->
                 <tr class="h-32 text-center">
                     <td class="border p-2 align-top dark:border-gray-600 dark:text-white">Foto</td>
-                    <template v-for="(obj, i) in data.object" :key="'foto-object-' + i">
-                        <td colspan="2" class="border p-2 dark:border-gray-600">
-                            <img :src="obj?.foto" class="h-24 mx-auto" />
+                    <template v-for="(obj, i) in data.tanahs" :key="'foto-object-' + i">
+                        <td colspan="3" class="border p-2 dark:border-gray-600">
+                            <img :src="obj?.foto_foto" class="h-24 mx-auto" />
                         </td>
                     </template>
                     <template v-for="(pb, i) in data.pembanding" :key="'foto-pembanding-' + i">
@@ -216,19 +230,17 @@ onMounted(() => {
                 <!-- INFORMASI UMUM -->
                 <tr class="bg-gray-100 dark:bg-gray-700 font-bold">
                     <td class="p-2 border dark:border-gray-600 dark:text-white"
-                        :colspan="1 + (data.object.length * 2) + (data.pembanding.length * 3)">
+                        :colspan="1 + (data.object.tanahs * 2) + (data.pembanding.length * 3)">
                         INFORMASI UMUM
                     </td>
                 </tr>
                 <tr v-for="field in informasiUmumFields" :key="'inf-' + field.key">
                     <td class="p-2 border dark:border-gray-600 dark:text-white">{{ field.label }}</td>
-                    <template v-for="(obj, idx) in data.object" :key="'info-obj-' + field.key + '-' + idx">
-                        <td colspan="2" class="p-2 border dark:border-gray-600 dark:text-white">
+
+                    <template v-for="(pb, idx) in data.tanahs" :key="'info-tanah-' + field.key + '-' + idx">
+                        <td colspan="3" class="p-2 border dark:border-gray-600 dark:text-white">
                             <div v-if="field.items?.[0]">
-                                <div class="font-medium">{{ field.items[0].keterangan }}</div>
-                                <div class="text-sm text-gray-600 dark:text-gray-400">
-                                    {{ field.items[0].object || '-' }}
-                                </div>
+                                {{ getValue(pb, field.key) || '-' }}
                             </div>
                             <div v-else>-</div>
                         </td>
@@ -252,11 +264,10 @@ onMounted(() => {
                 </tr>
                 <tr v-for="field in dataPropertiFields" :key="'prop-' + field.key">
                     <td class="p-2 border dark:border-gray-600 dark:text-white">{{ field.label }}</td>
-                    <template v-for="(obj, idx) in data.object" :key="'prop-obj-' + field.key + '-' + idx">
-                        <td colspan="2" class="p-2 border dark:border-gray-600 dark:text-white">
-                            <div class="font-medium">{{ field.items?.[0]?.keterangan || '-' }}</div>
-                            <div class="text-sm text-gray-600 dark:text-gray-400">{{ field.items?.[0]?.object || '-' }}
-                            </div>
+
+                    <template v-for="(pb, idx) in data.tanahs" :key="'tanah-pb-' + field.key + '-' + idx">
+                        <td colspan="3" class="p-2 border dark:border-gray-600 dark:text-white">
+                            {{ getValue(pb, field.key) || '-' }}
                         </td>
                     </template>
                     <template v-for="(pb, idx) in data.pembanding" :key="'prop-pb-' + field.key + '-' + idx">
@@ -273,21 +284,20 @@ onMounted(() => {
                         UNIT PERBANDINGAN
                     </td>
                 </tr>
-                <tr v-for="field in dataUnitPerbandinganField" :key="'unit-' + field.key">
+                <tr v-for="(field, index) in unitFieldDefinitions" :key="'unit-field-' + index">
                     <td class="p-2 border dark:border-gray-600 dark:text-white">{{ field.label }}</td>
-                    <template v-for="(obj, idx) in data.object" :key="'unit-obj-' + field.key + '-' + idx">
-                        <td colspan="2" class="p-2 border dark:border-gray-600 dark:text-white">
-                            <div class="font-medium">{{ field.items?.[0]?.keterangan || '-' }}</div>
-                            <div class="text-sm text-gray-600 dark:text-gray-400">{{ field.items?.[0]?.object || '-' }}
-                            </div>
+                    <template v-for="(pb, idx) in data.tanahs" :key="'unit-pb-' + field.key + '-' + idx">
+                        <td colspan="3" class="p-2 border dark:border-gray-600 dark:text-white">
+                            {{ getValue(pb, field.key) || '-' }}
                         </td>
                     </template>
-                    <template v-for="(pb, idx) in data.pembanding" :key="'unit-pb-' + field.key + '-' + idx">
+                    <template v-for="(pb, idx) in data.pembandings" :key="'unit-pb-' + field.key + '-' + idx">
                         <td colspan="3" class="p-2 border dark:border-gray-600 dark:text-white">
-                            {{ field.items?.[0]?.[`pembanding${idx + 1}`] || '-' }}
+                            {{ getValue(pb.unit_perbandingan, field.key) || '-' }}
                         </td>
                     </template>
                 </tr>
+
 
                 <!-- ELEMEN PERBANDINGAN -->
                 <!-- Sub-header hanya untuk elemen perbandingan -->
@@ -361,8 +371,9 @@ onMounted(() => {
                         OBJEK PENILAIAN {{ index + 1 }}
                     </th>
 
+
                     <!-- Kolom dinamis untuk DATA PEMBANDING -->
-                    <th v-for="(pb, index) in data.pembanding" :key="'pembanding-' + index"
+                    <th v-for="(pb, index) in data.pembandings" :key="'pembanding-' + index"
                         class="p-2 border dark:border-gray-600 dark:text-white">
                         DATA PEMBANDING {{ index + 1 }}
                     </th>

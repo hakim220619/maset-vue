@@ -1,0 +1,16 @@
+version: "3.8"
+
+services:
+  app:
+    container_name: maset
+    image: maset:latest
+    build:
+      context: .
+      dockerfile: .docker/Dockerfile
+    ports:
+      - "5173:5173"
+    environment:
+      - NODE_ENV=production
+    volumes:
+      - "/app/node_modules"
+      - .:/app
