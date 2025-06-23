@@ -14,6 +14,8 @@ const data = ref({
     elemen_perbandingan: [],
     karakter_fisik: [],
     summary: [],
+    conclusions: {},
+    final_summary: {},
 
 });
 const unitFieldDefinitions = [
@@ -217,6 +219,7 @@ async function loadSewaDetail(id) {
 
     if (res.data.success) {
         const resData = res.data.data
+        console.log(resData.conclusions)
 
         data.value = {
             object: [
@@ -228,6 +231,8 @@ async function loadSewaDetail(id) {
             elemen_perbandingan: resData.elemen_perbandingan || [],
             karakter_fisik: resData.karakter_fisik || [],
             summary: resData.summary || [],
+            conclusions: resData.conclusions || {},
+            final_summary: resData.final_summary || {}
         }
     }
 }
@@ -513,13 +518,17 @@ onMounted(() => {
                         </td>
                         <td v-for="(cell, i) in item.objects" :key="'val-' + i"
                             class="border p-2 dark:border-gray-600 text-center">
-                            <div v-if="cell.value">
-                                <span class="block">{{ cell.value }}</span>
-                                <span class="block">{{ cell.persen }}</span>
+                            <div>
+                                <span class="block">{{ cell.penyesuaian }}</span>
+                                <span class="block" v-if="cell.persen != ''">{{ cell.persen }}</span>
                             </div>
                         </td>
                         <td v-for="(cell, i) in item.pembanding" :key="'val-' + i"
-                            class="border p-2 dark:border-gray-600 text-center" v-html="cell.value">
+                            class="border p-2 dark:border-gray-600 text-center">
+                            <div>
+                                <span class="block">{{ cell.penyesuaian }}</span>
+                                <span class="block" v-if="cell.persen != ''">{{ cell.persen }}</span>
+                            </div>
                         </td>
                     </tr>
                 </template>
@@ -541,46 +550,53 @@ onMounted(() => {
                     <th class="p-2 border dark:border-gray-600 dark:text-white">Nilai</th>
                 </tr>
             </thead>
-            <tbody>
-                <tr v-for="(item, index) in kesimpulanSewa.pembanding" :key="'kesimpulan-' + index">
+            <tbody v-if="data.conclusions">
+                <tr v-for="(item, index) in data.conclusions?.items?.pembanding" :key="'kesimpulan-' + index">
                     <td class="border p-2 dark:border-gray-600 dark:text-white">{{ item.label }}</td>
                     <td class="border p-2 dark:border-gray-600 text-center">{{ item.bobot }}</td>
-                    <td class="border p-2 dark:border-gray-600 text-right">{{ item.nilai }}</td>
+                    <td class="border p-2 dark:border-gray-600 text-right">{{ item.value }}</td>
                 </tr>
 
-                <!-- Baris Kesimpulan -->
                 <tr class="bg-gray-50 dark:bg-gray-700 font-semibold">
                     <td class="border p-2 dark:border-gray-600 dark:text-white" colspan="2">
                         Indikasi Nilai Sewa Pasar / m²
                     </td>
-                    <td class="border p-2 dark:border-gray-600 text-right">{{ kesimpulanSewa.hasil.nilaiPerMeter }}</td>
+                    <td class="border p-2 dark:border-gray-600 text-right">
+                        {{ data.conclusions?.indikasi_nilai_m2 }}
+                    </td>
                 </tr>
                 <tr class="bg-gray-50 dark:bg-gray-700 font-semibold">
                     <td class="border p-2 dark:border-gray-600 dark:text-white" colspan="2">
                         Indikasi Nilai Sewa Pasar
                     </td>
-                    <td class="border p-2 dark:border-gray-600 text-right">{{ kesimpulanSewa.hasil.total }}</td>
+                    <td class="border p-2 dark:border-gray-600 text-right">
+                        {{ data.conclusions?.indikasi_nilai }}
+                    </td>
                 </tr>
-            </tbody>
 
+            </tbody>
         </table>
+
         <br>
-        <table class="min-w-full border border-gray-300 text-sm mt-4 text-center">
+        <table v-if="data.final_summary" class="min-w-full border border-gray-300 text-sm mt-4 text-center">
             <tbody>
                 <tr>
                     <td class="border p-2 text-left font-semibold dark:text-white">Deviasi:</td>
-                    <td class="border p-2 dark:text-white font-semibold">8,14%</td>
-                    <td class="border p-2 font-bold align-middle dark:text-white" rowspan="3">OK !!!</td>
+                    <td class="border p-2 dark:text-white font-semibold">{{ data.final_summary.deviasi }}</td>
+                    <td class="border p-2 font-bold align-middle dark:text-white" rowspan="3">
+                        {{ data.final_summary.status }}
+                    </td>
                 </tr>
                 <tr>
                     <td class="border p-2 text-left dark:text-white">Min</td>
-                    <td class="border p-2">Rp612.000</td>
+                    <td class="border p-2">{{ data.final_summary.min }}</td>
                 </tr>
                 <tr>
-                    <td class="border p-2 text-left ">Max</td>
-                    <td class="border p-2">Rp661.833</td>
+                    <td class="border p-2 text-left">Max</td>
+                    <td class="border p-2">{{ data.final_summary.max }}</td>
                 </tr>
             </tbody>
         </table>
+
     </div>
 </template>
