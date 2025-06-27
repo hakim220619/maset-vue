@@ -1,1 +1,0 @@
-import{a as t,p as s,o as a,t as r}from"./index-DXkPtohr.js";const n={key:0,class:"mt-1 inline-block text-red-600 text-sm"},p={__name:"InputError",props:{message:{type:String,default:""}},setup(e){return(o,c)=>e.message?(a(),t("span",n,r(e.message),1)):s("",!0)}};export{p as _};
