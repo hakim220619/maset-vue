@@ -38,6 +38,7 @@ async function getSewaData() {
         const sortedData = filteredData.sort((a, b) => {
             return new Date(b.created_at) - new Date(a.created_at);
         });
+
         data.value = sortedData;
     } catch (error) {
         console.log(error);
@@ -156,19 +157,20 @@ onMounted(() => {
                     </template>
                 </Column>
 
-                <Column field="object_id" sortable header="Object ID" style="min-width: 12rem">
-                    <template #body="{ data }">{{ JSON.stringify(data.object_id) }}</template>
+                <Column field="object" sortable header="Object" style="min-width: 12rem">
+                    <template #body="{ data }">{{ JSON.stringify(data.object).replace(/"/g, '') }}</template>
                     <template #filter="{ filterModel }">
                         <InputText v-model="filterModel.value" placeholder="Cari Object ID" />
                     </template>
                 </Column>
 
-                <Column field="pembanding_id" sortable header="Pembanding ID" style="min-width: 12rem">
-                    <template #body="{ data }">{{ JSON.stringify(data.pembanding_id) }}</template>
+                <Column field="pembanding" sortable header="Pembanding" style="min-width: 12rem">
+                    <template #body="{ data }">{{ JSON.stringify(data.pembanding).replace(/"/g, '') }}</template>
                     <template #filter="{ filterModel }">
                         <InputText v-model="filterModel.value" placeholder="Cari Pembanding ID" />
                     </template>
                 </Column>
+
 
                 <Column field="created_at" sortable header="Created At" style="min-width: 14rem">
                     <template #body="{ data }">{{ new Date(data.created_at).toLocaleString() }}</template>

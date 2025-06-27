@@ -7,12 +7,7 @@ import { inject, onBeforeMount, onMounted, ref, watch } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import { z } from 'zod';
 
-
-// Validasi Zod untuk form sewa
-const storeSchema = z.object({
-    object_id: z.array(z.number()).min(1, 'Wajib pilih minimal 1 Object'),
-    pembanding_id: z.array(z.number()).min(1, 'Wajib pilih minimal 1 Pembanding')
-});
+import { storeSchema } from './schema.js';
 
 
 const router = useRouter();
@@ -42,25 +37,24 @@ const form = ref({
     },
     loading: false
 });
+
+
 const save = async () => {
     form.value.loading = true;
     const url = route.params.id ? `sewa/${route.params.id}` : 'sewa';
 
     try {
         storeSchema.parse(form.value.data);
-        const selectedObjects = objectOptions.value.filter(obj =>
-            form.value.data.object_id.includes(obj.value)
+
+
+
+        const selectedObject = objectOptions.value.find(
+            obj => form.value.data.object_id === obj.value
         );
-        console.log(selectedObjects);
 
+        const tanah_id = selectedObject?.jenis_object === 'Tanah' ? [selectedObject.value] : [];
+        const bangunan_id = selectedObject?.jenis_object === 'Bangunan' ? [selectedObject.value] : [];
 
-        const tanah_id = selectedObjects
-            .filter(obj => obj.jenis_object === 'Tanah')
-            .map(obj => obj.value);
-
-        const bangunan_id = selectedObjects
-            .filter(obj => obj.jenis_object === 'Bangunan')
-            .map(obj => obj.value);
 
         const payload = {
             tanah_id,
@@ -163,8 +157,8 @@ const goBack = () => {
                 <Label for="object_id" class="block mb-1 text-gray-700 dark:text-white">
                     Object ID <span class="text-red-500">*</span>
                 </Label>
-                <MultiSelect v-model="form.data.object_id" :options="objectOptions" optionLabel="label"
-                    optionValue="value" display="chip" filter placeholder="Pilih Object" class="w-full"
+                <Select v-model="form.data.object_id" :options="objectOptions" optionLabel="label" optionValue="value"
+                    display="chip" filter placeholder="Pilih Object" class="w-full"
                     :class="{ 'p-invalid': !!form.errors.object_id }" />
                 <InputError :message="form.errors.object_id" />
             </div>

@@ -2,8 +2,6 @@
 import { z } from 'zod';
 
 export const storeSchema = z.object({
-    ra_name: z.string().min(1, { message: 'Role name is required' }),
-    ra_status: z.any().refine(val => val !== null && val !== undefined, {
-        message: 'Status is required'
-    })
+    object_id: z.number({ required_error: 'Wajib pilih Object' }).min(1, 'Wajib pilih Object'),
+    pembanding_id: z.array(z.number()).min(1, 'Wajib pilih minimal 1 Pembanding')
 });
