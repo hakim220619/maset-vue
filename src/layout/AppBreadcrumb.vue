@@ -51,10 +51,10 @@ watch(
             </ol>
         </nav>
 
-        <div class="layout-breadcrumb-buttons">
+        <!-- <div class="layout-breadcrumb-buttons">
             <Button icon="pi pi-cloud-upload" rounded text plain></Button>
             <Button icon="pi pi-bookmark" rounded text plain></Button>
             <Button icon="pi pi-power-off" rounded text plain></Button>
-        </div>
+        </div> -->
     </div>
 </template>
