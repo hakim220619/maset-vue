@@ -4,8 +4,6 @@ import { Helper } from '@/service/Helper';
 import { onBeforeMount, onMounted, ref } from 'vue';
 import { useRoute } from 'vue-router';
 
-
-
 const data = ref({
     object: [],
     pembanding: [],
@@ -30,180 +28,24 @@ const informasiUmumFields = ref([]);
 const dataPropertiFields = ref([]);
 const dataUnitPerbandinganField = ref([]);
 
-const elemen_perbandingan = [
-    {
-        kategori: "Faktor Fisik",
-        "items": [
-            {
-                "label": "Jarak terhadap pusat kota",
-                "objects": [
-                    { "keterangan": "Jarak dari pusat kota", "deskripsi": "Tugu Yogyakarta / 2 km" }
-                ],
-                "pembanding": [
-                    {
-                        "deskripsi": "Tugu Yogyakarta / 2 km",
-                        "persen": "0.00%",
-                        "penyesuaian": "Rp0"
-                    },
-                    {
-                        "deskripsi": "Tugu Yogyakarta / 2 km",
-                        "persen": "0.00%",
-                        "penyesuaian": "Rp0"
-                    },
-                    {
-                        "deskripsi": "Tugu Yogyakarta / 2 km",
-                        "persen": "0.00%",
-                        "penyesuaian": "Rp0"
-                    },
-                ]
-            },
-            {
-                "label": "Perkerasan Jalan/Lebar Jalan",
-                "objects": [
-                    { "keterangan": "Jalan depan aset", "deskripsi": "Aspal / 10" }
-                ],
-                "pembanding": [
-                    {
-                        "deskripsi": "Aspal / 10",
-                        "persen": "0.00%",
-                        "penyesuaian": "Rp0"
-                    },
-                    {
-                        "deskripsi": "Aspal / 10",
-                        "persen": "0.00%",
-                        "penyesuaian": "Rp0"
-                    },
-                    {
-                        "deskripsi": "Aspal / 10",
-                        "persen": "0.00%",
-                        "penyesuaian": "Rp0"
-                    },
-                ]
-            }
-        ]
-    }
-]
-
-
-const elemenPerbandinganFields = [
-    {
-        kategori: 'Lokasi',
-        items: [
-            {
-                label: 'Akses Jalan',
-                keterangan: 'Akses utama',
-                object: 'Dekat jalan raya',
-                pembanding1: {
-                    deskripsi: 'Gang kecil',
-                    persen: '-5%',
-                    penyesuaian: '-Rp 10.000'
-                },
-                pembanding2: {
-                    deskripsi: 'Dekat jalan besar',
-                    persen: '0%',
-                    penyesuaian: 'Rp 0'
-                }
-            },
-            {
-                label: 'Lingkungan',
-                keterangan: 'Kawasan perumahan',
-                object: 'Asri dan tenang',
-                pembanding1: {
-                    deskripsi: 'Dekat pasar',
-                    persen: '-3%',
-                    penyesuaian: '-Rp 5.000'
-                },
-                pembanding2: {
-                    deskripsi: 'Tenang dan aman',
-                    persen: '0%',
-                    penyesuaian: 'Rp 0'
-                }
-            }
-        ]
-    },
-    {
-        kategori: 'Faktor Fisik',
-        items: [
-            {
-                label: 'Kondisi Bangunan',
-                keterangan: 'Bagus',
-                object: 'Bangunan baru',
-                pembanding1: {
-                    deskripsi: 'Perlu renovasi',
-                    persen: '-10%',
-                    penyesuaian: '-Rp 15.000'
-                },
-                pembanding2: {
-                    deskripsi: 'Layak huni',
-                    persen: '-2%',
-                    penyesuaian: '-Rp 3.000'
-                }
-            }
-        ]
-    }
-]
-
-const dataPerhitungan = [
-    {
-        label: 'Jumlah Penyesuaian',
-        values: [
-            { value: '4,50%<br>Rp28.500' }, // Object
-            { value: '-3,67%<br>-Rp23.294' },
-            { value: '-4,00%<br>-Rp26.667' },
-        ]
-    },
-    {
-        label: 'Indikasi Nilai Sewa Pasar setelah penyesuaian / m²',
-        values: [
-            { value: 'Rp661.833' },
-            { value: 'Rp612.000' },
-            { value: 'Rp640.000' }
-        ]
-    },
-    {
-        label: 'Total Bobot Absolut',
-        values: [
-            { value: '4,50%' },
-            { value: '3,67%' },
-            { value: '4,00%' }
-        ]
-    },
-    {
-        label: 'Proporsi',
-        values: [
-            { value: '37%' },
-            { value: '30%' },
-            { value: '33%' }
-        ]
-    },
-    {
-        label: 'Inverse',
-        values: [
-            { value: '63%' },
-            { value: '70%' },
-            { value: '67%' }
-        ]
-    },
-    {
-        label: 'Pembobotan Akhir',
-        isBold: true,
-        values: [
-            { value: '32%' },
-            { value: '35%' },
-            { value: '34%' }
-        ]
-    }
-];
-
-const kesimpulanSewa = {
-    pembanding: [
-        { label: 'Data 1', bobot: '32%', nilai: 'Rp208.523' },
-        { label: 'Data 2', bobot: '35%', nilai: 'Rp213.781' },
-        { label: 'Data 3', bobot: '34%', nilai: 'Rp214.795' },
-    ],
-    hasil: {
-        nilaiPerMeter: 'Rp637.098',
-        total: 'Rp95.564.726'
+async function onPersenInput(raw_persen, label, pembanding_id, type = 'elemen_perbandingan') {
+    const sewaId = route.params.id;   // 👈 get it here
+    console.log(raw_persen, label, pembanding_id)
+    try {
+        const url = type === 'elemen_perbandingan' ? `/sewa/${sewaId}/penyesuaian/elemen-perbandingan` : `/sewa/${sewaId}/penyesuaian/karakter-fisik`;
+        await AuthApi.client().put(url, {
+            label,
+            raw_persen,
+            pembanding_id
+        });
+        // this.$toast.success("Tersimpan!");
+    } catch (err) {
+        console.error("Failed to save persen:", err);
+        // Optional user feedback
+        // this.$toast.error("Gagal menyimpan…");
+    } finally {
+        // Optionally, you can reload the data or show a success message
+        this.loadSewaDetail(sewaId);
     }
 }
 
@@ -277,7 +119,7 @@ onMounted(() => {
                     </th>
 
                     <th v-for="(pb, index) in data.pembandings" :key="'pembanding-' + index"
-                        class="p-2 border dark:border-gray-600 dark:text-white text-center" colspan="3">
+                        class="p-2 border dark:border-gray-600 dark:text-white text-center" colspan="4">
                         DATA PEMBANDING {{ index + 1 }}
                     </th>
                 </tr>
@@ -294,7 +136,7 @@ onMounted(() => {
                         </td>
                     </template>
                     <template v-for="(pb, i) in data.pembanding" :key="'foto-pembanding-' + i">
-                        <td colspan="3" class="border p-2 dark:border-gray-600">
+                        <td colspan="4" class="border p-2 dark:border-gray-600">
                             <img :src="pb?.foto" class="h-24 mx-auto" />
                         </td>
                     </template>
@@ -303,7 +145,7 @@ onMounted(() => {
                 <!-- INFORMASI UMUM -->
                 <tr class="bg-gray-100 dark:bg-gray-700 font-bold">
                     <td class="p-2 border dark:border-gray-600 dark:text-white"
-                        :colspan="1 + (data.object.tanahs * 2) + (data.pembanding.length * 3)">
+                        :colspan="5 + (data.object.tanahs * 2) + (data.pembanding.length * 3)">
                         INFORMASI UMUM
                     </td>
                 </tr>
@@ -319,7 +161,7 @@ onMounted(() => {
                         </td>
                     </template>
                     <template v-for="(pb, idx) in data.pembanding" :key="'info-pb-' + field.key + '-' + idx">
-                        <td colspan="3" class="p-2 border dark:border-gray-600 dark:text-white">
+                        <td colspan="4" class="p-2 border dark:border-gray-600 dark:text-white">
                             <div v-if="field.items?.[0]">
                                 {{ field.items[0][`pembanding${idx + 1}`] || '-' }}
                             </div>
@@ -331,7 +173,7 @@ onMounted(() => {
                 <!-- DATA PROPERTI -->
                 <tr class="bg-gray-100 dark:bg-gray-700 font-bold">
                     <td class="p-2 border dark:border-gray-600 dark:text-white"
-                        :colspan="1 + (data.object.length * 2) + (data.pembanding.length * 3)">
+                        :colspan="5 + (data.object.length * 2) + (data.pembanding.length * 3)">
                         DATA PROPERTI
                     </td>
                 </tr>
@@ -344,7 +186,7 @@ onMounted(() => {
                         </td>
                     </template>
                     <template v-for="(pb, idx) in data.pembanding" :key="'prop-pb-' + field.key + '-' + idx">
-                        <td colspan="3" class="p-2 border dark:border-gray-600 dark:text-white">
+                        <td colspan="4" class="p-2 border dark:border-gray-600 dark:text-white">
                             {{ field.items?.[0]?.[`pembanding${idx + 1}`] || '-' }}
                         </td>
                     </template>
@@ -353,7 +195,7 @@ onMounted(() => {
                 <!-- UNIT PERBANDINGAN -->
                 <tr class="bg-gray-100 dark:bg-gray-700 font-bold">
                     <td class="p-2 border dark:border-gray-600 dark:text-white"
-                        :colspan="1 + (data.object.length * 2) + (data.pembanding.length * 3)">
+                        :colspan="5 + (data.object.length * 2) + (data.pembanding.length * 3)">
                         UNIT PERBANDINGAN
                     </td>
                 </tr>
@@ -365,7 +207,7 @@ onMounted(() => {
                         </td>
                     </template>
                     <template v-for="(pb, idx) in data.pembandings" :key="'unit-pb-' + field.key + '-' + idx">
-                        <td colspan="3" class="p-2 border dark:border-gray-600 dark:text-white">
+                        <td colspan="4" class="p-2 border dark:border-gray-600 dark:text-white">
                             {{ getValue(pb.unit_perbandingan, field.key) || '-' }}
                         </td>
                     </template>
@@ -388,6 +230,7 @@ onMounted(() => {
                         :key="'pb-head-' + pbIdx">
                         <th class="p-2 border dark:border-gray-600 dark:text-white">Deskripsi</th>
                         <th class="p-2 border dark:border-gray-600 dark:text-white">(%)</th>
+                        <th class="p-2 border dark:border-gray-600 dark:text-white">RAW</th>
                         <th class="p-2 border dark:border-gray-600 dark:text-white">+/- Penyesuaian (Rp)</th>
                     </template>
                 </tr>
@@ -395,7 +238,7 @@ onMounted(() => {
                 <!-- Table Body -->
                 <template v-for="group in data.elemen_perbandingan" :key="group.kategori">
                     <tr class="bg-gray-200 dark:bg-gray-700 font-semibold">
-                        <td :colspan="1 + group.items[0].objects.length * 3 + group.items[0].pembanding.length * 3"
+                        <td :colspan="4 + group.items[0].objects.length * 3 + group.items[0].pembanding.length * 3"
                             class="p-2 border dark:border-gray-600 dark:text-white" colspan="2">
                             {{ group.kategori }}
                         </td>
@@ -418,6 +261,9 @@ onMounted(() => {
                             <td class="p-2 border dark:border-gray-600 dark:text-white align-top">{{ pb.deskripsi }}
                             </td>
                             <td class="p-2 border dark:border-gray-600 dark:text-white align-top">{{ pb.persen }}</td>
+                            <input type="number" step="0.01" class="w-full bg-transparent text-right outline-none"
+                                v-model.number="pb.raw_persen"
+                                @change="onPersenInput(pb.raw_persen, item.label, pb.pembanding_id)" />
                             <td class="p-2 border dark:border-gray-600 dark:text-white align-top">{{ pb.penyesuaian }}
                             </td>
                         </template>
@@ -440,20 +286,21 @@ onMounted(() => {
                         :key="'pb-head-' + pbIdx">
                         <th class="p-2 border dark:border-gray-600 dark:text-white">Deskripsi</th>
                         <th class="p-2 border dark:border-gray-600 dark:text-white">(%)</th>
+                        <th class="p-2 border dark:border-gray-600 dark:text-white">RAW</th>
                         <th class="p-2 border dark:border-gray-600 dark:text-white">+/- Penyesuaian (Rp)</th>
                     </template>
                 </tr>
 
                 <!-- Table Body -->
-                <template v-for="group in data.karakter_fisik" :key="group.kategori">
+                <template v-for="k in data.karakter_fisik" :key="k.kategori">
                     <tr class="bg-gray-200 dark:bg-gray-700 font-semibold">
-                        <td :colspan="1 + group.items[0].objects.length * 3 + group.items[0].pembanding.length * 3"
+                        <td :colspan="4 + k.items[0].objects.length * 3 + k.items[0].pembanding.length * 3"
                             class="p-2 border dark:border-gray-600 dark:text-white" colspan="2">
-                            {{ group.kategori }}
+                            {{ k.kategori }}
                         </td>
                     </tr>
 
-                    <tr v-for="item in group.items" :key="item.label">
+                    <tr v-for="item in k.items" :key="item.label">
                         <td class="p-2 border dark:border-gray-600 dark:text-white align-top">{{ item.label }}</td>
 
                         <!-- Multiple Object Columns -->
@@ -470,6 +317,12 @@ onMounted(() => {
                             <td class="p-2 border dark:border-gray-600 dark:text-white align-top">{{ pb.deskripsi }}
                             </td>
                             <td class="p-2 border dark:border-gray-600 dark:text-white align-top">{{ pb.persen }}</td>
+                            <!-- 🆕 Editable raw_persen field -->
+                            <td class="p-2 border dark:border-gray-600 dark:text-white align-top">
+                                <input type="number" step="0.01" class="w-full bg-transparent text-right outline-none"
+                                    v-model.number="pb.raw_persen"
+                                    @change="onPersenInput(pb.raw_persen, item.label, pb.pembanding_id, 'karakter_fisik')" />
+                            </td>
                             <td class="p-2 border dark:border-gray-600 dark:text-white align-top">{{ pb.penyesuaian }}
                             </td>
                         </template>
