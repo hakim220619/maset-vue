@@ -522,7 +522,42 @@ const routes = [
                     breadcrumb: [{ parent: 'Utilities', label: 'Sewa', item: 'Detail Sewa' }]
                 }
             },
-
+            {
+                path: 'pages/pasar',
+                name: 'Pasar List',
+                component: () => import('@/views/pages/pasar/Index.vue'),
+                meta: {
+                    requiresAuth: true,
+                    breadcrumb: [{ parent: 'Utilities', label: 'Pasar' }]
+                }
+            },
+            {
+                path: 'pages/pasar/create',
+                name: 'Pasar Create',
+                component: () => import('@/views/pages/pasar/Form.vue'),
+                meta: {
+                    requiresAuth: true,
+                    breadcrumb: [{ parent: 'Utilities', label: 'Pasar', item: 'Add Pasar' }]
+                }
+            },
+            {
+                path: 'pages/pasar/:id/edit',
+                name: 'Pasar Edit',
+                component: () => import('@/views/pages/pasar/Form.vue'),
+                meta: {
+                    requiresAuth: true,
+                    breadcrumb: [{ parent: 'Utilities', label: 'Pasar', item: 'Edit Pasar' }]
+                }
+            },
+            {
+                path: 'pages/pasar/:id/detail',
+                name: 'Pasar Detail',
+                component: () => import('@/views/pages/pasar/Detail.vue'),
+                meta: {
+                    requiresAuth: true,
+                    breadcrumb: [{ parent: 'Utilities', label: 'Pasar', item: 'Detail Pasar' }]
+                }
+            },
             {
                 path: 'pages/ms_icons',
                 name: 'Icons List',
