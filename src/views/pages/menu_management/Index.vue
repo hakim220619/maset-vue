@@ -65,6 +65,12 @@ async function getMenuManagement() {
 
 const items = [
     {
+        label: 'Detail',
+        command: (e) => {
+            router.push({ name: 'menuManagement-detail', params: { id: e.item.data.id } });
+        }
+    },
+    {
         label: 'Ubah',
         command: (e) => {
             router.push({ name: 'menuManagement-edit', params: { id: e.item.data.id } });
