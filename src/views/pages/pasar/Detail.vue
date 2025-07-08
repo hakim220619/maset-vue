@@ -24,13 +24,14 @@ const unitFieldDefinitions = [
     { key: 'indikasi_sewa_rp', label: 'Indikasi Nilai Sewa sebelum penyesuaian' },
     { key: 'indikasi_sewa_m2_rp', label: 'Indikasi Nilai Sewa sebelum penyesuaian / m²' }
 ];
-
 const informasiUmumFields = ref([]);
 const dataPropertiFields = ref([]);
+const dataTransaksiFields = ref([]);
 const dataUnitPerbandinganField = ref([]);
 
 async function onPersenInput(raw_persen, label, pembanding_id, type = 'elemen_perbandingan') {
-    const sewaId = route.params.id;
+    const sewaId = route.params.id;   // 👈 get it here
+    console.log(raw_persen, label, pembanding_id)
     try {
         const url = type === 'elemen_perbandingan' ? `/sewa/${sewaId}/penyesuaian/elemen-perbandingan` : `/sewa/${sewaId}/penyesuaian/karakter-fisik`;
         await AuthApi.client().put(url, {
@@ -38,10 +39,14 @@ async function onPersenInput(raw_persen, label, pembanding_id, type = 'elemen_pe
             raw_persen,
             pembanding_id
         });
+        // this.$toast.success("Tersimpan!");
     } catch (err) {
         console.error("Failed to save persen:", err);
+        // Optional user feedback
+        // this.$toast.error("Gagal menyimpan…");
     } finally {
-        await loadSewaDetail(sewaId);
+        // Optionally, you can reload the data or show a success message
+        this.loadSewaDetail(sewaId);
     }
 }
 
@@ -99,11 +104,64 @@ onBeforeMount(async () => {
 });
 onMounted(() => {
     loadSewaDetail(route.params.id)
+    // loadElementPerbandingan(route.params.id);
 })
 
 </script>
+
 <template>
+    <div class="max-w-3xl ml-0 space-y-6">
+        <!-- Card 1 -->
+        <div class="bg-white dark:bg-gray-800 shadow-lg rounded-2xl p-6 space-y-4 w-96">
+            <h2 class="text-xl font-bold text-gray-800 dark:text-white">Jenis Penilaian</h2>
+            <p class="text-lg text-gray-600 dark:text-gray-300">Nilai Pasar</p>
+
+            <div class="border-t border-gray-200 dark:border-gray-600 pt-4 space-y-2">
+                <p class="text-sm text-gray-700 dark:text-gray-300">
+                    <span class="font-medium">Nomor ID Data Aset:</span> 1111
+                </p>
+                <p class="text-sm text-gray-700 dark:text-gray-300">
+                    <span class="font-medium">Nomor ID Data Pembanding 1:</span> 2111
+                </p>
+                <p class="text-sm text-gray-700 dark:text-gray-300">
+                    <span class="font-medium">Nomor ID Data Pembanding 2:</span> 2112
+                </p>
+                <p class="text-sm text-gray-700 dark:text-gray-300">
+                    <span class="font-medium">Nomor ID Data Pembanding 3:</span> 2113
+                </p>
+            </div>
+        </div>
+
+
+        <!-- Card 2 -->
+        <div class="bg-white dark:bg-gray-800 shadow-lg rounded-2xl p-8 space-y-5">
+            <h2 class="text-2xl font-bold text-gray-800 dark:text-white">Judul Penilaian</h2>
+            <p class="text-xl text-gray-600 dark:text-gray-300">
+                Penilaian Nilai Pasar Tempat Usaha
+            </p>
+
+            <div class="border-t border-gray-200 dark:border-gray-600 pt-5 space-y-3">
+                <p class="text-base text-gray-700 dark:text-gray-300">
+                    <span class="font-medium">Nama Entitas:</span> PT LPP Agro Nusantara
+                </p>
+                <p class="text-base text-gray-700 dark:text-gray-300">
+                    <span class="font-medium">Tanggal Inspeksi:</span> 19 Mei 2025
+                </p>
+                <p class="text-base text-gray-700 dark:text-gray-300">
+                    <span class="font-medium">Tanggal Penilaian:</span> 19 Mei 2025
+                </p>
+                <p class="text-base text-gray-700 dark:text-gray-300">
+                    <span class="font-medium">Penilai / Surveyor:</span> Figo
+                </p>
+                <p class="text-base text-gray-700 dark:text-gray-300">
+                    <span class="font-medium">Tahun Penilaian:</span> 2025
+                </p>
+            </div>
+        </div>
+    </div>
+    <br><br>
     <div class="overflow-auto">
+
         <table class="min-w-full border border-gray-300 text-sm dark:border-gray-600">
             <thead>
                 <tr class="bg-gray-100 dark:bg-gray-800 text-left">
@@ -169,6 +227,27 @@ onMounted(() => {
                 <tr class="bg-gray-100 dark:bg-gray-700 font-bold">
                     <td class="p-2 border dark:border-gray-600 dark:text-white"
                         :colspan="5 + (data.object.length * 2) + (data.pembanding.length * 3)">
+                        DATA TRANSAKSI
+                    </td>
+                </tr>
+                <tr v-for="field in dataTransaksiFields" :key="'prop-' + field.key">
+                    <td class="p-2 border dark:border-gray-600 dark:text-white">{{ field.label }}</td>
+
+                    <template v-for="(pb, idx) in data.tanahs" :key="'tanah-pb-' + field.key + '-' + idx">
+                        <td colspan="3" class="p-2 border dark:border-gray-600 dark:text-white">
+                            {{ getValue(pb, field.key) || '-' }}
+                        </td>
+                    </template>
+                    <template v-for="(pb, idx) in data.pembanding" :key="'prop-pb-' + field.key + '-' + idx">
+                        <td colspan="4" class="p-2 border dark:border-gray-600 dark:text-white">
+                            {{ field.items?.[0]?.[`pembanding${idx + 1}`] || '-' }}
+                        </td>
+                    </template>
+                </tr>
+                <!-- DATA PROPERTI -->
+                <tr class="bg-gray-100 dark:bg-gray-700 font-bold">
+                    <td class="p-2 border dark:border-gray-600 dark:text-white"
+                        :colspan="5 + (data.object.length * 2) + (data.pembanding.length * 3)">
                         DATA PROPERTI
                     </td>
                 </tr>
@@ -214,20 +293,20 @@ onMounted(() => {
                     <th class="p-2 border dark:border-gray-600 dark:text-white">ELEMEN PERBANDINGAN</th>
 
                     <!-- Dynamic Object Headers (2 columns each) -->
-                    <template v-for="(_, objIdx) in data.elemen_perbandingan[0].items[0].objects"
+                    <!-- <template v-for="(_, objIdx) in data.elemen_perbandingan[0].items[0].objects"
                         :key="'obj-head-' + objIdx">
                         <th class="p-2 border dark:border-gray-600 dark:text-white">Keterangan</th>
                         <th class="p-2 border dark:border-gray-600 dark:text-white" colspan="2">Deskripsi</th>
-                    </template>
+                    </template> -->
 
                     <!-- Dynamic Pembanding Headers (3 columns each) -->
-                    <template v-for="(_, pbIdx) in data.elemen_perbandingan[0].items[0].pembanding"
+                    <!-- <template v-for="(_, pbIdx) in data.elemen_perbandingan[0].items[0].pembanding"
                         :key="'pb-head-' + pbIdx">
                         <th class="p-2 border dark:border-gray-600 dark:text-white">Deskripsi</th>
                         <th class="p-2 border dark:border-gray-600 dark:text-white">(%)</th>
                         <th class="p-2 border dark:border-gray-600 dark:text-white">RAW</th>
                         <th class="p-2 border dark:border-gray-600 dark:text-white">+/- Penyesuaian (Rp)</th>
-                    </template>
+                    </template> -->
                 </tr>
 
                 <!-- Table Body -->
@@ -270,20 +349,20 @@ onMounted(() => {
                     <th class="p-2 border dark:border-gray-600 dark:text-white">KARAKTER FISIK</th>
 
                     <!-- Dynamic Object Headers (2 columns each) -->
-                    <template v-for="(_, objIdx) in data.karakter_fisik[0].items[0].objects"
+                    <!-- <template v-for="(_, objIdx) in data.karakter_fisik[0].items[0].objects"
                         :key="'obj-head-' + objIdx">
                         <th class="p-2 border dark:border-gray-600 dark:text-white">Keterangan</th>
                         <th class="p-2 border dark:border-gray-600 dark:text-white" colspan="2">Deskripsi</th>
-                    </template>
+                    </template> -->
 
                     <!-- Dynamic Pembanding Headers (3 columns each) -->
-                    <template v-for="(_, pbIdx) in data.karakter_fisik[0].items[0].pembanding"
+                    <!-- <template v-for="(_, pbIdx) in data.karakter_fisik[0].items[0].pembanding"
                         :key="'pb-head-' + pbIdx">
                         <th class="p-2 border dark:border-gray-600 dark:text-white">Deskripsi</th>
                         <th class="p-2 border dark:border-gray-600 dark:text-white">(%)</th>
                         <th class="p-2 border dark:border-gray-600 dark:text-white">RAW</th>
                         <th class="p-2 border dark:border-gray-600 dark:text-white">+/- Penyesuaian (Rp)</th>
-                    </template>
+                    </template> -->
                 </tr>
 
                 <!-- Table Body -->
@@ -326,7 +405,6 @@ onMounted(() => {
 
             </tbody>
         </table>
-
 
         <br><br>
         <table class="min-w-full border border-gray-300 text-sm dark:border-gray-600">

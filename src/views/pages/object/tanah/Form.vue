@@ -1,6 +1,7 @@
 <script setup>
 import InputDate from '@/components/InputDate.vue';
 import InputError from '@/components/InputError.vue';
+import MapPicker from '@/components/MapPicker.vue';
 import { AuthApi } from '@/service/Api';
 import { Helper } from '@/service/Helper';
 import { inject, onBeforeMount, ref, watch } from 'vue';
@@ -182,6 +183,8 @@ onBeforeMount(async () => {
 <template>
     <form class="card mt-8" @submit.prevent="save">
         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+
+
             <template v-for="(value, key) in form.data" :key="key">
                 <!-- Upload file khusus untuk foto_foto -->
                 <div v-if="key === 'foto_foto'">
@@ -190,7 +193,20 @@ onBeforeMount(async () => {
                         @change="(e) => (form.data[key] = e.target.files[0])" />
                     <InputError :message="form.errors[key]" />
                 </div>
-
+                <div v-else-if="[
+                    'koordinat',
+                ].includes(key)">
+                    <!-- Coordinate picker (spans full width) -->
+                    <div class="md:col-span-2">
+                        <Label for="koordinat">KOORDINAT & ALAMAT ASET</Label>
+                        <MapPicker v-model="form.data.koordinat" @address="addr => form.data.alamat_aset = addr" />
+                        <small class="text-sm text-gray-500">
+                            Klik pada peta untuk memilih titik. Koordinat dan alamat otomatis terisi,
+                            tetapi alamat bisa Anda edit manual di bawah jika perlu.
+                        </small>
+                    </div>
+                    <InputText v-model="form.data[key]" :id="key" class="w-full" :invalid="!!form.errors[key]" />
+                </div>
                 <!-- Dropdown untuk field yang membutuhkan select -->
                 <div
                     v-else-if="['perkerasan_jalan', 'posisi_aset', 'bentuk_tanah', 'topografi', 'orientasi', 'peruntukan'].includes(key)">

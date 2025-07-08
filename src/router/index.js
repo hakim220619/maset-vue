@@ -522,7 +522,42 @@ const routes = [
                     breadcrumb: [{ parent: 'Utilities', label: 'Sewa', item: 'Detail Sewa' }]
                 }
             },
-
+            {
+                path: 'pages/pasar',
+                name: 'Pasar List',
+                component: () => import('@/views/pages/pasar/Index.vue'),
+                meta: {
+                    requiresAuth: true,
+                    breadcrumb: [{ parent: 'Utilities', label: 'Pasar' }]
+                }
+            },
+            {
+                path: 'pages/pasar/create',
+                name: 'Pasar Create',
+                component: () => import('@/views/pages/pasar/Form.vue'),
+                meta: {
+                    requiresAuth: true,
+                    breadcrumb: [{ parent: 'Utilities', label: 'Pasar', item: 'Add Pasar' }]
+                }
+            },
+            {
+                path: 'pages/pasar/:id/edit',
+                name: 'Pasar Edit',
+                component: () => import('@/views/pages/pasar/Form.vue'),
+                meta: {
+                    requiresAuth: true,
+                    breadcrumb: [{ parent: 'Utilities', label: 'Pasar', item: 'Edit Pasar' }]
+                }
+            },
+            {
+                path: 'pages/pasar/:id/detail',
+                name: 'Pasar Detail',
+                component: () => import('@/views/pages/pasar/Detail.vue'),
+                meta: {
+                    requiresAuth: true,
+                    breadcrumb: [{ parent: 'Utilities', label: 'Pasar', item: 'Detail Pasar' }]
+                }
+            },
             {
                 path: 'pages/ms_icons',
                 name: 'Icons List',
@@ -551,52 +586,7 @@ const routes = [
                 }
             },
 
-            {
-                path: 'pages/sys_company',
-                name: 'Company List',
-                component: () => import('@/views/pages/sys_company/Index.vue'),
-                meta: {
-                    requiresAuth: true,
-                    breadcrumb: [{ parent: 'Utilities', label: 'Company' }]
-                }
-            },
-            {
-                path: 'pages/sys_company/create',
-                name: 'Company Create',
-                component: () => import('@/views/pages/sys_company/sysCompanyForm.vue'),
-                meta: {
-                    requiresAuth: true,
-                    breadcrumb: [{ parent: 'Utilities', label: 'Company', item: 'Add Company' }]
-                }
-            },
-            {
-                path: 'pages/sys_company/:id/edit',
-                name: 'Company Edit',
-                component: () => import('@/views/pages/sys_company/sysCompanyForm.vue'),
-                meta: {
-                    requiresAuth: true,
-                    breadcrumb: [{ parent: 'Utilities', label: 'Company', item: 'Edit Company' }]
-                }
-            },
 
-            {
-                path: 'pages/attribute',
-                name: 'Attribute',
-                component: () => import('@/views/pages/attribute/Index.vue'),
-                meta: {
-                    requiresAuth: true,
-                    breadcrumb: [{ parent: 'Utilities', label: 'Attribute' }]
-                }
-            },
-            {
-                path: 'pages/attribute/create',
-                name: 'attribute-create',
-                component: () => import('@/views/pages/attribute/create.vue'),
-                meta: {
-                    requiresAuth: true,
-                    breadcrumb: [{ parent: 'Utilities', label: 'Attribute', item: 'Add Attribute' }]
-                }
-            },
 
             {
                 path: '/pages/ms_role',
@@ -649,6 +639,15 @@ const routes = [
                 meta: {
                     requiresAuth: true,
                     breadcrumb: [{ parent: 'Setting', label: 'Menu Management', item: 'Edit Menu Management' }]
+                }
+            },
+            {
+                path: 'pages/menu_management/:id/detail',
+                name: 'menuManagement-detail',
+                component: () => import('@/views/pages/menu_management/Detail.vue'),
+                meta: {
+                    requiresAuth: true,
+                    breadcrumb: [{ parent: 'Setting', label: 'Menu Management', item: 'Detail Menu Management' }]
                 }
             },
             {
