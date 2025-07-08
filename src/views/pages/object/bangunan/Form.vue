@@ -1,4 +1,5 @@
 <script setup>
+import MapPicker from '@/components/MapPicker.vue';
 import { AuthApi } from '@/service/Api';
 import { Helper } from '@/service/Helper';
 import swal from 'sweetalert2';
@@ -274,6 +275,8 @@ const form = ref({
         // bobot_tahun_pemakaian_penutup_atap: null,
         // bobot_bangunan: null,
         status_data: 'draft',
+        koordinat: '',
+        alamat_aset: '',
     },
     errors: {},
     assign: (data = {}) => {
@@ -529,11 +532,31 @@ const goBack = () => {
 
 
 
+
             <p v-if="form.errors.foto_lainnya" class="text-red-600 text-sm">
                 {{ form.errors.foto_lainnya }}
             </p>
         </div>
 
+        <div>
+            <!-- Coordinate picker (spans full width) -->
+            <div class="md:col-span-2">
+                <Label for="koordinat">KOORDINAT & ALAMAT ASET</Label>
+                <MapPicker v-model="form.data.koordinat" @address="addr => form.data.alamat_aset = addr" />
+                <small class="text-sm text-gray-500">
+                    Klik pada peta untuk memilih titik. Koordinat dan alamat otomatis terisi,
+                    tetapi alamat bisa Anda edit manual di bawah jika perlu.
+                </small>
+            </div>
+            <InputText v-model="form.data['koordinat']" :id="key" class="w-full"
+                :invalid="!!form.errors['koordinat']" />
+        </div>
+        <div>
+            <Label for="alamat_aset" class="block font-medium">Alamat Aset</Label>
+            <InputText id="alamat_aset" v-model="form.data.alamat_aset" class="w-full border rounded p-2"
+                :invalid="!!form.errors.alamat_aset" />
+            <InputError :message="form.errors.alamat_aset" />
+        </div>
         <!-- bentuk_bangunan -->
         <div>
             <Label for="bentuk_bangunan" class="block font-medium">Bentuk Bangunan</Label>
