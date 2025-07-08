@@ -1,0 +1,14 @@
+version: "3.8"
+networks:
+  default:
+    driver: bridge
+services:
+  app:
+    container_name: maset
+    image: zulkarnen/maset-vue
+    ports:
+      - "80:80"
+    environment:
+      - NODE_ENV=production
+      - VITE_API_URL=http://103.181.182.81:3000/
+      - VITE_APP_NAME="APP GO"

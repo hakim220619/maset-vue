@@ -24,13 +24,13 @@ const unitFieldDefinitions = [
     { key: 'indikasi_sewa_rp', label: 'Indikasi Nilai Sewa sebelum penyesuaian' },
     { key: 'indikasi_sewa_m2_rp', label: 'Indikasi Nilai Sewa sebelum penyesuaian / m²' }
 ];
+
 const informasiUmumFields = ref([]);
 const dataPropertiFields = ref([]);
 const dataUnitPerbandinganField = ref([]);
 
 async function onPersenInput(raw_persen, label, pembanding_id, type = 'elemen_perbandingan') {
-    const sewaId = route.params.id;   // 👈 get it here
-    console.log(raw_persen, label, pembanding_id)
+    const sewaId = route.params.id;
     try {
         const url = type === 'elemen_perbandingan' ? `/sewa/${sewaId}/penyesuaian/elemen-perbandingan` : `/sewa/${sewaId}/penyesuaian/karakter-fisik`;
         await AuthApi.client().put(url, {
@@ -38,14 +38,10 @@ async function onPersenInput(raw_persen, label, pembanding_id, type = 'elemen_pe
             raw_persen,
             pembanding_id
         });
-        // this.$toast.success("Tersimpan!");
     } catch (err) {
         console.error("Failed to save persen:", err);
-        // Optional user feedback
-        // this.$toast.error("Gagal menyimpan…");
     } finally {
-        // Optionally, you can reload the data or show a success message
-        this.loadSewaDetail(sewaId);
+        await loadSewaDetail(sewaId);
     }
 }
 
@@ -103,7 +99,6 @@ onBeforeMount(async () => {
 });
 onMounted(() => {
     loadSewaDetail(route.params.id)
-    // loadElementPerbandingan(route.params.id);
 })
 
 </script>

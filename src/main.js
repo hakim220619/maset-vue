@@ -16,10 +16,16 @@ import '@/assets/styles.scss';
 import '@/assets/tailwind.css';
 import { definePreset } from '@primevue/themes';
 
+import { LMap, LMarker, LTileLayer } from '@vue-leaflet/vue-leaflet';
+import 'leaflet/dist/leaflet.css';
 import nprogress from 'nprogress';
 import 'nprogress/nprogress.css';
 
 const app = createApp(App);
+
+app.component('LMap', LMap)
+app.component('LTileLayer', LTileLayer)
+app.component('LMarker', LMarker)
 
 const appzone = definePreset(Aura, {
     semantic: {
