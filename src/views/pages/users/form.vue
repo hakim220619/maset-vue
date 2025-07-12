@@ -186,8 +186,7 @@ const goBack = () => {
                 <!-- NIK -->
                 <div class="col-span-6">
                     <Label for="nik" class="block mb-1 text-gray-700">NIK</Label>
-                    <TextNumber v-model="form.data.nik" id="nik" class="w-full" :invalid="!!form.errors.nik"
-                        inputmode="numeric" pattern="[0-9]*" />
+                    <TextNumber v-model="form.data.nik" id="nik" class="w-full" :invalid="!!form.errors.nik" />
                     <InputError :message="form.errors.nik" />
                 </div>
 

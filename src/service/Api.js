@@ -4,10 +4,10 @@ import axios from 'axios';
 
 // Buat instance axios
 const api = axios.create({
-    baseURL: import.meta.env.VITE_API_URL || 'http://localhost:3000/',
+    baseURL: import.meta.env.VITE_API_URL,
     headers: {
-        'Content-Type': 'application/json',
-    },
+        'Content-Type': 'application/json'
+    }
 });
 
 // Tambahkan interceptor untuk menyisipkan token ke setiap request
@@ -31,10 +31,12 @@ export const AuthApi = {
             const response = await api.post('/auth/login', data);
             return response;
         } catch (error) {
-            return error?.response?.data || {
-                success: false,
-                message: 'Login failed',
-            };
+            return (
+                error?.response?.data || {
+                    success: false,
+                    message: 'Login failed'
+                }
+            );
         }
     },
 
@@ -54,13 +56,12 @@ export const AuthApi = {
         }
     },
 
-
     checkAuth: async () => {
         try {
             const response = await api.post('/auth/validate-token');
             return response.data.success;
         } catch (error) {
-            console.error("Error during token validation:", error);
+            console.error('Error during token validation:', error);
             return false;
         }
     }

@@ -66,48 +66,40 @@ const loadDropdownOptions = () => {
         perkerasan_jalan: [
             { id: 1, name: 'Aspal' },
             { id: 2, name: 'Beton' },
-            { id: 3, name: 'Tanah' },
+            { id: 3, name: 'Tanah' }
         ],
         posisi_aset: [
             { id: 1, name: 'Dekat Jalan' },
-            { id: 2, name: 'Tengah Tanah' },
+            { id: 2, name: 'Tengah Tanah' }
         ],
         bentuk_tanah: [
             { id: 1, name: 'Persegi' },
             { id: 2, name: 'Persegi Panjang' },
-            { id: 3, name: 'Segitiga' },
+            { id: 3, name: 'Segitiga' }
         ],
         topografi: [
             { id: 1, name: 'Datar' },
             { id: 2, name: 'Bergunung' },
-            { id: 3, name: 'Berbukit' },
+            { id: 3, name: 'Berbukit' }
         ],
         orientasi: [
             { id: 1, name: 'Utara' },
             { id: 2, name: 'Selatan' },
             { id: 3, name: 'Timur' },
-            { id: 4, name: 'Barat' },
+            { id: 4, name: 'Barat' }
         ],
         peruntukan: [
             { id: 1, name: 'Perumahan' },
             { id: 2, name: 'Komersial' },
-            { id: 3, name: 'Industri' },
-        ],
+            { id: 3, name: 'Industri' }
+        ]
     };
 };
 
 // Field helpers
-const isNumberField = (key) => [
-    'luas_tanah_m2',
-    'row_jalan_m',
-    'lebar_muka_m',
-    'elevasi_terhadap_jalan_m'
-].includes(key);
+const isNumberField = (key) => ['luas_tanah_m2', 'row_jalan_m', 'lebar_muka_m', 'elevasi_terhadap_jalan_m'].includes(key);
 
-const isDateField = (key) => [
-    'tanggal_inspeksi',
-    'tanggal_penilaian'
-].includes(key);
+const isDateField = (key) => ['tanggal_inspeksi', 'tanggal_penilaian'].includes(key);
 
 // Submit logic
 
@@ -180,14 +172,13 @@ onBeforeMount(async () => {
         const data = await Helper.getDataById('tanah', route.params.id);
         if (data) {
             console.log(data);
-            data.old_foto_foto = data.foto_foto
+            data.old_foto_foto = data.foto_foto;
 
             form.value.assign(data);
         }
     }
 });
 </script>
-
 
 <template>
     <form class="card mt-8" @submit.prevent="save">
@@ -199,7 +190,7 @@ onBeforeMount(async () => {
                 <div v-if="key === 'foto_foto'">
                     <Label :for="key">{{ 'Foto-foto' }}</Label>
                     <input type="file" :id="key" class="w-full border rounded p-2"
-                        @change="e => form.data[key] = e.target.files[0]" />
+                        @change="(e) => (form.data[key] = e.target.files[0])" />
                     <InputError :message="form.errors[key]" />
                 </div>
                 <div v-else-if="[
@@ -217,14 +208,8 @@ onBeforeMount(async () => {
                     <InputText v-model="form.data[key]" :id="key" class="w-full" :invalid="!!form.errors[key]" />
                 </div>
                 <!-- Dropdown untuk field yang membutuhkan select -->
-                <div v-else-if="[
-                    'perkerasan_jalan',
-                    'posisi_aset',
-                    'bentuk_tanah',
-                    'topografi',
-                    'orientasi',
-                    'peruntukan'
-                ].includes(key)">
+                <div
+                    v-else-if="['perkerasan_jalan', 'posisi_aset', 'bentuk_tanah', 'topografi', 'orientasi', 'peruntukan'].includes(key)">
                     <Label :for="key">{{ key.replaceAll('_', ' ').toUpperCase() }}</Label>
                     <Select v-model="form.data[key]" :options="dropdownOptions[key] || []" show-clear
                         option-label="name" option-value="id" filter placeholder="Select an option" class="w-full"
@@ -234,11 +219,7 @@ onBeforeMount(async () => {
                 </div>
 
                 <!-- Textarea untuk alamat_aset, aksesibilitas_lokasi, kondisi_lingkungan -->
-                <div v-else-if="[
-                    'alamat_aset',
-                    'aksesibilitas_lokasi',
-                    'kondisi_lingkungan'
-                ].includes(key)">
+                <div v-else-if="['alamat_aset', 'aksesibilitas_lokasi', 'kondisi_lingkungan'].includes(key)">
                     <Label :for="key">{{ key.replaceAll('_', ' ').toUpperCase() }}</Label>
                     <Textarea v-model="form.data[key]" :id="key" rows="3" class="w-full"
                         :invalid="!!form.errors[key]" />
@@ -268,11 +249,7 @@ onBeforeMount(async () => {
 
                     <InputError :message="form.errors[key]" />
                 </div>
-
             </template>
-
-
-
         </div>
 
         <div class="flex justify-end gap-2 mt-4">

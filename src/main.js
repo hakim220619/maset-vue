@@ -20,6 +20,9 @@ import { LMap, LMarker, LTileLayer } from '@vue-leaflet/vue-leaflet';
 import 'leaflet/dist/leaflet.css';
 import nprogress from 'nprogress';
 import 'nprogress/nprogress.css';
+import ConfirmDialog from 'primevue/confirmdialog';
+
+
 
 const app = createApp(App);
 
@@ -27,6 +30,8 @@ app.component('LMap', LMap)
 app.component('LTileLayer', LTileLayer)
 app.component('LMarker', LMarker)
 
+app.component('ConfirmDialog', ConfirmDialog);
+app.use(ConfirmationService);
 const appzone = definePreset(Aura, {
     semantic: {
         colorScheme: {

@@ -1,4 +1,5 @@
 <script setup>
+import TextContact from '@/components/InputContact.vue';
 import InputError from '@/components/InputError.vue';
 import Label from '@/components/Label.vue';
 import { AuthApi } from '@/service/Api';
@@ -6,6 +7,8 @@ import { onMounted, ref, watch } from 'vue';
 import { useRouter } from 'vue-router';
 import { z } from 'zod';
 
+
+import swal from 'sweetalert2';
 
 
 const router = useRouter();
@@ -20,7 +23,7 @@ const form = ref({
         name: '',
         email: '',
         password: '',
-        entitas: '',
+        role_structure: '',
         image: null,
         contact: '',
         address: '',
@@ -30,14 +33,14 @@ const form = ref({
         name: '',
         email: '',
         password: '',
-        entitas: '',
+        role_structure: '',
         image: '',
         contact: '',
         address: '',
     },
 });
 
-const entitasOptions = ref([]);
+const role_structureOptions = ref([]);
 
 
 const schema = z.object({
@@ -45,7 +48,7 @@ const schema = z.object({
     name: z.string().min(1, { message: 'Full Name is required' }).max(100),
     email: z.string().email({ message: 'Invalid email' }),
     password: z.string().min(6, { message: 'Password must be at least 6 characters' }).max(32),
-    entitas: z.number().min(1, { message: 'Please select entitas' }),
+    role_structure: z.number().min(1, { message: 'Please select role_structure' }),
     image: z
         .union([z.instanceof(File), z.null()])
         .refine((file) => !file || file.size <= 2 * 1024 * 1024, {
@@ -86,6 +89,11 @@ async function onFormSubmit() {
         });
 
         if (response.data.success) {
+            swal.fire({
+                title: 'Success',
+                text: 'Data Users berhasil disimpan',
+                icon: 'success'
+            });
             router.push('/auth/login');
         } else {
             visibleErrorMessage.value = true;
@@ -97,6 +105,11 @@ async function onFormSubmit() {
                 form.value.errors[error.path[0]] = error.message;
             }
         } else {
+            swal.fire({
+                title: 'Error',
+                text: 'Gagal menyimpan data Users',
+                icon: 'error'
+            });
             console.error('Error during registration:', err);
             visibleErrorMessage.value = true;
             errorMessage.value = 'An unexpected error occurred';
@@ -112,13 +125,13 @@ onMounted(async () => {
         const response = await AuthApi.client().get('/role_structure_public');
         console.log(response);
 
-        entitasOptions.value = response.data.data.map(item => ({
+        role_structureOptions.value = response.data.data.map(item => ({
             name: item.rs_name,
             id: item.rs_id,
         }));
 
     } catch (error) {
-        console.error('Failed to fetch entitas options:', error);
+        console.error('Failed to fetch role_structure options:', error);
     }
 });
 
@@ -184,11 +197,11 @@ for (const key in form.value.data) {
 
                     <!-- Entitas -->
                     <div class="col-span-12 sm:col-span-6">
-                        <Label for="entitas" class="block mb-1 text-gray-700">Entitas</Label>
-                        <Select v-model="form.data.entitas" :options=entitasOptions show-clear option-label="name"
-                            filter option-value="id" :virtualScrollerOptions="{ itemSize: 38 }"
-                            placeholder="Select a category" class="w-full" :invalid="!!form.errors.entitas" />
-                        <InputError :message="form.errors.entitas" />
+                        <Label for="role_structure" class="block mb-1 text-gray-700">Entitas</Label>
+                        <Select v-model="form.data.role_structure" :options=role_structureOptions show-clear
+                            option-label="name" filter option-value="id" :virtualScrollerOptions="{ itemSize: 38 }"
+                            placeholder="Select a category" class="w-full" :invalid="!!form.errors.role_structure" />
+                        <InputError :message="form.errors.role_structure" />
                     </div>
 
                     <!-- Image -->
@@ -202,7 +215,7 @@ for (const key in form.value.data) {
                     <!-- contact -->
                     <div class="col-span-12 sm:col-span-6">
                         <Label for="contact" class="block mb-1 text-gray-700">Contact</Label>
-                        <InputText v-model="form.data.contact" id="contact" class="w-full"
+                        <TextContact v-model="form.data.contact" id="contact" class="w-full"
                             :invalid="!!form.errors.contact" />
                         <InputError :message="form.errors.contact" />
                     </div>

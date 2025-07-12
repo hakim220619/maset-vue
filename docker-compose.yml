@@ -7,10 +7,9 @@ services:
     build:
       context: .
       dockerfile: .docker/Dockerfile
+      target: development
     ports:
       - "5173:5173"
-    environment:
-      - NODE_ENV=production
     volumes:
-      - "/app/node_modules"
       - .:/app
+      - /app/node_modules

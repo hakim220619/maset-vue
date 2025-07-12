@@ -2,18 +2,33 @@
 import { AuthApi } from '@/service/Api';
 import { Helper } from '@/service/Helper';
 import { FilterMatchMode, FilterOperator } from '@primevue/core/api';
-import { inject, onMounted, ref } from 'vue';
+import Swal from 'sweetalert2';
+import { inject, onMounted, ref, watch } from 'vue';
 import { useRouter } from 'vue-router';
-
 const data = ref();
 const filters = ref();
 const swal = inject('$swal');
 const isRedirect = ref(false);
 const firstRowIndex = ref(0);
 const rows = ref(10);
+const visible = ref(false);
+const selectedData = ref(null);
+const roleOptions = ref([]);
+const roleAccessOptions = ref([]);
 
 const loading = ref(true);
 const router = useRouter();
+
+const form = ref({
+    data: {
+        role: null,
+        role_access: null
+    },
+    errors: {
+        role: null,
+        role_access: null
+    }
+});
 
 const fetchUsers = async () => {
     try {
@@ -134,6 +149,63 @@ const add = () => {
     router.push('/pages/users/create');
     isRedirect.value = true;
 };
+
+
+// Fungsi saat tombol verifikasi diklik
+function openVerifikasiDialog(data) {
+    selectedData.value = data;
+    visible.value = true;
+}
+
+async function confirmVerifikasi() {
+    if (!selectedData.value?.id) {
+        Swal.fire({ title: 'Error', text: 'ID user tidak ditemukan.', icon: 'error' });
+        return;
+    }
+
+    // Validasi
+    if (!form.value.data.role) {
+        form.value.errors.role = 'Role harus dipilih';
+        return;
+    }
+    if (!form.value.data.role_access) {
+        form.value.errors.role_access = 'Akses role harus dipilih';
+        return;
+    }
+
+    const url = `/users/verifikasi`;
+    const formData = new FormData();
+    formData.append('id', selectedData.value.id);
+    formData.append('status', 1);
+    formData.append('role', form.value.data.role);
+    formData.append('role_access', form.value.data.role_access);
+
+    try {
+        const response = await AuthApi.client()({
+            url,
+            method: 'post',
+            data: formData
+        });
+        if (response.data.success) {
+            fetchUsers();~
+
+            Swal.fire({ title: 'Success', text: 'User berhasil diverifikasi.', icon: 'success' });
+            visible.value = false;
+        }
+    } catch (error) {
+        Swal.fire({ title: 'Error', text: 'Gagal memverifikasi user.', icon: 'error' });
+        console.error(error);
+    }
+}
+watch(visible, async (val) => {
+    if (val) {
+        roleOptions.value = await Helper.getRole();
+        roleAccessOptions.value = await Helper.getRoleAccess();
+
+        form.value.data.role = selectedData.value?.role_id ?? null;
+        form.value.data.role_access = selectedData.value?.role_access_id ?? null;
+    }
+});
 
 </script>
 
@@ -264,7 +336,31 @@ const add = () => {
                     </template>
                 </Column>
 
+                <Column header="Action">
+                    <template #body="{ data }">
+                        <div class="flex gap-1 items-center"
+                            :class="data.status === 4 ? 'justify-end' : 'justify-left'">
+                            <!-- Tombol Verifikasi jika status === 4 -->
 
+
+                            <!-- DropdownButton -->
+                            <DropdownButton :items="items" :data="data" :menu-key="data.id" />
+                            <Button v-if="data.status === 4" title="Verifikasi" @click="openVerifikasiDialog(data)">
+                                <i class="pi pi-check"></i>
+                            </Button>
+                        </div>
+                    </template>
+                </Column>
+                <Column field="status" sortable header="Status" style="min-width: 10rem">
+                    <template #body="{ data }">
+                        <Tag :value="Helper.getStatusLabel(data.status)"
+                            :severity="Helper.getStatusSeverity(data.status)" />
+                    </template>
+                    <template #filter="{ filterModel }">
+                        <Dropdown v-model="filterModel.value" :options="statusOptions" placeholder="Filter Status"
+                            optionLabel="label" optionValue="value" />
+                    </template>
+                </Column>
                 <Column field="nik" sortable header="NIK" style="min-width: 12rem">
                     <template #body="{ data }">{{ data.nik }}</template>
                     <template #filter="{ filterModel }">
@@ -278,6 +374,7 @@ const add = () => {
                         <InputText v-model="filterModel.value" type="text" placeholder="Search by name" />
                     </template>
                 </Column>
+
 
                 <Column field="email" sortable header="Email" style="min-width: 12rem">
                     <template #body="{ data }">{{ data.email }}</template>
@@ -314,26 +411,49 @@ const add = () => {
                     </template>
                 </Column>
 
-                <Column field="status" sortable header="Status" style="min-width: 10rem">
-                    <template #body="{ data }">
-                        <Tag :value="Helper.getStatusLabel(data.status)"
-                            :severity="Helper.getStatusSeverity(data.status)" />
-                    </template>
-                    <template #filter="{ filterModel }">
-                        <Dropdown v-model="filterModel.value" :options="statusOptions" placeholder="Filter Status"
-                            optionLabel="label" optionValue="value" />
-                    </template>
-                </Column>
 
 
-                <Column header="Action">
-                    <template #body="{ data }">
-                        <div class="flex gap-1 justify-end">
-                            <DropdownButton :items="items" :data="data" :menu-key="data.id" />
-                        </div>
-                    </template>
-                </Column>
+
+
+
             </DataTable>
+        </div>
+        <div class="card flex justify-center">
+            <Dialog v-model:visible="visible" header="Konfirmasi Verifikasi" :style="{ width: '30rem' }" modal>
+                <span class="text-gray-700 dark:text-gray-300 block mb-6">
+                    Apakah Anda yakin ingin <strong>memverifikasi</strong> data berikut?
+                </span>
+
+                <ul class="mb-6 ml-4 list-disc text-sm text-gray-800 dark:text-gray-200">
+                    <li><strong>Nama:</strong> {{ selectedData?.name ?? '-' }}</li>
+                    <li><strong>Email:</strong> {{ selectedData?.email ?? '-' }}</li>
+                    <li><strong>Role Sekarang:</strong> {{ selectedData?.rs_name ?? '-' }}</li>
+                </ul>
+
+                <!-- Select Role -->
+                <div class="col-span-6 mb-4">
+                    <Label for="role" class="block mb-1 text-gray-700">Role</Label>
+                    <Select v-model="form.data.role" :options="roleOptions" show-clear option-label="name"
+                        option-value="id" filter placeholder="Pilih role" :virtualScrollerOptions="{ itemSize: 38 }"
+                        class="w-full" :invalid="!!form.errors.role" />
+                    <InputError :message="form.errors.role" />
+                </div>
+
+                <!-- Select Role Access -->
+                <div class="col-span-6 mb-4">
+                    <Label for="role_access" class="block mb-1 text-gray-700">Role Access</Label>
+                    <Select v-model="form.data.role_access" :options="roleAccessOptions" show-clear option-label="name"
+                        option-value="id" filter placeholder="Pilih akses role"
+                        :virtualScrollerOptions="{ itemSize: 38 }" class="w-full"
+                        :invalid="!!form.errors.role_access" />
+                    <InputError :message="form.errors.role_access" />
+                </div>
+
+                <div class="flex justify-end gap-2">
+                    <Button type="button" label="Batal" severity="secondary" @click="visible = false" />
+                    <Button type="button" label="Ya, Verifikasi" icon="pi pi-check" @click="confirmVerifikasi" />
+                </div>
+            </Dialog>
         </div>
 
     </div>

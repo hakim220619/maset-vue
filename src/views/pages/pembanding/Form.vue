@@ -9,336 +9,96 @@ import { z } from 'zod';
 
 import { storeSchema } from './schema.js';
 
+import InputError from '@/components/InputError.vue';
+
+// Import PrimeVue components
+
 const router = useRouter();
 const route = useRoute();
-const jsonFields = [
-    {
-        key: 'jenis_property',
-        label: 'Jenis Properti',
-        options: [
-            { id: 1, name: 'Kaca Geser' },
-            { id: 2, name: 'Kayu Solid' }
-        ]
-    },
-    {
-        key: 'luas_bobot_pintu_jendela',
-        label: 'Luas Bobot Pintu Jendela',
-        options: [
-            { id: 1, name: 'Ringan' },
-            { id: 2, name: 'Sedang' },
-            { id: 3, name: 'Berat' }
-        ]
-    },
-    {
-        key: 'luas_nama_dinding',
-        label: 'Luas Nama Dinding',
-        options: [
-            { id: 1, name: 'Bata Merah' },
-            { id: 2, name: 'Batako' }
-        ]
-    },
-    {
-        key: 'luas_bobot_dinding',
-        label: 'Luas Bobot Dinding',
-        options: [
-            { id: 1, name: 'Tipis' },
-            { id: 2, name: 'Tebal' }
-        ]
-    },
-    {
-        key: 'luas_nama_rangka_atap_datar',
-        label: 'Luas Nama Rangka Atap Datar',
-        options: [
-            { id: 1, name: 'Besi Hollow' },
-            { id: 2, name: 'Kayu Jati' }
-        ]
-    },
-    {
-        key: 'luas_bobot_rangka_atap_datar',
-        label: 'Luas Bobot Rangka Atap Datar',
-        options: [
-            { id: 1, name: 'Ringan' },
-            { id: 2, name: 'Sedang' },
-            { id: 3, name: 'Berat' }
-        ]
-    },
-    {
-        key: 'luas_nama_atap_datar',
-        label: 'Luas Nama Atap Datar',
-        options: [
-            { id: 1, name: 'Galvalum' },
-            { id: 2, name: 'Dak Beton' }
-        ]
-    },
-    {
-        key: 'luas_bobot_atap_datar',
-        label: 'Luas Bobot Atap Datar',
-        options: [
-            { id: 1, name: 'Ringan' },
-            { id: 2, name: 'Berat' }
-        ]
-    },
-    {
-        key: 'tipe_pondasi_existing',
-        label: 'Tipe Pondasi Existing',
-        options: [
-            { id: 1, name: 'Batu Kali' },
-            { id: 2, name: 'Pancang Beton' }
-        ]
-    },
-    {
-        key: 'bobot_tipe_pondasi_existing',
-        label: 'Bobot Tipe Pondasi Existing',
-        options: [
-            { id: 1, name: 'Rendah' },
-            { id: 2, name: 'Tinggi' }
-        ]
-    },
-    {
-        key: 'tipe_struktur_existing',
-        label: 'Tipe Struktur Existing',
-        options: [
-            { id: 1, name: 'Beton Bertulang' },
-            { id: 2, name: 'Baja Ringan' }
-        ]
-    },
-    {
-        key: 'bobot_tipe_struktur_existing',
-        label: 'Bobot Tipe Struktur Existing',
-        options: [
-            { id: 1, name: 'Kuat' },
-            { id: 2, name: 'Sedang' }
-        ]
-    },
-    {
-        key: 'tipe_rangka_atap_existing',
-        label: 'Tipe Rangka Atap Existing',
-        options: [
-            { id: 1, name: 'Kayu' },
-            { id: 2, name: 'Besi Hollow' }
-        ]
-    },
-    {
-        key: 'bobot_rangka_atap_existing',
-        label: 'Bobot Rangka Atap Existing',
-        options: [
-            { id: 1, name: 'Ringan' },
-            { id: 2, name: 'Sedang' }
-        ]
-    },
-    {
-        key: 'tipe_penutup_atap_existing',
-        label: 'Tipe Penutup Atap Existing',
-        options: [
-            { id: 1, name: 'Genteng' },
-            { id: 2, name: 'Asbes' }
-        ]
-    },
-    {
-        key: 'bobot_penutup_atap_existing',
-        label: 'Bobot Penutup Atap Existing',
-        options: [
-            { id: 1, name: 'Sedang' },
-            { id: 2, name: 'Berat' }
-        ]
-    },
-    {
-        key: 'tipe_tipe_dinding_existing',
-        label: 'Tipe Tipe Dinding Existing',
-        options: [
-            { id: 1, name: 'Hebel' },
-            { id: 2, name: 'Gypsum' }
-        ]
-    },
-    {
-        key: 'bobot_tipe_dinding_existing',
-        label: 'Bobot Tipe Dinding Existing',
-        options: [
-            { id: 1, name: 'Tebal' },
-            { id: 2, name: 'Tipis' }
-        ]
-    },
-    {
-        key: 'tipe_tipe_pelapis_dinding_existing',
-        label: 'Tipe Pelapis Dinding Existing',
-        options: [
-            { id: 1, name: 'Cat' },
-            { id: 2, name: 'Wallpaper' }
-        ]
-    },
-    {
-        key: 'bobot_tipe_pelapis_dinding_existing',
-        label: 'Bobot Pelapis Dinding Existing',
-        options: [
-            { id: 1, name: 'Ringan' },
-            { id: 2, name: 'Berat' }
-        ]
-    },
-    {
-        key: 'tipe_tipe_pintu_jendela_existing',
-        label: 'Tipe Pintu Jendela Existing',
-        options: [
-            { id: 1, name: 'Aluminium' },
-            { id: 2, name: 'Kayu' }
-        ]
-    },
-    {
-        key: 'bobot_tipe_pintu_jendela_existing',
-        label: 'Bobot Pintu Jendela Existing',
-        options: [
-            { id: 1, name: 'Ringan' },
-            { id: 2, name: 'Sedang' },
-            { id: 3, name: 'Berat' }
-        ]
-    },
-    {
-        key: 'tipe_tipe_lantai_existing',
-        label: 'Tipe Lantai Existing',
-        options: [
-            { id: 1, name: 'Keramik' },
-            { id: 2, name: 'Granit' },
-            { id: 3, name: 'Vinyl' }
-        ]
-    },
-    {
-        key: 'bobot_tipe_lantai_existing',
-        label: 'Bobot Lantai Existing',
-        options: [
-            { id: 1, name: 'Ringan' },
-            { id: 2, name: 'Berat' }
-        ]
-    }
-];
+
+const folderName = 'pembanding';
 
 const form = ref({
     data: {
-        nama_bangunan: '',
-        foto_depan: null,
-        foto_sisi_kiri: null,
-        foto_sisi_kanan: null,
-        judul_foto: '',
-        foto_lainnya: [], // JSON array of files or URLs
-        bentuk_bangunan: '',
-        grade_gudang: '',
-        jumlah_lantai: null,
-        basement: null,
-        konstruksi_bangunan: '',
-        konstruksi_lantai: '',
-        konstruksi_dinding: '',
-        konstruksi_atap: '',
-        konstruksi_pondasi: '',
-        versi_btb: null,
-        tipe_spek: null,
-        canvas_data: null, // JSON
-        jenis_bangunan: '',
-        jenis_bangunan_detail: '',
-        jenis_bangunan_indeks_lantai: '',
-        tahun_dibangun: null,
-        keterangan_tahun_dibangun: '',
-        tahun_renovasi: null,
-        keterangan_tahun_direnovasi: '',
-        jenis_renovasi: '',
-        bobot_renovasi: null,
-        kondisi_visual: '',
-        catatan_khusus: '',
-        luas_bangunan_terpotong: null,
-        luas_bangunan_imb: null,
-        luas_nama_pintu_jendela: null, // JSON
-        luas_bobot_pintu_jendela: null, // JSON
-        luas_nama_dinding: null, // JSON
-        luas_bobot_dinding: null, // JSON
-        luas_nama_rangka_atap_datar: null, // JSON
-        luas_bobot_rangka_atap_datar: null, // JSON
-        luas_nama_atap_datar: null, // JSON
-        luas_bobot_atap_datar: null, // JSON
-        tipe_pondasi_existing: null, // JSON
-        bobot_tipe_pondasi_existing: null, // JSON
-        tipe_struktur_existing: null, // JSON
-        bobot_tipe_struktur_existing: null, // JSON
-        tipe_rangka_atap_existing: null, // JSON
-        bobot_rangka_atap_existing: null, // JSON
-        tipe_penutup_atap_existing: null, // JSON
-        bobot_penutup_atap_existing: null, // JSON
-        tipe_tipe_dinding_existing: null, // JSON
-        bobot_tipe_dinding_existing: null, // JSON
-        tipe_tipe_pelapis_dinding_existing: null, // JSON
-        bobot_tipe_pelapis_dinding_existing: null, // JSON
-        // tahun_pemakaian_pondasi: null,
-        // tahun_pemakaian_struktur: null,
-        // tahun_pemakaian_rangka_atap: null,
-        // tahun_pemakaian_penutup_atap: null,
-        // bobot_tahun_pemakaian_pondasi: null,
-        // bobot_tahun_pemakaian_struktur: null,
-        // bobot_tahun_pemakaian_rangka_atap: null,
-        // bobot_tahun_pemakaian_penutup_atap: null,
-        // bobot_bangunan: null,
+        jenis_property: '',
+        foto: [], // JSON array of files or URLs
+        sumber_informasi: '',
+        kategori_sumber_informasi: '',
+        no_hp: '',
+        jenis_data: '',
+        tgl_penawaran: null, // Changed to null for date input
+        harga_penawaran: '',
+        diskon: '',
+        alamat_aset: '',
+        koordinat: '',
+        hak_kepemilikan: '',
+        luas_tanah: '',
+        luas_bangunan: '',
+        tahun_dibangun: '',
+        tahun_renovasi: '',
+        tipe_bangunan: '',
+        jumlah_lantai: '',
+        kondisi_bangunan: '',
+        row_jalan: '',
+        perkerasan_jalan: '',
+        posisi_aset: '',
+        bentuk_tanah: '',
+        lebar_muka: '', // New field
+        elevasi_terhadap_jalan: '', // New field
+        topografi: '', // New field
+        orientasi: '', // New field
+        peruntukan: '', // New field
+        jarak_thd_pusat_kota: '', // New field
+        aksesibilitas_lokasi: '', // New field
+        kondisi_lingkungan: '', // New field
+        syarat_pembiayaan: '', // New field
+        kondisi_penjualan: '', // New field
+        pengeluaran_setelah_pembelian: '', // New field
+        kondisi_pasar: '', // New field
         status_data: 'draft'
     },
     errors: {},
+
     assign: (data = {}) => {
         for (const key in data) {
             if (key in form.value.data) {
-                form.value.data[key] = data[key];
+                // Special handling for date fields if needed, assuming backend sends ISO string
+                if (key === 'tgl_penawaran' && data[key]) {
+                    form.value.data[key] = new Date(data[key]);
+                } else {
+                    form.value.data[key] = data[key];
+                }
             }
         }
     },
     loading: false
 });
 
-// Fungsi untuk file change, hanya untuk 3 foto utama
-const onFileChange = (event, fieldName) => {
-    const files = event.target.files;
-    if (files.length) {
-        form.value.data[fieldName] = files[0];
-    } else {
-        form.value.data[fieldName] = null;
-    }
-};
+// Fungsi untuk file change, hanya untuk 3 foto utama (These seem to be commented out or not directly used for the 'foto' array)
+// const onFileChange = (event, fieldName) => {
+//     const files = event.target.files;
+//     if (files.length) {
+//         form.value.data[fieldName] = files[0];
+//     } else {
+//         form.value.data[fieldName] = null;
+//     }
+// };
+
 const save = async () => {
     form.value.loading = true;
-    form.value.errors = {};
-
-    const isEdit = !!route.params.id;
-    const url = isEdit ? `bangunan/${route.params.id}/object` : 'bangunan/object';
-    const method = isEdit ? 'put' : 'post';
+    const url = route.params.id ? `pembanding/${route.params.id}/${folderName}` : `pembanding/${folderName}`;
 
     try {
-        // Validasi schema
         storeSchema.parse(form.value.data);
 
         const formData = new FormData();
-
-        // Append field biasa
         for (const key in form.value.data) {
-            const value = form.value.data[key];
-
-            // Skip foto_lainnya karena ditangani terpisah di bawah
-            if (key === 'foto_lainnya') continue;
-
-            // Handle File khusus (foto_depan, sisi_kiri, sisi_kanan)
-            if (['foto_depan', 'foto_sisi_kiri', 'foto_sisi_kanan'].includes(key) && value instanceof File) {
-                formData.append(key, value);
-            } else if (typeof value === 'object') {
-                formData.append(key, JSON.stringify(value)); // misalnya canvas_data atau json
-            } else if (value !== null && value !== undefined) {
-                formData.append(key, value.toString());
-            }
+            formData.append(key, form.value.data[key]);
         }
 
-        // Tangani foto_lainnya (array file dan keterangan)
-        form.value.data.foto_lainnya.forEach((item, index) => {
-            if (item.file) {
-                formData.append('foto_lainnya', item.file);
-            }
-            if (item.keterangan) {
-                formData.append(`foto_lainnya[${index}]`, item.keterangan);
-            }
-        });
-
-        // Kirim ke backend
         const response = await AuthApi.client()({
             url,
-            method,
+            method: route.params.id ? 'put' : 'post',
             data: formData,
             headers: {
                 'Content-Type': 'multipart/form-data'
@@ -348,32 +108,31 @@ const save = async () => {
         if (response.data.success) {
             swal.fire({
                 title: 'Success',
-                text: `Data Bangunan berhasil ${isEdit ? 'diperbarui' : 'disimpan'}`,
+                text: 'Data Pembanding berhasil disimpan',
                 icon: 'success'
             });
-            router.push({ name: 'Bangunan List' });
+            router.push({ name: 'Pembanding List' });
         }
     } catch (error) {
         if (error instanceof z.ZodError) {
-            error.errors.forEach((err) => {
-                form.value.errors[err.path[0]] = err.message;
-            });
+            for (const err of error.errors) {
+                form.value.errors[err.path] = err.message;
+            }
         } else {
-            console.error(error);
             swal.fire({
                 title: 'Error',
-                text: 'Terjadi kesalahan saat menyimpan data',
+                text: 'Gagal menyimpan data Pembanding',
                 icon: 'error'
             });
         }
-    } finally {
-        form.value.loading = false;
     }
+
+    form.value.loading = false;
 };
 
 // Initialize with one empty photo if array is empty
-if (form.value.data.foto_lainnya.length === 0) {
-    form.value.data.foto_lainnya.push({ file: null, keterangan: '', url: '' });
+if (form.value.data.foto.length === 0) {
+    form.value.data.foto.push({ file: null, keterangan: '', url: '' });
 }
 
 function getPreviewUrl(file) {
@@ -382,18 +141,18 @@ function getPreviewUrl(file) {
 
 function handleFileChange(event, index) {
     if (event.target.files.length > 0) {
-        form.value.data.foto_lainnya[index].file = event.target.files[0];
-        form.value.data.foto_lainnya[index].url = getPreviewUrl(event.target.files[0]);
+        form.value.data.foto[index].file = event.target.files[0];
+        form.value.data.foto[index].url = getPreviewUrl(event.target.files[0]);
     }
 }
 
 function addPhoto() {
-    form.value.data.foto_lainnya.push({ file: null, keterangan: '', url: '' });
+    form.value.data.foto.push({ file: null, keterangan: '', url: '' });
 }
 
 function removePhoto(index) {
-    if (form.value.data.foto_lainnya.length > 1) {
-        form.value.data.foto_lainnya.splice(index, 1);
+    if (form.value.data.foto.length > 1) {
+        form.value.data.foto.splice(index, 1);
     }
 }
 
@@ -401,37 +160,100 @@ const statusOptions = [
     { name: 'Draft', id: 'draft' },
     { name: 'Publish', id: 'publish' }
 ];
+
+const jenisDataOptions = [
+    { name: 'Penawaran', id: 'penawaran' },
+    { name: 'Transaksi', id: 'transaksi' }
+];
+
+// New options for dropdowns
+const kategoriSumberInformasiOptions = [
+    { name: 'Pemilik', id: 'pemilik' },
+    { name: 'Perantara', id: 'perantara' },
+    { name: 'Agen', id: 'agen' }
+];
+
+const tipeBangunanOptions = [
+    { name: 'Bertingkat', id: 'bertingkat' },
+    { name: 'Tidak bertingkat', id: 'tidak_bertingkat' }
+];
+
+const kondisiBangunanOptions = [
+    { name: 'Terawat', id: 'terawat' },
+    { name: 'Tidak terawat', id: 'tidak_terawat' }
+];
+
+const perkerasanJalanOptions = [
+    { name: 'Aspal', id: 'aspal' },
+    { name: 'Beton', id: 'beton' },
+    { name: 'Paving block', id: 'paving_block' },
+    { name: 'Tanah', id: 'tanah' },
+    { name: 'Sirtu', id: 'sirtu' }
+];
+
+const posisiAsetOptions = [
+    { name: 'Hook', id: 'hook' },
+    { name: 'Interior', id: 'interior' },
+    { name: 'Tusuk sate', id: 'tusuk_sate' },
+    { name: 'Sudut', id: 'sudut' }
+];
+
+const bentukTanahOptions = [
+    { name: 'Beraturan', id: 'beraturan' },
+    { name: 'Tidak beraturan', id: 'tidak_beraturan' },
+    { name: 'Letter L', id: 'letter_l' },
+    { name: 'Trapesium', id: 'trapesium' }
+];
+
+const topografiOptions = [
+    { name: 'Datar', id: 'datar' },
+    { name: 'Bergelombang', id: 'bergelombang' },
+    { name: 'Bukit', id: 'bukit' },
+    { name: 'Jurang', id: 'jurang' },
+    { name: 'Kombinasi', id: 'kombinasi' }
+];
+
+const orientasiOptions = [
+    { name: 'Utara', id: 'utara' },
+    { name: 'Selatan', id: 'selatan' },
+    { name: 'Barat', id: 'barat' },
+    { name: 'Timur', id: 'timur' }
+];
+
+const peruntukanOptions = [
+    { name: 'Permukiman', id: 'permukiman' },
+    { name: 'Perkantoran', id: 'perkantoran' },
+    { name: 'Perdagangan & Jasa', id: 'perdagangan_jasa' },
+    { name: 'Komersial', id: 'komersial' },
+    { name: 'Pertanian', id: 'pertanian' },
+    { name: 'Perkebunan', id: 'perkebunan' },
+    { name: 'Industri', id: 'industri' },
+    { name: 'Campuran', id: 'campuran' }
+];
+
 onBeforeMount(async () => {
     if (route.params.id) {
-        const data = await Helper.getDataById('bangunan', route.params.id);
+        const data = await Helper.getDataById('pembanding', route.params.id);
         if (data) {
-            // Set old_ untuk semua foto
-            const fotoFields = ['foto_depan', 'foto_sisi_kiri', 'foto_sisi_kanan'];
-            fotoFields.forEach((field) => {
-                if (field in data) {
-                    data[`old_${field}`] = data[field];
-                }
-            });
-
             // Jika keterangan_foto_lainnya ada dan berupa string JSON, parse ke foto_lainnya
-            if (data.foto_lainnya) {
+            if (data.foto) {
                 try {
-                    const parsed = JSON.parse(data.foto_lainnya);
+                    const parsed = JSON.parse(data.foto);
                     if (Array.isArray(parsed)) {
-                        data.foto_lainnya = parsed.map((item) => ({
+                        data.foto = parsed.map((item) => ({
                             url: item.path || '', // URL preview
                             keterangan: item.keterangan || '',
                             file: null // untuk deteksi apakah file baru diupload
                         }));
                     }
                 } catch (err) {
-                    console.error('Gagal parse foto_lainnya:', err.message);
+                    console.error('Gagal parse foto:', err.message);
                 }
             }
 
-            // Fallback jika tidak ada data foto_lainnya
-            if (!Array.isArray(data.foto_lainnya) || data.foto_lainnya.length === 0) {
-                data.foto_lainnya = [
+            // Fallback jika tidak ada data foto
+            if (!Array.isArray(data.foto) || data.foto.length === 0) {
+                data.foto = [
                     {
                         url: '',
                         keterangan: '',
@@ -446,325 +268,285 @@ onBeforeMount(async () => {
 });
 
 const goBack = () => {
-    router.push('/pages/object/bangunan');
+    router.push('/pages/pembanding');
 };
 </script>
 
 <template>
     <form @submit.prevent="save" class="space-y-6">
-        <!-- nama_bangunan -->
         <div>
-            <!-- nama_bangunan -->
-            <Label for="nama_bangunan" class="block font-medium">Nama Bangunan</Label>
-            <InputText id="nama_bangunan" v-model="form.data.nama_bangunan" class="w-full border rounded p-2"
-                :invalid="!!form.errors.nama_bangunan" />
-            <InputError :message="form.errors.nama_bangunan" />
+            <Label for="jenis_property" class="block font-medium">Jenis Properti</Label>
+            <InputText id="jenis_property" v-model="form.data.jenis_property" class="w-full border rounded p-2"
+                :invalid="!!form.errors.jenis_property" />
+            <InputError :message="form.errors.jenis_property" />
         </div>
 
         <div>
-            <Label for="foto_depan" class="block font-medium">Foto Depan</Label>
-            <InputText id="foto_depan" type="file" @change="(e) => onFileChange(e, 'foto_depan')" accept="image/*"
-                class="w-full" />
-            <p v-if="form.errors.foto_depan" class="text-red-600 text-sm">{{ form.errors.foto_depan }}</p>
-        </div>
-
-        <!-- foto_sisi_kiri -->
-        <div>
-            <Label for="foto_sisi_kiri" class="block font-medium">Foto Sisi Kiri</Label>
-            <InputText id="foto_sisi_kiri" type="file" @change="(e) => onFileChange(e, 'foto_sisi_kiri')"
-                accept="image/*" class="w-full" />
-            <p v-if="form.errors.foto_sisi_kiri" class="text-red-600 text-sm">{{ form.errors.foto_sisi_kiri }}</p>
-        </div>
-
-        <!-- foto_sisi_kanan -->
-        <div>
-            <Label for="foto_sisi_kanan" class="block font-medium">Foto Sisi Kanan</Label>
-            <InputText id="foto_sisi_kanan" type="file" @change="(e) => onFileChange(e, 'foto_sisi_kanan')"
-                accept="image/*" class="w-full" />
-            <p v-if="form.errors.foto_sisi_kanan" class="text-red-600 text-sm">{{ form.errors.foto_sisi_kanan }}</p>
-        </div>
-
-        <!-- judul_foto -->
-        <div>
-            <Label for="judul_foto" class="block font-medium">Judul Foto</Label>
-            <textarea id="judul_foto" v-model="form.data.judul_foto" class="w-full border rounded p-2"></textarea>
-            <p v-if="form.errors.judul_foto" class="text-red-600 text-sm">{{ form.errors.judul_foto }}</p>
-        </div>
-
-        <!-- foto_lainnya -->
-        <div>
-            <Label class="block font-medium">Foto Lainnya</Label>
-
-            <div v-for="(photo, index) in form.data.foto_lainnya" :key="index" class="mb-4 flex items-center gap-2">
+            <Label class="block font-medium">Foto-foto</Label>
+            <div v-for="(photo, index) in form.data.foto" :key="index" class="mb-4 flex items-center gap-2">
                 <div class="flex-1">
                     <InputText type="file" @change="(e) => handleFileChange(e, index)" class="w-full"
                         accept="image/*" />
-                    <InputText type="text" v-model="photo.keterangan" placeholder="Keterangan foto"
-                        class="w-full mt-2 border rounded p-2" />
-                    <!-- Preview for existing images -->
                     <img v-if="photo.url && !photo.file" :src="photo.url" class="mt-2 h-20 object-cover" />
-                    <!-- Preview for newly uploaded images -->
                     <img v-if="photo.file" :src="getPreviewUrl(photo.file)" class="mt-2 h-20 object-cover" />
                 </div>
-
                 <div class="flex flex-col space-y-2">
                     <button type="button" @click="addPhoto"
                         class="text-blue-600 hover:text-blue-800 text-2xl font-bold">+</button>
                     <button type="button" @click="removePhoto(index)"
                         class="text-red-600 hover:text-red-800 text-2xl font-bold"
-                        :disabled="form.data.foto_lainnya.length <= 1">-</button>
+                        :disabled="form.data.foto.length <= 1">-</button>
                 </div>
             </div>
-
-            <p v-if="form.errors.foto_lainnya" class="text-red-600 text-sm">
-                {{ form.errors.foto_lainnya }}
-            </p>
+            <InputError :message="form.errors.foto" />
         </div>
 
-        <!-- bentuk_bangunan -->
         <div>
-            <Label for="bentuk_bangunan" class="block font-medium">Bentuk Bangunan</Label>
-            <InputText id="bentuk_bangunan" v-model="form.data.bentuk_bangunan" class="w-full border rounded p-2"
-                :invalid="!!form.errors.bentuk_bangunan" />
-            <InputError :message="form.errors.bentuk_bangunan" />
+            <Label for="sumber_informasi" class="block font-medium">Sumber Informasi</Label>
+            <InputText id="sumber_informasi" v-model="form.data.sumber_informasi" class="w-full border rounded p-2"
+                :invalid="!!form.errors.sumber_informasi" />
+            <InputError :message="form.errors.sumber_informasi" />
         </div>
 
-        <!-- grade_gudang -->
         <div>
-            <Label for="grade_gudang" class="block font-medium">Grade Gudang</Label>
-            <InputText id="grade_gudang" v-model="form.data.grade_gudang" class="w-full border rounded p-2"
-                :invalid="!!form.errors.grade_gudang" />
-            <InputError :message="form.errors.grade_gudang" />
+            <Label for="kategori_sumber_informasi" class="block font-medium">Kategori Sumber Informasi</Label>
+            <Select v-model="form.data.kategori_sumber_informasi" :options="kategoriSumberInformasiOptions" show-clear
+                option-label="name" option-value="id" filter :placeholder="`Pilih Kategori Sumber Informasi`"
+                class="w-full" :invalid="!!form.errors.kategori_sumber_informasi" />
+            <InputError :message="form.errors.kategori_sumber_informasi" />
         </div>
 
-        <!-- jumlah_lantai -->
+        <div>
+            <Label for="no_hp" class="block font-medium">Nomor HP</Label>
+            <InputText id="no_hp" v-model.number="form.data.no_hp" type="number" min="0"
+                class="w-full border rounded p-2" :invalid="!!form.errors.no_hp" />
+            <InputError :message="form.errors.no_hp" />
+        </div>
+
+        <div>
+            <Label for="jenis_data" class="block font-medium">Jenis Data</Label>
+            <Select v-model="form.data.jenis_data" :options="jenisDataOptions" show-clear option-label="name"
+                option-value="id" filter :virtualScrollerOptions="{ itemSize: 38 }" :placeholder="`Pilih Jenis Data`"
+                class="w-full" :invalid="!!form.errors.jenis_data" />
+            <InputError :message="form.errors.jenis_data" />
+        </div>
+
+        <div>
+            <Label for="tgl_penawaran" class="block font-medium">Tanggal Penawaran / Transaksi</Label>
+            <Calendar id="tgl_penawaran" v-model="form.data.tgl_penawaran" dateFormat="yy-mm-dd"
+                class="w-full border rounded p-2" :invalid="!!form.errors.tgl_penawaran" showIcon />
+            <InputError :message="form.errors.tgl_penawaran" />
+        </div>
+
+        <div>
+            <Label for="harga_penawaran" class="block font-medium">Harga Penawaran / Transaksi</Label>
+            <InputText id="harga_penawaran" v-model.number="form.data.harga_penawaran" type="number" min="0"
+                class="w-full border rounded p-2" :invalid="!!form.errors.harga_penawaran" />
+            <InputError :message="form.errors.harga_penawaran" />
+        </div>
+
+        <div>
+            <Label for="diskon" class="block font-medium">Diskon</Label>
+            <InputText id="diskon" v-model.number="form.data.diskon" type="number" min="0"
+                class="w-full border rounded p-2" :invalid="!!form.errors.diskon" />
+            <InputError :message="form.errors.diskon" />
+        </div>
+
+        <div>
+            <Label for="alamat_aset" class="block font-medium">Alamat Aset</Label>
+            <InputText id="alamat_aset" v-model="form.data.alamat_aset" class="w-full border rounded p-2"
+                :invalid="!!form.errors.alamat_aset" />
+            <InputError :message="form.errors.alamat_aset" />
+        </div>
+
+        <div>
+            <Label for="koordinat" class="block font-medium">Koordinat</Label>
+            <InputText id="koordinat" v-model="form.data.koordinat" class="w-full border rounded p-2"
+                :invalid="!!form.errors.koordinat" />
+            <InputError :message="form.errors.koordinat" />
+        </div>
+
+        <div>
+            <Label for="hak_kepemilikan" class="block font-medium">Hak Kepemilikan</Label>
+            <InputText id="hak_kepemilikan" v-model="form.data.hak_kepemilikan" class="w-full border rounded p-2"
+                :invalid="!!form.errors.hak_kepemilikan" />
+            <InputError :message="form.errors.hak_kepemilikan" />
+        </div>
+
+        <div>
+            <Label for="luas_tanah" class="block font-medium">Luas Tanah (m2)</Label>
+            <InputText id="luas_tanah" v-model.number="form.data.luas_tanah" type="number" min="0"
+                class="w-full border rounded p-2" :invalid="!!form.errors.luas_tanah" />
+            <InputError :message="form.errors.luas_tanah" />
+        </div>
+
+        <div>
+            <Label for="luas_bangunan" class="block font-medium">Luas Bangunan (m2)</Label>
+            <InputText id="luas_bangunan" v-model.number="form.data.luas_bangunan" type="number" min="0"
+                class="w-full border rounded p-2" :invalid="!!form.errors.luas_bangunan" />
+            <InputError :message="form.errors.luas_bangunan" />
+        </div>
+
+        <div>
+            <Label for="tahun_dibangun" class="block font-medium">Tahun dibangun</Label>
+            <InputText id="tahun_dibangun" v-model.number="form.data.tahun_dibangun" type="number" min="1900"
+                :max="new Date().getFullYear()" class="w-full border rounded p-2"
+                :invalid="!!form.errors.tahun_dibangun" />
+            <InputError :message="form.errors.tahun_dibangun" />
+        </div>
+
+        <div>
+            <Label for="tahun_renovasi" class="block font-medium">Tahun direnovasi</Label>
+            <InputText id="tahun_renovasi" v-model.number="form.data.tahun_renovasi" type="number" min="1900"
+                :max="new Date().getFullYear()" class="w-full border rounded p-2"
+                :invalid="!!form.errors.tahun_renovasi" />
+            <InputError :message="form.errors.tahun_renovasi" />
+        </div>
+
+        <div>
+            <Label for="tipe_bangunan" class="block font-medium">Tipe Bangunan</Label>
+            <Select v-model="form.data.tipe_bangunan" :options="tipeBangunanOptions" show-clear option-label="name"
+                option-value="id" filter :placeholder="`Pilih Tipe Bangunan`" class="w-full"
+                :invalid="!!form.errors.tipe_bangunan" />
+            <InputError :message="form.errors.tipe_bangunan" />
+        </div>
+
         <div>
             <Label for="jumlah_lantai" class="block font-medium">Jumlah Lantai</Label>
-            <InputText id="jumlah_lantai" v-model.number="form.data.jumlah_lantai" type="number" min="0"
+            <InputText id="jumlah_lantai" v-model.number="form.data.jumlah_lantai" type="number" min="1"
                 class="w-full border rounded p-2" :invalid="!!form.errors.jumlah_lantai" />
             <InputError :message="form.errors.jumlah_lantai" />
         </div>
 
-        <!-- basement -->
-        <div>
-            <Label for="basement" class="block font-medium">Basement</Label>
-            <InputText id="basement" v-model.number="form.data.basement" type="number" min="0"
-                class="w-full border rounded p-2" :invalid="!!form.errors.basement" />
-            <InputError :message="form.errors.basement" />
-        </div>
-
-        <!-- konstruksi_bangunan -->
-        <div>
-            <Label for="konstruksi_bangunan" class="block font-medium">Konstruksi Bangunan</Label>
-            <InputText id="konstruksi_bangunan" v-model="form.data.konstruksi_bangunan"
-                class="w-full border rounded p-2" :invalid="!!form.errors.konstruksi_bangunan" />
-            <InputError :message="form.errors.konstruksi_bangunan" />
-        </div>
-
-        <!-- konstruksi_lantai -->
-        <div>
-            <Label for="konstruksi_lantai" class="block font-medium">Konstruksi Lantai</Label>
-            <InputText id="konstruksi_lantai" v-model="form.data.konstruksi_lantai" class="w-full border rounded p-2"
-                :invalid="!!form.errors.konstruksi_lantai" />
-            <InputError :message="form.errors.konstruksi_lantai" />
-        </div>
-
-        <!-- konstruksi_dinding -->
-        <div>
-            <Label for="konstruksi_dinding" class="block font-medium">Konstruksi Dinding</Label>
-            <InputText id="konstruksi_dinding" v-model="form.data.konstruksi_dinding" class="w-full border rounded p-2"
-                :invalid="!!form.errors.konstruksi_dinding" />
-            <InputError :message="form.errors.konstruksi_dinding" />
-        </div>
-
-        <!-- konstruksi_atap -->
-        <div>
-            <Label for="konstruksi_atap" class="block font-medium">Konstruksi Atap</Label>
-            <InputText id="konstruksi_atap" v-model="form.data.konstruksi_atap" class="w-full border rounded p-2"
-                :invalid="!!form.errors.konstruksi_atap" />
-            <InputError :message="form.errors.konstruksi_atap" />
-        </div>
-
-        <!-- konstruksi_pondasi -->
-        <div>
-            <Label for="konstruksi_pondasi" class="block font-medium">Konstruksi Pondasi</Label>
-            <InputText id="konstruksi_pondasi" v-model="form.data.konstruksi_pondasi" class="w-full border rounded p-2"
-                :invalid="!!form.errors.konstruksi_pondasi" />
-            <InputError :message="form.errors.konstruksi_pondasi" />
-        </div>
-
-        <!-- versi_btb -->
-        <div>
-            <Label for="versi_btb" class="block font-medium">Versi BTB</Label>
-            <InputText id="versi_btb" v-model.number="form.data.versi_btb" type="number" min="0"
-                class="w-full border rounded p-2" :invalid="!!form.errors.versi_btb" />
-            <InputError :message="form.errors.versi_btb" />
-        </div>
-
-        <!-- tipe_spek -->
-        <div>
-            <Label for="tipe_spek" class="block font-medium">Tipe Spek</Label>
-            <InputText id="tipe_spek" v-model.number="form.data.tipe_spek" type="number" min="0"
-                class="w-full border rounded p-2" :invalid="!!form.errors.tipe_spek" />
-            <InputError :message="form.errors.tipe_spek" />
-        </div>
-
-        <!-- canvas_data -->
-        <div>
-            <Label for="canvas_data" class="block font-medium">Canvas Data (JSON)</Label>
-            <Textarea id="canvas_data" v-model="form.data.canvas_data" placeholder='Contoh: {"shapes": [...]}'
-                class="w-full border rounded p-2" rows="4"></Textarea>
-            <p v-if="form.errors.canvas_data" class="text-red-600 text-sm">{{ form.errors.canvas_data }}</p>
-        </div>
-
-        <!-- jenis_bangunan -->
-        <div>
-            <Label for="jenis_bangunan" class="block font-medium">Jenis Bangunan</Label>
-            <InputText id="jenis_bangunan" v-model="form.data.jenis_bangunan" class="w-full border rounded p-2"
-                :invalid="!!form.errors.jenis_bangunan" />
-            <InputError :message="form.errors.jenis_bangunan" />
-        </div>
-
-        <!-- jenis_bangunan_detail -->
-        <div>
-            <Label for="jenis_bangunan_detail" class="block font-medium">Jenis Bangunan Detail</Label>
-            <InputText id="jenis_bangunan_detail" v-model="form.data.jenis_bangunan_detail"
-                class="w-full border rounded p-2" :invalid="!!form.errors.jenis_bangunan_detail" />
-            <InputError :message="form.errors.jenis_bangunan_detail" />
-        </div>
-
-        <!-- jenis_bangunan_indeks_lantai -->
-        <div>
-            <Label for="jenis_bangunan_indeks_lantai" class="block font-medium">Jenis Bangunan Indeks Lantai</Label>
-            <InputText id="jenis_bangunan_indeks_lantai" v-model="form.data.jenis_bangunan_indeks_lantai"
-                class="w-full border rounded p-2" :invalid="!!form.errors.jenis_bangunan_indeks_lantai" />
-            <InputError :message="form.errors.jenis_bangunan_indeks_lantai" />
-        </div>
-
-        <!-- tahun_dibangun -->
-        <div>
-            <Label for="tahun_dibangun" class="block font-medium">Tahun Dibangun</Label>
-            <InputText id="tahun_dibangun" v-model.number="form.data.tahun_dibangun" type="number" min="0"
-                class="w-full border rounded p-2" :invalid="!!form.errors.tahun_dibangun" />
-            <InputError :message="form.errors.tahun_dibangun" />
-        </div>
-
-        <!-- keterangan_tahun_dibangun -->
-        <div>
-            <Label for="keterangan_tahun_dibangun" class="block font-medium">Keterangan Tahun Dibangun</Label>
-            <Textarea id="keterangan_tahun_dibangun" v-model="form.data.keterangan_tahun_dibangun"
-                class="w-full border rounded p-2"></Textarea>
-            <p v-if="form.errors.keterangan_tahun_dibangun" class="text-red-600 text-sm">{{
-                form.errors.keterangan_tahun_dibangun }}</p>
-        </div>
-
-        <!-- tahun_renovasi -->
-        <div>
-            <Label for="tahun_renovasi" class="block font-medium">Tahun Renovasi</Label>
-            <InputText id="tahun_renovasi" v-model.number="form.data.tahun_renovasi" type="number" min="0"
-                class="w-full border rounded p-2" :invalid="!!form.errors.tahun_renovasi" />
-            <InputError :message="form.errors.tahun_renovasi" />
-        </div>
-
-        <!-- keterangan_tahun_direnovasi -->
-        <div>
-            <Label for="keterangan_tahun_direnovasi" class="block font-medium">Keterangan Tahun Direnovasi</Label>
-            <Textarea id="keterangan_tahun_direnovasi" v-model="form.data.keterangan_tahun_direnovasi"
-                class="w-full border rounded p-2"></Textarea>
-            <p v-if="form.errors.keterangan_tahun_direnovasi" class="text-red-600 text-sm">{{
-                form.errors.keterangan_tahun_direnovasi }}</p>
-        </div>
-
-        <!-- jenis_renovasi -->
-        <div>
-            <Label for="jenis_renovasi" class="block font-medium">Jenis Renovasi</Label>
-            <Textarea id="jenis_renovasi" v-model="form.data.jenis_renovasi"
-                class="w-full border rounded p-2"></Textarea>
-            <InputError :message="form.errors.jenis_renovasi" />
-        </div>
-
-        <div>
-            <Label for="bobot_renovasi" class="block font-medium">Bobot Renovasi</Label>
-            <InputText id="bobot_renovasi" v-model.number="form.data.bobot_renovasi" type="number" min="0"
-                class="w-full border rounded p-2" :invalid="!!form.errors.bobot_renovasi" />
-            <InputError :message="form.errors.bobot_renovasi" />
-        </div>
-
-        <div>
-            <Label for="kondisi_visual" class="block font-medium">Kondisi Visual</Label>
-            <Textarea id="kondisi_visual" v-model="form.data.kondisi_visual"
-                class="w-full border rounded p-2"></Textarea>
-            <InputError :message="form.errors.kondisi_visual" />
-        </div>
-
-        <div>
-            <Label for="catatan_khusus" class="block font-medium">Catatan Khusus</Label>
-            <Textarea id="catatan_khusus" v-model="form.data.catatan_khusus"
-                class="w-full border rounded p-2"></Textarea>
-            <InputError :message="form.errors.catatan_khusus" />
-        </div>
-
-        <div>
-            <Label for="luas_bangunan_terpotong" class="block font-medium">Luas Bangunan Terpotong</Label>
-            <InputText id="luas_bangunan_terpotong" v-model.number="form.data.luas_bangunan_terpotong" type="number"
-                step="0.01" min="0" class="w-full border rounded p-2"
-                :invalid="!!form.errors.luas_bangunan_terpotong" />
-            <InputError :message="form.errors.luas_bangunan_terpotong" />
-        </div>
-
-        <div>
-            <Label for="luas_bangunan_imb" class="block font-medium">Luas Bangunan IMB</Label>
-            <InputText id="luas_bangunan_imb" v-model.number="form.data.luas_bangunan_imb" type="number" step="0.01"
-                min="0" class="w-full border rounded p-2" :invalid="!!form.errors.luas_bangunan_imb" />
-            <InputError :message="form.errors.luas_bangunan_imb" />
-        </div>
-
-        <div v-for="field in jsonFields" :key="field.key">
-            <Label :for="field.key" class="block font-medium">{{ field.label }}</Label>
-            <Select v-model="form.data[field.key]" :options="field.options" show-clear option-label="name"
-                option-value="id" filter :virtualScrollerOptions="{ itemSize: 38 }"
-                :placeholder="`Pilih ${field.label}`" class="w-full" :invalid="!!form.errors[field.key]" />
-            <InputError :message="form.errors[field.key]" />
-        </div>
-
-        <div>
-            <Label for="jumlah_lantai_rumah_tinggal" class="block font-medium">Jumlah Lantai Rumah Tinggal</Label>
-            <InputText id="jumlah_lantai_rumah_tinggal" v-model.number="form.data.jumlah_lantai_rumah_tinggal"
-                type="number" min="0" step="1" class="w-full border rounded p-2"
-                :invalid="!!form.errors.jumlah_lantai_rumah_tinggal" />
-            <InputError :message="form.errors.jumlah_lantai_rumah_tinggal" />
-        </div>
-
-        <div>
-            <Label for="penggunaan_bangunan" class="block font-medium">Penggunaan Bangunan</Label>
-            <InputText id="penggunaan_bangunan" v-model="form.data.penggunaan_bangunan" type="text" maxlength="100"
-                class="w-full border rounded p-2" :invalid="!!form.errors.penggunaan_bangunan" />
-            <InputError :message="form.errors.penggunaan_bangunan" />
-        </div>
-
-        <div>
-            <Label for="perlengkapan_bangunan" class="block font-medium">Perlengkapan Bangunan</Label>
-            <Textarea id="perlengkapan_bangunan" v-model="form.data.perlengkapan_bangunan" rows="4"
-                :invalid="!!form.errors.perlengkapan_bangunan" class="w-full border rounded p-2" />
-            <InputError :message="form.errors.perlengkapan_bangunan" />
-        </div>
-
-        <div>
-            <Label for="progres_pembangunan" class="block font-medium">Progres Pembangunan</Label>
-            <InputText id="progres_pembangunan" v-model.number="form.data.progres_pembangunan" type="number" min="0"
-                step="1" class="w-full border rounded p-2" :invalid="!!form.errors.progres_pembangunan" />
-            <InputError :message="form.errors.progres_pembangunan" />
-        </div>
-
         <div>
             <Label for="kondisi_bangunan" class="block font-medium">Kondisi Bangunan</Label>
-            <Textarea id="kondisi_bangunan" v-model="form.data.kondisi_bangunan" rows="3"
-                class="w-full border rounded p-2"></Textarea>
+            <Select v-model="form.data.kondisi_bangunan" :options="kondisiBangunanOptions" show-clear
+                option-label="name" option-value="id" filter :placeholder="`Pilih Kondisi Bangunan`" class="w-full"
+                :invalid="!!form.errors.kondisi_bangunan" />
             <InputError :message="form.errors.kondisi_bangunan" />
         </div>
 
-        <!-- status_data -->
         <div>
+            <Label for="row_jalan" class="block font-medium">Row Jalan (m)</Label>
+            <InputText id="row_jalan" v-model.number="form.data.row_jalan" type="number" min="0" step="0.1"
+                class="w-full border rounded p-2" :invalid="!!form.errors.row_jalan" />
+            <InputError :message="form.errors.row_jalan" />
+        </div>
+
+        <div>
+            <Label for="perkerasan_jalan" class="block font-medium">Perkerasan Jalan</Label>
+            <Select v-model="form.data.perkerasan_jalan" :options="perkerasanJalanOptions" show-clear
+                option-label="name" option-value="id" filter :placeholder="`Pilih Perkerasan Jalan`" class="w-full"
+                :invalid="!!form.errors.perkerasan_jalan" />
+            <InputError :message="form.errors.perkerasan_jalan" />
+        </div>
+
+        <div>
+            <Label for="posisi_aset" class="block font-medium">Posisi Aset</Label>
+            <Select v-model="form.data.posisi_aset" :options="posisiAsetOptions" show-clear option-label="name"
+                option-value="id" filter :placeholder="`Pilih Posisi Aset`" class="w-full"
+                :invalid="!!form.errors.posisi_aset" />
+            <InputError :message="form.errors.posisi_aset" />
+        </div>
+
+        <div>
+            <Label for="bentuk_tanah" class="block font-medium">Bentuk Tanah</Label>
+            <Select v-model="form.data.bentuk_tanah" :options="bentukTanahOptions" show-clear option-label="name"
+                option-value="id" filter :placeholder="`Pilih Bentuk Tanah`" class="w-full"
+                :invalid="!!form.errors.bentuk_tanah" />
+            <InputError :message="form.errors.bentuk_tanah" />
+        </div>
+
+        <div>
+            <Label for="lebar_muka" class="block font-medium">Lebar Muka (m)</Label>
+            <InputText id="lebar_muka" v-model.number="form.data.lebar_muka" type="number" min="0" step="0.1"
+                class="w-full border rounded p-2" :invalid="!!form.errors.lebar_muka" />
+            <InputError :message="form.errors.lebar_muka" />
+        </div>
+
+        <div>
+            <Label for="elevasi_terhadap_jalan" class="block font-medium">Elevasi terhadap jalan (m)</Label>
+            <InputText id="elevasi_terhadap_jalan" v-model.number="form.data.elevasi_terhadap_jalan" type="number"
+                step="0.1" class="w-full border rounded p-2" :invalid="!!form.errors.elevasi_terhadap_jalan" />
+            <InputError :message="form.errors.elevasi_terhadap_jalan" />
+        </div>
+
+        <div>
+            <Label for="topografi" class="block font-medium">Topografi</Label>
+            <Select v-model="form.data.topografi" :options="topografiOptions" show-clear option-label="name"
+                option-value="id" filter :placeholder="`Pilih Topografi`" class="w-full"
+                :invalid="!!form.errors.topografi" />
+            <InputError :message="form.errors.topografi" />
+        </div>
+
+        <div>
+            <Label for="orientasi" class="block font-medium">Orientasi</Label>
+            <Select v-model="form.data.orientasi" :options="orientasiOptions" show-clear option-label="name"
+                option-value="id" filter :placeholder="`Pilih Orientasi`" class="w-full"
+                :invalid="!!form.errors.orientasi" />
+            <InputError :message="form.errors.orientasi" />
+        </div>
+
+        <div>
+            <Label for="peruntukan" class="block font-medium">Peruntukan</Label>
+            <Select v-model="form.data.peruntukan" :options="peruntukanOptions" show-clear option-label="name"
+                option-value="id" filter :placeholder="`Pilih Peruntukan`" class="w-full"
+                :invalid="!!form.errors.peruntukan" />
+            <InputError :message="form.errors.peruntukan" />
+        </div>
+
+        <div>
+            <Label for="jarak_thd_pusat_kota" class="block font-medium">Jarak terhadap pusat kota</Label>
+            <InputText id="jarak_thd_pusat_kota" v-model="form.data.jarak_thd_pusat_kota"
+                class="w-full border rounded p-2" :invalid="!!form.errors.jarak_thd_pusat_kota" />
+            <InputError :message="form.errors.jarak_thd_pusat_kota" />
+        </div>
+
+        <div>
+            <Label for="aksesibilitas_lokasi" class="block font-medium">Aksesibilitas & Lokasi</Label>
+            <InputText id="aksesibilitas_lokasi" v-model="form.data.aksesibilitas_lokasi"
+                class="w-full border rounded p-2" :invalid="!!form.errors.aksesibilitas_lokasi" />
+            <InputError :message="form.errors.aksesibilitas_lokasi" />
+        </div>
+
+        <div>
+            <Label for="kondisi_lingkungan" class="block font-medium">Kondisi Lingkungan</Label>
+            <InputText id="kondisi_lingkungan" v-model="form.data.kondisi_lingkungan" class="w-full border rounded p-2"
+                :invalid="!!form.errors.kondisi_lingkungan" />
+            <InputError :message="form.errors.kondisi_lingkungan" />
+        </div>
+
+        <div>
+            <Label for="syarat_pembiayaan" class="block font-medium">Syarat Pembiayaan</Label>
+            <InputText id="syarat_pembiayaan" v-model="form.data.syarat_pembiayaan" class="w-full border rounded p-2"
+                :invalid="!!form.errors.syarat_pembiayaan" />
+            <InputError :message="form.errors.syarat_pembiayaan" />
+        </div>
+
+        <div>
+            <Label for="kondisi_penjualan" class="block font-medium">Kondisi Penjualan</Label>
+            <InputText id="kondisi_penjualan" v-model="form.data.kondisi_penjualan" class="w-full border rounded p-2"
+                :invalid="!!form.errors.kondisi_penjualan" />
+            <InputError :message="form.errors.kondisi_penjualan" />
+        </div>
+
+        <div>
+            <Label for="pengeluaran_setelah_pembelian" class="block font-medium">Pengeluaran Yang Dilakukan Segera
+                Setelah Pembelian</Label>
+            <InputText id="pengeluaran_setelah_pembelian" v-model="form.data.pengeluaran_setelah_pembelian"
+                class="w-full border rounded p-2" :invalid="!!form.errors.pengeluaran_setelah_pembelian" />
+            <InputError :message="form.errors.pengeluaran_setelah_pembelian" />
+        </div>
+
+        <div>
+            <Label for="kondisi_pasar" class="block font-medium">Kondisi Pasar</Label>
+            <InputText id="kondisi_pasar" v-model="form.data.kondisi_pasar" class="w-full border rounded p-2"
+                :invalid="!!form.errors.kondisi_pasar" />
+            <InputError :message="form.errors.kondisi_pasar" />
+        </div>
+
+        <div>
+            <Label for="status_data" class="block font-medium">Status Data</Label>
             <Select v-model="form.data.status_data" :options="statusOptions" option-label="name" option-value="id"
                 show-clear filter placeholder="Select a status" class="w-full" :invalid="!!form.errors.status_data" />
             <InputError :message="form.errors.status_data" />
