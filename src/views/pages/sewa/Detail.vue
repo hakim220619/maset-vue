@@ -1,7 +1,7 @@
 <script setup>
 import { AuthApi } from '@/service/Api';
 import { Helper } from '@/service/Helper';
-import { onBeforeMount, onMounted, ref } from 'vue';
+import { computed, onBeforeMount, onMounted, ref } from 'vue';
 import { useRoute } from 'vue-router';
 
 const data = ref({
@@ -29,8 +29,23 @@ const informasiUmumFields = ref([]);
 const dataPropertiFields = ref([]);
 const dataUnitPerbandinganField = ref([]);
 
+const route = useRoute();
+const sewaId = route.params.id;
+
+// Computed properties to check if data is loaded
+const isElemenPerbandinganLoaded = computed(() => {
+    return data.value.elemen_perbandingan && 
+           data.value.elemen_perbandingan.length > 0 && 
+           data.value.elemen_perbandingan[0]?.items?.length > 0;
+});
+
+const isKarakterFisikLoaded = computed(() => {
+    return data.value.karakter_fisik && 
+           data.value.karakter_fisik.length > 0 && 
+           data.value.karakter_fisik[0]?.items?.length > 0;
+});
+
 async function onPersenInput(raw_persen, label, pembanding_id, type = 'elemen_perbandingan') {
-    const sewaId = route.params.id;
     try {
         const url = type === 'elemen_perbandingan' ? `/sewa/${sewaId}/penyesuaian/elemen-perbandingan` : `/sewa/${sewaId}/penyesuaian/karakter-fisik`;
         await AuthApi.client().put(url, {
@@ -49,56 +64,53 @@ function getValue(obj, key) {
     return obj?.[key] ?? '-'
 }
 
-
-const route = useRoute();
-
 async function loadSewaDetail(id) {
-    const res = await AuthApi.client().get(`/sewa/${id}`)
+    try {
+        const res = await AuthApi.client().get(`/sewa/${id}`)
 
-    if (res.data.success) {
-        const resData = res.data.data
-        console.log(resData.conclusions)
+        if (res.data.success) {
+            console.info(res.data)
+            const resData = res.data.data
 
-        data.value = {
-            object: [
-                1
-            ],
-            pembanding: resData.pembandings || [],
-            pembandings: resData.pembandings || [],
-            tanahs: resData.tanahs || [],
-            elemen_perbandingan: resData.elemen_perbandingan || [],
-            karakter_fisik: resData.karakter_fisik || [],
-            summary: resData.summary || [],
-            conclusions: resData.conclusions || {},
-            final_summary: resData.final_summary || {}
+            data.value = {
+                object: [
+                    1
+                ],
+                pembanding: resData.pembandings || [],
+                pembandings: resData.pembandings || [],
+                tanahs: resData.tanahs || [],
+                elemen_perbandingan: resData.elemen_perbandingan || [],
+                karakter_fisik: resData.karakter_fisik || [],
+                summary: resData.summary || [],
+                conclusions: resData.conclusions || {},
+                final_summary: resData.final_summary || {}
+            }
         }
+    } catch (error) {
+        console.error('Error loading sewa detail:', error);
+        // Handle error appropriately
     }
-}
-
-async function loadElementPerbandingan(id) {
-    const res = await AuthApi.client().get(`/findElemenPerbandingan/${id}`)
-
-    const resData = res.data
-    console.log(resData)
-    data.value = {
-        ...data.value,
-        elemen_perbandingan: resData || [],
-    }
-    console.log("M", data.value.elemen_perbandingan);
 }
 
 onBeforeMount(async () => {
-    if (route.params.id) {
-        const dataUnitPerbandingan = await Helper.getDataById('getDataUnitPerbandingan', route.params.id);
-        const dataInformasiUmum = await Helper.getDataById('getInformasiUmum', route.params.id);
-        const dataProperti = await Helper.getDataById('getDataProperti', route.params.id);
-        informasiUmumFields.value = dataInformasiUmum;
-        dataPropertiFields.value = dataProperti;
-        dataUnitPerbandinganField.value = dataUnitPerbandingan;
+    if (sewaId) {
+        try {
+            const dataUnitPerbandingan = await Helper.getDataById('getDataUnitPerbandingan', sewaId);
+            const dataInformasiUmum = await Helper.getDataById('getInformasiUmum', sewaId);
+            const dataProperti = await Helper.getDataById('getDataProperti', sewaId);
+            informasiUmumFields.value = dataInformasiUmum;
+            dataPropertiFields.value = dataProperti;
+            dataUnitPerbandinganField.value = dataUnitPerbandingan;
+        } catch (error) {
+            console.error('Error loading data:', error);
+            // Handle error appropriately - you might want to show a toast or redirect
+        }
     }
 });
-onMounted(() => {
-    loadSewaDetail(route.params.id)
+onMounted(async () => {
+    if (sewaId) {
+        await loadSewaDetail(sewaId);
+    }
 })
 
 </script>
@@ -210,18 +222,19 @@ onMounted(() => {
 
 
                 <!-- Table Header -->
-                <tr class="bg-gray-200 dark:bg-gray-700 text-center text-sm">
+                <tr v-if="isElemenPerbandinganLoaded" 
+                    class="bg-gray-200 dark:bg-gray-700 text-center text-sm">
                     <th class="p-2 border dark:border-gray-600 dark:text-white">ELEMEN PERBANDINGAN</th>
 
                     <!-- Dynamic Object Headers (2 columns each) -->
-                    <template v-for="(_, objIdx) in data.elemen_perbandingan[0].items[0].objects"
+                    <template v-for="(_, objIdx) in data.elemen_perbandingan?.[0]?.items?.[0]?.objects || []"
                         :key="'obj-head-' + objIdx">
                         <th class="p-2 border dark:border-gray-600 dark:text-white">Keterangan</th>
                         <th class="p-2 border dark:border-gray-600 dark:text-white" colspan="2">Deskripsi</th>
                     </template>
 
                     <!-- Dynamic Pembanding Headers (3 columns each) -->
-                    <template v-for="(_, pbIdx) in data.elemen_perbandingan[0].items[0].pembanding"
+                    <template v-for="(_, pbIdx) in data.elemen_perbandingan?.[0]?.items?.[0]?.pembanding || []"
                         :key="'pb-head-' + pbIdx">
                         <th class="p-2 border dark:border-gray-600 dark:text-white">Deskripsi</th>
                         <th class="p-2 border dark:border-gray-600 dark:text-white">(%)</th>
@@ -233,7 +246,7 @@ onMounted(() => {
                 <!-- Table Body -->
                 <template v-for="group in data.elemen_perbandingan" :key="group.kategori">
                     <tr class="bg-gray-200 dark:bg-gray-700 font-semibold">
-                        <td :colspan="4 + group.items[0].objects.length * 3 + group.items[0].pembanding.length * 3"
+                        <td :colspan="4 + (group.items?.[0]?.objects?.length || 0) * 3 + (group.items?.[0]?.pembanding?.length || 0) * 3"
                             class="p-2 border dark:border-gray-600 dark:text-white" colspan="2">
                             {{ group.kategori }}
                         </td>
@@ -266,18 +279,19 @@ onMounted(() => {
                 </template>
 
                 <!-- Table Header -->
-                <tr class="bg-gray-200 dark:bg-gray-700 text-center text-sm">
+                <tr v-if="isKarakterFisikLoaded" 
+                    class="bg-gray-200 dark:bg-gray-700 text-center text-sm">
                     <th class="p-2 border dark:border-gray-600 dark:text-white">KARAKTER FISIK</th>
 
                     <!-- Dynamic Object Headers (2 columns each) -->
-                    <template v-for="(_, objIdx) in data.karakter_fisik[0].items[0].objects"
+                    <template v-for="(_, objIdx) in data.karakter_fisik?.[0]?.items?.[0]?.objects || []"
                         :key="'obj-head-' + objIdx">
                         <th class="p-2 border dark:border-gray-600 dark:text-white">Keterangan</th>
                         <th class="p-2 border dark:border-gray-600 dark:text-white" colspan="2">Deskripsi</th>
                     </template>
 
                     <!-- Dynamic Pembanding Headers (3 columns each) -->
-                    <template v-for="(_, pbIdx) in data.karakter_fisik[0].items[0].pembanding"
+                    <template v-for="(_, pbIdx) in data.karakter_fisik?.[0]?.items?.[0]?.pembanding || []"
                         :key="'pb-head-' + pbIdx">
                         <th class="p-2 border dark:border-gray-600 dark:text-white">Deskripsi</th>
                         <th class="p-2 border dark:border-gray-600 dark:text-white">(%)</th>
@@ -289,7 +303,7 @@ onMounted(() => {
                 <!-- Table Body -->
                 <template v-for="k in data.karakter_fisik" :key="k.kategori">
                     <tr class="bg-gray-200 dark:bg-gray-700 font-semibold">
-                        <td :colspan="4 + k.items[0].objects.length * 3 + k.items[0].pembanding.length * 3"
+                        <td :colspan="4 + (k.items?.[0]?.objects?.length || 0) * 3 + (k.items?.[0]?.pembanding?.length || 0) * 3"
                             class="p-2 border dark:border-gray-600 dark:text-white" colspan="2">
                             {{ k.kategori }}
                         </td>
@@ -392,7 +406,7 @@ onMounted(() => {
                         Kesimpulan Nilai
                     </th>
                 </tr>
-                <tr class="bg-gray-100 text-center dark:bg-gray-800 text-left">
+                <tr class="bg-gray-100 dark:bg-gray-800 text-left">
                     <th class="p-2 border dark:border-gray-600 dark:text-white">Data Pembanding</th>
                     <th class="p-2 border dark:border-gray-600 dark:text-white">Bobot</th>
                     <th class="p-2 border dark:border-gray-600 dark:text-white">Nilai</th>

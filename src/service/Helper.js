@@ -1,7 +1,6 @@
 import { useTitle } from '@vueuse/core';
 import collect from 'collect.js';
 import _ from 'lodash';
-import { useRouter } from 'vue-router';
 import { AuthApi } from './Api';
 
 
@@ -137,7 +136,6 @@ export const Helper = {
         return params;
     },
     async getDataById(endpoint, id) {
-        const router = useRouter();
         try {
             const response = await AuthApi.client().get(`${endpoint}/${id}`);
 
@@ -145,9 +143,9 @@ export const Helper = {
                 return response.data.data; // Return the first data element if success
             }
         } catch (error) {
-            if ([400, 404].includes(error.status)) {
-                router.push({ name: 'notfound' });
-            }
+            console.error('Error fetching data:', error);
+            // Let the calling component handle the error instead of router navigation
+            throw error;
         }
     },
     async getAllData(endpoint) {
