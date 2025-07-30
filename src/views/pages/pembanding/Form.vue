@@ -10,6 +10,7 @@ import { z } from 'zod';
 import { storeSchema } from './schema.js';
 
 import InputError from '@/components/InputError.vue';
+import MapPicker from '@/components/MapPicker.vue';
 
 // Import PrimeVue components
 
@@ -93,15 +94,32 @@ const save = async () => {
 
         const formData = new FormData();
         for (const key in form.value.data) {
-            formData.append(key, form.value.data[key]);
+            if (key !== 'foto') {
+                // Tangani khusus koordinat jika perlu dikirim sebagai string
+                if (key === 'koordinat' && typeof form.value.data[key] === 'object' && form.value.data[key] !== null) {
+                    formData.append(key, JSON.stringify(form.value.data[key]));
+                } else {
+                    // Untuk field lain, append nilai normalnya
+                    // Pastikan nilai tidak undefined/null jika tidak diinginkan
+                    const value = form.value.data[key];
+                    formData.append(key, (value !== null && value !== undefined) ? value : '');
+                }
+            }
         }
+
+        const validPhotos = form.value.data.foto.filter(photo => photo.file && photo.file instanceof File);
+        const photoCaptions = form.value.data.foto.map(photo => photo.keterangan || '');
+
+        validPhotos.forEach(photo => {
+            formData.append('foto', photo.file); // 'foto' adalah nama field yang diharapkan oleh multer
+        });
 
         const response = await AuthApi.client()({
             url,
             method: route.params.id ? 'put' : 'post',
             data: formData,
             headers: {
-                'Content-Type': 'multipart/form-data'
+                'Content-Type': 'multipart/form-data' // Biarkan browser set Content-Type dengan boundary
             }
         });
 
@@ -111,23 +129,41 @@ const save = async () => {
                 text: 'Data Pembanding berhasil disimpan',
                 icon: 'success'
             });
-            router.push({ name: 'Pembanding List' });
-        }
-    } catch (error) {
-        if (error instanceof z.ZodError) {
-            for (const err of error.errors) {
-                form.value.errors[err.path] = err.message;
-            }
+            router.push({ name: 'Pembanding List' }); // Pastikan nama route ini benar
         } else {
+            // Tangani error dari API meskipun status HTTP 200
             swal.fire({
                 title: 'Error',
-                text: 'Gagal menyimpan data Pembanding',
+                text: response.data.message || 'Gagal menyimpan data Pembanding',
                 icon: 'error'
             });
         }
+    } catch (error) {
+        console.error("Error saving data:", error); // Tambahkan logging
+        if (error instanceof z.ZodError) {
+            // Reset errors sebelumnya
+            form.value.errors = {};
+            for (const err of error.errors) {
+                // Pastikan path-nya sesuai dengan key di form.data
+                const path = err.path.join('.'); // Atau sesuaikan jika path kompleks
+                form.value.errors[path] = err.message;
+            }
+            swal.fire({
+                title: 'Validasi Gagal',
+                text: 'Silakan periksa kembali data yang dimasukkan.',
+                icon: 'warning'
+            });
+        } else {
+            // Error lainnya (network, server, dll)
+            swal.fire({
+                title: 'Error',
+                text: error.response?.data?.message || 'Gagal menyimpan data Pembanding. Silakan coba lagi.',
+                icon: 'error'
+            });
+        }
+    } finally {
+        form.value.loading = false;
     }
-
-    form.value.loading = false;
 };
 
 // Initialize with one empty photo if array is empty
@@ -157,78 +193,78 @@ function removePhoto(index) {
 }
 
 const statusOptions = [
-    { name: 'Draft', id: 'draft' },
-    { name: 'Publish', id: 'publish' }
+    { name: 'draft', id: 'draft', value: 'Draft', label: 'Draft' },
+    { name: 'publish', id: 'publish', value: 'Publish', label: 'Publish' }
 ];
 
 const jenisDataOptions = [
-    { name: 'Penawaran', id: 'penawaran' },
-    { name: 'Transaksi', id: 'transaksi' }
+    { name: 'penawaran', id: 'penawaran', value: 'Penawaran', label: 'Penawaran' },
+    { name: 'transaksi', id: 'transaksi', value: 'Transaksi', label: 'Transaksi' }
 ];
 
 // New options for dropdowns
 const kategoriSumberInformasiOptions = [
-    { name: 'Pemilik', id: 'pemilik' },
-    { name: 'Perantara', id: 'perantara' },
-    { name: 'Agen', id: 'agen' }
+    { name: 'pemilik', id: 'pemilik', value: 'Pemilik', label: 'Pemilik' },
+    { name: 'perantara', id: 'perantara', value: 'Perantara', label: 'Perantara' },
+    { name: 'agen', id: 'agen', value: 'Agen', label: 'Agen' }
 ];
 
 const tipeBangunanOptions = [
-    { name: 'Bertingkat', id: 'bertingkat' },
-    { name: 'Tidak bertingkat', id: 'tidak_bertingkat' }
+    { name: 'bertingkat', id: 'bertingkat', value: 'Bertingkat', label: 'Bertingkat' },
+    { name: 'tidak_bertingkat', id: 'tidak_bertingkat', value: 'Tidak bertingkat', label: 'Tidak bertingkat' }
 ];
 
 const kondisiBangunanOptions = [
-    { name: 'Terawat', id: 'terawat' },
-    { name: 'Tidak terawat', id: 'tidak_terawat' }
+    { name: 'terawat', id: 'terawat', value: 'Terawat', label: 'Terawat' },
+    { name: 'tidak_terawat', id: 'tidak_terawat', value: 'Tidak terawat', label: 'Tidak terawat' }
 ];
 
 const perkerasanJalanOptions = [
-    { name: 'Aspal', id: 'aspal' },
-    { name: 'Beton', id: 'beton' },
-    { name: 'Paving block', id: 'paving_block' },
-    { name: 'Tanah', id: 'tanah' },
-    { name: 'Sirtu', id: 'sirtu' }
+    { name: 'aspal', id: 'aspal', value: 'Aspal', label: 'Aspal' },
+    { name: 'beton', id: 'beton', value: 'Beton', label: 'Beton' },
+    { name: 'paving_block', id: 'paving_block', value: 'Paving block', label: 'Paving block' },
+    { name: 'tanah', id: 'tanah', value: 'Tanah', label: 'Tanah' },
+    { name: 'sirtu', id: 'sirtu', value: 'Sirtu', label: 'Sirtu' }
 ];
 
 const posisiAsetOptions = [
-    { name: 'Hook', id: 'hook' },
-    { name: 'Interior', id: 'interior' },
-    { name: 'Tusuk sate', id: 'tusuk_sate' },
-    { name: 'Sudut', id: 'sudut' }
+    { name: 'hook', id: 'hook', value: 'Hook', label: 'Hook' },
+    { name: 'interior', id: 'interior', value: 'Interior', label: 'Interior' },
+    { name: 'tusuk_sate', id: 'tusuk_sate', value: 'Tusuk sate', label: 'Tusuk sate' },
+    { name: 'sudut', id: 'sudut', value: 'Sudut', label: 'Sudut' }
 ];
 
 const bentukTanahOptions = [
-    { name: 'Beraturan', id: 'beraturan' },
-    { name: 'Tidak beraturan', id: 'tidak_beraturan' },
-    { name: 'Letter L', id: 'letter_l' },
-    { name: 'Trapesium', id: 'trapesium' }
+    { name: 'beraturan', id: 'beraturan', value: 'Beraturan', label: 'Beraturan' },
+    { name: 'tidak_beraturan', id: 'tidak_beraturan', value: 'Tidak beraturan', label: 'Tidak beraturan' },
+    { name: 'letter_l', id: 'letter_l', value: 'Letter L', label: 'Letter L' },
+    { name: 'trapesium', id: 'trapesium', value: 'Trapesium', label: 'Trapesium' }
 ];
 
 const topografiOptions = [
-    { name: 'Datar', id: 'datar' },
-    { name: 'Bergelombang', id: 'bergelombang' },
-    { name: 'Bukit', id: 'bukit' },
-    { name: 'Jurang', id: 'jurang' },
-    { name: 'Kombinasi', id: 'kombinasi' }
+    { name: 'datar', id: 'datar', value: 'Datar', label: 'Datar' },
+    { name: 'bergelombang', id: 'bergelombang', value: 'Bergelombang', label: 'Bergelombang' },
+    { name: 'bukit', id: 'bukit', value: 'Bukit', label: 'Bukit' },
+    { name: 'jurang', id: 'jurang', value: 'Jurang', label: 'Jurang' },
+    { name: 'kombinasi', id: 'kombinasi', value: 'Kombinasi', label: 'Kombinasi' }
 ];
 
 const orientasiOptions = [
-    { name: 'Utara', id: 'utara' },
-    { name: 'Selatan', id: 'selatan' },
-    { name: 'Barat', id: 'barat' },
-    { name: 'Timur', id: 'timur' }
+    { name: 'utara', id: 'utara', value: 'Utara', label: 'Utara' },
+    { name: 'selatan', id: 'selatan', value: 'Selatan', label: 'Selatan' },
+    { name: 'barat', id: 'barat', value: 'Barat', label: 'Barat' },
+    { name: 'timur', id: 'timur', value: 'Timur', label: 'Timur' }
 ];
 
 const peruntukanOptions = [
-    { name: 'Permukiman', id: 'permukiman' },
-    { name: 'Perkantoran', id: 'perkantoran' },
-    { name: 'Perdagangan & Jasa', id: 'perdagangan_jasa' },
-    { name: 'Komersial', id: 'komersial' },
-    { name: 'Pertanian', id: 'pertanian' },
-    { name: 'Perkebunan', id: 'perkebunan' },
-    { name: 'Industri', id: 'industri' },
-    { name: 'Campuran', id: 'campuran' }
+    { name: 'permukiman', id: 'permukiman', value: 'Permukiman', label: 'Permukiman' },
+    { name: 'perkantoran', id: 'perkantoran', value: 'Perkantoran', label: 'Perkantoran' },
+    { name: 'perdagangan_jasa', id: 'perdagangan_jasa', value: 'Perdagangan & Jasa', label: 'Perdagangan & Jasa' },
+    { name: 'komersial', id: 'komersial', value: 'Komersial', label: 'Komersial' },
+    { name: 'pertanian', id: 'pertanian', value: 'Pertanian', label: 'Pertanian' },
+    { name: 'perkebunan', id: 'perkebunan', value: 'Perkebunan', label: 'Perkebunan' },
+    { name: 'industri', id: 'industri', value: 'Industri', label: 'Industri' },
+    { name: 'campuran', id: 'campuran', value: 'Campuran', label: 'Campuran' }
 ];
 
 onBeforeMount(async () => {
@@ -311,8 +347,9 @@ const goBack = () => {
         <div>
             <Label for="kategori_sumber_informasi" class="block font-medium">Kategori Sumber Informasi</Label>
             <Select v-model="form.data.kategori_sumber_informasi" :options="kategoriSumberInformasiOptions" show-clear
-                option-label="name" option-value="id" filter :placeholder="`Pilih Kategori Sumber Informasi`"
-                class="w-full" :invalid="!!form.errors.kategori_sumber_informasi" />
+                option-label="label" option-value="value" option-id="id" option-name="name" filter
+                :placeholder="`Pilih Kategori Sumber Informasi`" class="w-full"
+                :invalid="!!form.errors.kategori_sumber_informasi" />
             <InputError :message="form.errors.kategori_sumber_informasi" />
         </div>
 
@@ -325,9 +362,9 @@ const goBack = () => {
 
         <div>
             <Label for="jenis_data" class="block font-medium">Jenis Data</Label>
-            <Select v-model="form.data.jenis_data" :options="jenisDataOptions" show-clear option-label="name"
-                option-value="id" filter :virtualScrollerOptions="{ itemSize: 38 }" :placeholder="`Pilih Jenis Data`"
-                class="w-full" :invalid="!!form.errors.jenis_data" />
+            <Select v-model="form.data.jenis_data" :options="jenisDataOptions" show-clear option-label="label"
+                option-name="name" option-id="id" option-value="value" filter :virtualScrollerOptions="{ itemSize: 38 }"
+                :placeholder="`Pilih Jenis Data`" class="w-full" :invalid="!!form.errors.jenis_data" />
             <InputError :message="form.errors.jenis_data" />
         </div>
 
@@ -360,9 +397,12 @@ const goBack = () => {
         </div>
 
         <div>
-            <Label for="koordinat" class="block font-medium">Koordinat</Label>
-            <InputText id="koordinat" v-model="form.data.koordinat" class="w-full border rounded p-2"
-                :invalid="!!form.errors.koordinat" />
+            <Label for="koordinat" class="block font-medium">Koordinat & Alamat Aset</Label>
+            <MapPicker v-model="form.data.koordinat" @address="addr => form.data.alamat_aset = addr" />
+            <small class="text-sm text-gray-500">
+                Klik pada peta untuk memilih titik. Koordinat dan alamat otomatis terisi,
+                tetapi alamat bisa Anda edit manual di bawah jika perlu.
+            </small>
             <InputError :message="form.errors.koordinat" />
         </div>
 
@@ -405,9 +445,9 @@ const goBack = () => {
 
         <div>
             <Label for="tipe_bangunan" class="block font-medium">Tipe Bangunan</Label>
-            <Select v-model="form.data.tipe_bangunan" :options="tipeBangunanOptions" show-clear option-label="name"
-                option-value="id" filter :placeholder="`Pilih Tipe Bangunan`" class="w-full"
-                :invalid="!!form.errors.tipe_bangunan" />
+            <Select v-model="form.data.tipe_bangunan" :options="tipeBangunanOptions" show-clear option-label="label"
+                option-value="value" option-name="name" option-id="id" filter :placeholder="`Pilih Tipe Bangunan`"
+                class="w-full" :invalid="!!form.errors.tipe_bangunan" />
             <InputError :message="form.errors.tipe_bangunan" />
         </div>
 
@@ -421,8 +461,8 @@ const goBack = () => {
         <div>
             <Label for="kondisi_bangunan" class="block font-medium">Kondisi Bangunan</Label>
             <Select v-model="form.data.kondisi_bangunan" :options="kondisiBangunanOptions" show-clear
-                option-label="name" option-value="id" filter :placeholder="`Pilih Kondisi Bangunan`" class="w-full"
-                :invalid="!!form.errors.kondisi_bangunan" />
+                option-label="label" option-value="value" option-name="name" option-id="id" filter
+                :placeholder="`Pilih Kondisi Bangunan`" class="w-full" :invalid="!!form.errors.kondisi_bangunan" />
             <InputError :message="form.errors.kondisi_bangunan" />
         </div>
 
@@ -436,24 +476,24 @@ const goBack = () => {
         <div>
             <Label for="perkerasan_jalan" class="block font-medium">Perkerasan Jalan</Label>
             <Select v-model="form.data.perkerasan_jalan" :options="perkerasanJalanOptions" show-clear
-                option-label="name" option-value="id" filter :placeholder="`Pilih Perkerasan Jalan`" class="w-full"
-                :invalid="!!form.errors.perkerasan_jalan" />
+                option-label="label" option-value="value" option-name="name" option-id="id" filter
+                :placeholder="`Pilih Perkerasan Jalan`" class="w-full" :invalid="!!form.errors.perkerasan_jalan" />
             <InputError :message="form.errors.perkerasan_jalan" />
         </div>
 
         <div>
             <Label for="posisi_aset" class="block font-medium">Posisi Aset</Label>
-            <Select v-model="form.data.posisi_aset" :options="posisiAsetOptions" show-clear option-label="name"
-                option-value="id" filter :placeholder="`Pilih Posisi Aset`" class="w-full"
-                :invalid="!!form.errors.posisi_aset" />
+            <Select v-model="form.data.posisi_aset" :options="posisiAsetOptions" show-clear option-label="label"
+                option-value="value" option-name="name" option-id="id" filter :placeholder="`Pilih Posisi Aset`"
+                class="w-full" :invalid="!!form.errors.posisi_aset" />
             <InputError :message="form.errors.posisi_aset" />
         </div>
 
         <div>
             <Label for="bentuk_tanah" class="block font-medium">Bentuk Tanah</Label>
-            <Select v-model="form.data.bentuk_tanah" :options="bentukTanahOptions" show-clear option-label="name"
-                option-value="id" filter :placeholder="`Pilih Bentuk Tanah`" class="w-full"
-                :invalid="!!form.errors.bentuk_tanah" />
+            <Select v-model="form.data.bentuk_tanah" :options="bentukTanahOptions" show-clear option-label="label"
+                option-value="value" option-name="name" option-id="id" filter :placeholder="`Pilih Bentuk Tanah`"
+                class="w-full" :invalid="!!form.errors.bentuk_tanah" />
             <InputError :message="form.errors.bentuk_tanah" />
         </div>
 
@@ -473,25 +513,25 @@ const goBack = () => {
 
         <div>
             <Label for="topografi" class="block font-medium">Topografi</Label>
-            <Select v-model="form.data.topografi" :options="topografiOptions" show-clear option-label="name"
-                option-value="id" filter :placeholder="`Pilih Topografi`" class="w-full"
-                :invalid="!!form.errors.topografi" />
+            <Select v-model="form.data.topografi" :options="topografiOptions" show-clear option-label="label"
+                option-value="value" option-name="name" option-id="id" filter :placeholder="`Pilih Topografi`"
+                class="w-full" :invalid="!!form.errors.topografi" />
             <InputError :message="form.errors.topografi" />
         </div>
 
         <div>
             <Label for="orientasi" class="block font-medium">Orientasi</Label>
-            <Select v-model="form.data.orientasi" :options="orientasiOptions" show-clear option-label="name"
-                option-value="id" filter :placeholder="`Pilih Orientasi`" class="w-full"
-                :invalid="!!form.errors.orientasi" />
+            <Select v-model="form.data.orientasi" :options="orientasiOptions" show-clear option-label="label"
+                option-value="value" option-name="name" option-id="id" filter :placeholder="`Pilih Orientasi`"
+                class="w-full" :invalid="!!form.errors.orientasi" />
             <InputError :message="form.errors.orientasi" />
         </div>
 
         <div>
             <Label for="peruntukan" class="block font-medium">Peruntukan</Label>
-            <Select v-model="form.data.peruntukan" :options="peruntukanOptions" show-clear option-label="name"
-                option-value="id" filter :placeholder="`Pilih Peruntukan`" class="w-full"
-                :invalid="!!form.errors.peruntukan" />
+            <Select v-model="form.data.peruntukan" :options="peruntukanOptions" show-clear option-label="label"
+                option-id="id" option-name="name" option-value="value" filter :placeholder="`Pilih Peruntukan`"
+                class="w-full" :invalid="!!form.errors.peruntukan" />
             <InputError :message="form.errors.peruntukan" />
         </div>
 
@@ -547,8 +587,9 @@ const goBack = () => {
 
         <div>
             <Label for="status_data" class="block font-medium">Status Data</Label>
-            <Select v-model="form.data.status_data" :options="statusOptions" option-label="name" option-value="id"
-                show-clear filter placeholder="Select a status" class="w-full" :invalid="!!form.errors.status_data" />
+            <Select v-model="form.data.status_data" :options="statusOptions" option-label="label" option-value="value"
+                option-name="name" option-id="id" show-clear filter placeholder="Select a status" class="w-full"
+                :invalid="!!form.errors.status_data" />
             <InputError :message="form.errors.status_data" />
         </div>
 

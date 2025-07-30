@@ -26,7 +26,7 @@ const filters = ref({
 const search = ref({
     judul_penilaian: ''
 });
-
+const baseUrl = import.meta.env.VITE_API_URL;
 async function getPembandingData() {
     isFiltering.value = true;
     const params = Helper.formatSearchParams(search.value);
@@ -151,8 +151,23 @@ onMounted(() => {
 
                 <Column field="foto" header="Foto" style="min-width: 14rem">
                     <template #body="{ data }">
-                        <img :src="data.foto" alt="Foto Properti" style="max-width: 100px; max-height: 100px"
-                            v-if="data.foto" />
+                        <div v-if="data.foto">
+                            <template v-if="typeof data.foto === 'string'">
+                                <template v-if="data.foto.startsWith('[') || data.foto.startsWith('{')">
+                                    <img v-for="(foto, index) in JSON.parse(data.foto)" :key="index"
+                                        :src="`${baseUrl}/${foto.path}`" alt="Foto Properti"
+                                        style="max-width: 100px; max-height: 100px" />
+                                </template>
+                                <template v-else>
+                                    <img :src="`${baseUrl}/${data.foto}`" alt="Foto Properti"
+                                        style="max-width: 100px; max-height: 100px" />
+                                </template>
+                            </template>
+                            <template v-else>
+                                <img v-for="(foto, index) in data.foto" :key="index" :src="`${baseUrl}${foto.path}`"
+                                    alt="Foto Properti" style="max-width: 100px; max-height: 100px" />
+                            </template>
+                        </div>
                         <span v-else>Tidak ada foto</span>
                     </template>
                 </Column>
@@ -285,7 +300,7 @@ onMounted(() => {
 
                 <Column field="jarak_thd_pusat_kota" sortable header="Jarak ke Pusat Kota" style="min-width: 14rem">
                     <template #body="{ data }">{{ data.jarak_thd_pusat_kota ? data.jarak_thd_pusat_kota + ' km' : '-'
-                        }}</template>
+                    }}</template>
                 </Column>
 
                 <Column field="aksesibilitas_n_lokasi" sortable header="Aksesibilitas & Lokasi"
