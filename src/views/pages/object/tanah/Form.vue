@@ -32,6 +32,7 @@ const form = ref({
         koordinat: '',
         hak_kepemilikan: '',
         luas_tanah_m2: '',
+        luas_bangunan_m2: '',
         row_jalan_m: '',
         perkerasan_jalan: '',
         posisi_aset: '',
@@ -97,7 +98,7 @@ const loadDropdownOptions = () => {
 };
 
 // Field helpers
-const isNumberField = (key) => ['luas_tanah_m2', 'row_jalan_m', 'lebar_muka_m', 'elevasi_terhadap_jalan_m'].includes(key);
+const isNumberField = (key) => ['luas_tanah_m2', 'luas_bangunan_m2', 'row_jalan_m', 'lebar_muka_m', 'elevasi_terhadap_jalan_m'].includes(key);
 
 const isDateField = (key) => ['tanggal_inspeksi', 'tanggal_penilaian'].includes(key);
 
