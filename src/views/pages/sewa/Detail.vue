@@ -34,15 +34,15 @@ const sewaId = route.params.id;
 
 // Computed properties to check if data is loaded
 const isElemenPerbandinganLoaded = computed(() => {
-    return data.value.elemen_perbandingan && 
-           data.value.elemen_perbandingan.length > 0 && 
-           data.value.elemen_perbandingan[0]?.items?.length > 0;
+    return data.value.elemen_perbandingan &&
+        data.value.elemen_perbandingan.length > 0 &&
+        data.value.elemen_perbandingan[0]?.items?.length > 0;
 });
 
 const isKarakterFisikLoaded = computed(() => {
-    return data.value.karakter_fisik && 
-           data.value.karakter_fisik.length > 0 && 
-           data.value.karakter_fisik[0]?.items?.length > 0;
+    return data.value.karakter_fisik &&
+        data.value.karakter_fisik.length > 0 &&
+        data.value.karakter_fisik[0]?.items?.length > 0;
 });
 
 async function onPersenInput(raw_persen, label, pembanding_id, type = 'elemen_perbandingan') {
@@ -222,8 +222,7 @@ onMounted(async () => {
 
 
                 <!-- Table Header -->
-                <tr v-if="isElemenPerbandinganLoaded" 
-                    class="bg-gray-200 dark:bg-gray-700 text-center text-sm">
+                <tr v-if="isElemenPerbandinganLoaded" class="bg-gray-200 dark:bg-gray-700 text-center text-sm">
                     <th class="p-2 border dark:border-gray-600 dark:text-white">ELEMEN PERBANDINGAN</th>
 
                     <!-- Dynamic Object Headers (2 columns each) -->
@@ -238,7 +237,7 @@ onMounted(async () => {
                         :key="'pb-head-' + pbIdx">
                         <th class="p-2 border dark:border-gray-600 dark:text-white">Deskripsi</th>
                         <th class="p-2 border dark:border-gray-600 dark:text-white">(%)</th>
-                        <th class="p-2 border dark:border-gray-600 dark:text-white">RAW</th>
+                        <th class="p-2 border dark:border-gray-600 dark:text-white ">RAW</th>
                         <th class="p-2 border dark:border-gray-600 dark:text-white">+/- Penyesuaian (Rp)</th>
                     </template>
                 </tr>
@@ -268,10 +267,13 @@ onMounted(async () => {
                         <template v-for="(pb, pbIdx) in item.pembanding" :key="'pb-' + pbIdx">
                             <td class="p-2 border dark:border-gray-600 dark:text-white align-top">{{ pb.deskripsi }}
                             </td>
-                            <td class="p-2 border dark:border-gray-600 dark:text-white align-top">{{ pb.persen }}</td>
-                            <input type="number" step="0.01" class="w-full bg-transparent text-right outline-none"
-                                v-model.number="pb.raw_persen"
-                                @change="onPersenInput(pb.raw_persen, item.label, pb.pembanding_id)" />
+                            <td class="p-2 border dark:border-gray-600 dark:text-white align-top ">{{ pb.persen }}</td>
+                            <td class="p-2 border dark:border-gray-600 dark:text-white align-top bg-yellow-100">
+
+                                <input type="number" step="0.01" class="w-full bg-transparent text-right outline-none"
+                                    v-model.number="pb.raw_persen"
+                                    @change="onPersenInput(pb.raw_persen, item.label, pb.pembanding_id)" />
+                            </td>
                             <td class="p-2 border dark:border-gray-600 dark:text-white align-top">{{ pb.penyesuaian }}
                             </td>
                         </template>
@@ -279,8 +281,7 @@ onMounted(async () => {
                 </template>
 
                 <!-- Table Header -->
-                <tr v-if="isKarakterFisikLoaded" 
-                    class="bg-gray-200 dark:bg-gray-700 text-center text-sm">
+                <tr v-if="isKarakterFisikLoaded" class="bg-gray-200 dark:bg-gray-700 text-center text-sm">
                     <th class="p-2 border dark:border-gray-600 dark:text-white">KARAKTER FISIK</th>
 
                     <!-- Dynamic Object Headers (2 columns each) -->
@@ -295,8 +296,9 @@ onMounted(async () => {
                         :key="'pb-head-' + pbIdx">
                         <th class="p-2 border dark:border-gray-600 dark:text-white">Deskripsi</th>
                         <th class="p-2 border dark:border-gray-600 dark:text-white">(%)</th>
-                        <th class="p-2 border dark:border-gray-600 dark:text-white">RAW</th>
-                        <th class="p-2 border dark:border-gray-600 dark:text-white">+/- Penyesuaian (Rp)</th>
+                        <th class="p-2 border dark:border-gray-600 dark:text-white">RAW
+                        </th>
+                        <th class=" p-2 border dark:border-gray-600 dark:text-white">+/- Penyesuaian (Rp)</th>
                     </template>
                 </tr>
 
@@ -327,7 +329,7 @@ onMounted(async () => {
                             </td>
                             <td class="p-2 border dark:border-gray-600 dark:text-white align-top">{{ pb.persen }}</td>
                             <!-- 🆕 Editable raw_persen field -->
-                            <td class="p-2 border dark:border-gray-600 dark:text-white align-top">
+                            <td class="p-2 border dark:border-gray-600 dark:text-white align-top bg-yellow-100">
                                 <input type="number" step="0.01" class="w-full bg-transparent text-right outline-none"
                                     v-model.number="pb.raw_persen"
                                     @change="onPersenInput(pb.raw_persen, item.label, pb.pembanding_id, 'karakter_fisik')" />
@@ -363,17 +365,6 @@ onMounted(async () => {
                 </tr>
             </thead>
             <tbody>
-                <!-- <tr v-for="(row, index) in dataPerhitungan" :key="'row-' + index">
-                    <td class="border p-2 dark:border-gray-600 dark:text-white font-semibold"
-                        :class="{ 'font-semibold': row.isBold }">
-                        {{ row.label }}
-                    </td>
-
-                    <td v-for="(cell, i) in row.values" :key="'val-' + i"
-                        class="border p-2 dark:border-gray-600 text-center" :class="{ 'font-semibold': row.isBold }"
-                        v-html="cell.value">
-                    </td>
-                </tr> -->
                 <template v-for="group in data.summary" :key="group.kategori">
                     <tr v-for="item in group.items" :key="item.label">
                         <td class="border p-2 dark:border-gray-600 dark:text-white font-semibold">{{ item.label }}
