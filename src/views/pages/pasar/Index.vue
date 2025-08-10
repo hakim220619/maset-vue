@@ -33,7 +33,7 @@ async function getSewaData() {
     isFiltering.value = true;
     const params = Helper.formatSearchParams(search.value);
     try {
-        const response = await AuthApi.client().get('/sewa/?' + new URLSearchParams(params));
+        const response = await AuthApi.client().get('/pasar/?' + new URLSearchParams(params));
         const filteredData = response.data.data;
         const sortedData = filteredData.sort((a, b) => {
             return new Date(b.created_at) - new Date(a.created_at);
@@ -80,17 +80,17 @@ const destroy = (id) => {
         .fire({
             icon: 'warning',
             title: 'Peringatan',
-            text: `Apakah anda yakin ingin menghapus data sewa ini?`,
+            text: `Apakah anda yakin ingin menghapus data pasar ini?`,
             showCancelButton: true,
             confirmButtonText: 'Ya, Hapus Data!'
         })
         .then(async (result) => {
             if (result.isConfirmed) {
-                const response = await AuthApi.client().delete('/sewa/' + id);
+                const response = await AuthApi.client().delete('/pasar/' + id);
                 if (response.data.success) {
                     swal.fire({
                         title: 'Success',
-                        text: 'Data sewa berhasil dihapus',
+                        text: 'Data pasar berhasil dihapus',
                         icon: 'success'
                     });
                     getSewaData();
@@ -101,7 +101,7 @@ const destroy = (id) => {
 
 const exportExcel = async () => {
     const params = Helper.formatSearchParams(search.value);
-    await Helper.exportExcelFromApi('gateway/idp/sewa/export', 'sewa.xlsx', params);
+    await Helper.exportExcelFromApi('gateway/idp/pasar/export', 'pasar.xlsx', params);
 };
 
 const add = () => {
