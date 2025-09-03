@@ -29,6 +29,7 @@ const dataPropertiFields = ref([]);
 const dataTransaksiFields = ref([]);
 const dataUnitPerbandinganField = ref([]);
 const dataUmurEkonomis = ref([])
+const dataJenisBangunan = ref([])
 const bangunanOptions = ref([])
 const pembandingOptions = ref([])
 
@@ -90,76 +91,129 @@ async function loadPasarDetail(id) {
 }
 
 
-async function getUmurEkonomis() {
-    const res = await AuthApi.client().get(`/getUmurEkonomis`)
-    dataUmurEkonomis.value = res.data.data
+async function getMasterJenisBangunan() {
+    const res = await AuthApi.client().get(`/getMasterJenisBangunan`)
+    dataJenisBangunan.value = res.data.data
 
-    // mapping sesuai type ke format {label, value}
-    bangunanOptions.value = dataUmurEkonomis.value
-        .filter(o => o.type === 'bangunan')
-        .map(o => ({ label: o.tahun, value: o.id }))
+    // Grouping berdasarkan type
+    const grouped = {}
+    dataJenisBangunan.value.forEach(item => {
+        if (!grouped[item.type]) {
+            grouped[item.type] = {
+                label: item.type,
+                code: item.type, // bisa juga bikin kode singkat kalau mau
+                items: []
+            }
+        }
+        grouped[item.type].items.push({
+            label: item.name,
+            value: item.id,
+            tahun: item.tahun
+        })
+    })
 
-    pembandingOptions.value = dataUmurEkonomis.value
-        .filter(o => o.type === 'pembanding')
-        .map(o => ({ label: o.tahun, value: o.tahun }))
+    pembandingOptions.value = Object.values(grouped)
 }
-
 const selectedTahun = ref([]);
+const kondisiFisikValues = ref([]);
+const keusanganFungsionalValues = ref([]);
+const keusanganEkonomisValues = ref([]);
 
-const onTahunChange = async (tahun, idx) => {
-    selectedTahun.value[idx] = tahun || null; // simpan tahun per pembanding
-    console.log(selectedTahun.value);
-
+const onDataChange = async (fieldKey, selectedValue, idx, pbId) => {
     try {
+        if (fieldKey === "jenis_bangunan") {
+            let tahun = null;
+            for (const group of pembandingOptions.value) {
+                const found = group.items.find(i => i.value === selectedValue);
+                if (found) {
+                    tahun = found.tahun;
+                    break;
+                }
+            }
+
+            selectedTahun.value[idx] = tahun || null;
+
+            dataEstimasiBangunan.value.forEach(field => {
+                if (!field.items[0]) field.items[0] = {};
+                if (field.label === "Jenis Bangunan") {
+                    field.items[0]['pembandingjbangunan' + (idx + 1)] = selectedValue;
+                }
+                if (field.label === "Umur Ekonomis") {
+                    field.items[0]['umur_ekonomis' + (idx + 1)] = tahun || '-';
+                }
+            });
+
+        } else if (fieldKey === "kondisi_fisik_bangunan") {
+            let value = parseFloat(selectedValue.value) || 0;
+            if (value > 100) value = 100;
+            if (value < 0) value = 0;
+            kondisiFisikValues.value[idx] = value;
+
+        } else if (fieldKey === "keusangan_fungsional") {
+            let value = parseFloat(selectedValue.value) || 0;
+            if (value > 100) value = 100;
+            if (value < 0) value = 0;
+            keusanganFungsionalValues.value[idx] = value;
+
+        } else if (fieldKey === "keusangan_ekonomis") {
+            let value = parseFloat(selectedValue.value) || 0;
+            if (value > 100) value = 100;
+            if (value < 0) value = 0;
+            keusanganEkonomisValues.value[idx] = value;
+        }
+
+        // bikin query dinamis untuk API
         const PasarId = route.params.id;
-        const query = selectedTahun.value.map(t => `tahun=${t}`).join("&");
-        // kirim semua tahun pembanding (misal: [2020, 2019, 2021])
-        const res = await AuthApi.client().get(
-            `/getDataEstimasiBangunanPasar/${PasarId}?${query}`
-        );
-        if (res.data.success) {
-            const newData = res.data.data;
+        const query = data.value.pembandings
+            .map((pb, i) => {
+                const tahun = selectedTahun.value[i] ?? null;
+                const kfisik = kondisiFisikValues.value[i] ?? null;
+                const kfungsional = keusanganFungsionalValues.value[i] ?? null;
+                const kekonomis = keusanganEkonomisValues.value[i] ?? null;
 
-            dataEstimasiBangunan.value = newData.map((newField, i) => {
-                const oldField = dataEstimasiBangunan.value[i] || {};
+                if (pb?.id && (tahun !== null || kfisik !== null || kfungsional !== null || kekonomis !== null)) {
+                    return `pembanding_id=${pb.id}&tahun=${tahun ?? ""}&kfisik=${kfisik ?? ""}&kfungsional=${kfungsional ?? ""}&kekonomis=${kekonomis ?? ""}&list_data=${i + 1}`;
+                }
+                return null;
+            })
+            .filter(Boolean)
+            .join("&");
 
-                // Khusus Umur Ekonomis → jangan timpa data pembanding lain
-                if (newField.label === "Umur Ekonomis") {
+
+        if (query) {
+            const res = await AuthApi.client().get(
+                `/getDataEstimasiBangunanPasar/${PasarId}?${query}`
+            );
+
+            if (res.data.success) {
+                const newData = res.data.data;
+                dataEstimasiBangunan.value = newData.map((newField, i) => {
+                    const oldField = dataEstimasiBangunan.value[i] || { items: [{}] };
                     return {
                         ...newField,
                         items: [{
-                            ...newField.items?.[0],
                             ...oldField.items?.[0],
-                            ['pembanding' + (idx + 1)]: tahun // update hanya pembanding yang berubah
+                            ...newField.items?.[0],
                         }]
                     };
-                }
-
-                return newField;
-            });
-
-            // jaga supaya key pembanding tetap ada
-            dataEstimasiBangunan.value.forEach(field => {
-                if (!field.items[0]) field.items[0] = {};
-                data.value.pembandings.forEach((_, idxx) => {
-                    const key = 'pembanding' + (idxx + 1);
-                    if (!(key in field.items[0])) {
-                        field.items[0][key] = null;
-                    }
                 });
-            });
+            }
         }
+
     } catch (err) {
         console.error("Error load data estimasi bangunan:", err);
     }
 };
 
 
-
 onMounted(async () => {
 
     if (route.params.id) {
-        await getUmurEkonomis();
+        await getMasterJenisBangunan();
+        await loadPasarDetail(route.params.id);
+        if (data.value.pembandings && data.value.pembandings.length > 0) {
+            selectedTahun.value = Array(data.value.pembandings.length).fill(null);
+        }
 
         const dataUnitPerbandingan = await Helper.getDataById('getDataUnitPerbandinganPasar', route.params.id);
         const dataTransaksi = await Helper.getDataById('getDataTransaksiPasar', route.params.id);
@@ -191,30 +245,40 @@ onMounted(async () => {
     }
 });
 
-onMounted(() => {
-    loadPasarDetail(route.params.id)
-    // loadElementPerbandingan(route.params.id);
-})
-
 function formatDate(dateStr) {
     if (!dateStr) return '-'
     const options = { day: '2-digit', month: 'long', year: 'numeric' }
     return new Date(dateStr).toLocaleDateString('id-ID', options)
 }
+
+
 watch(
-    () => pembandingOptions,
-    (newVal) => {
-        if (newVal.length > 0) {
-            field.items.forEach((item, idx) => {
-                const key = "pembanding" + (idx + 1);
-                if (!item[key]) {
-                    item[key] = newVal[0].value; // set default = data pertama
+    [() => pembandingOptions.value, () => dataEstimasiBangunan.value],
+    ([newOptions, newEstimasi]) => {
+        if (!newEstimasi || newOptions.length === 0) return;
+
+        newEstimasi.forEach((field) => {
+            // Hanya untuk field tertentu
+            if (
+                ["Keusangan Fungsional", "Keusangan Ekonomis", "Kondisi Fisik Bangunan (Visual)"].includes(field.label)
+            ) {
+                if (field.items?.[0]) {
+                    data.value.pembandings.forEach((_, idxx) => {
+                        const key = "pembandings" + (idxx + 1);
+
+                        // default dari pembandingOptions atau 0
+                        if (!field.items[0][key]) {
+                            field.items[0][key] = newOptions[0]?.value ?? 0;
+                        }
+                    });
                 }
-            });
-        }
+            }
+        });
     },
-    { immediate: true } // langsung jalan pertama kali
+    { deep: true, immediate: true }
 );
+
+
 
 </script>
 
@@ -427,17 +491,49 @@ watch(
                     <!-- Loop pembanding -->
                     <template v-for="(pb, idx) in data.pembandings" :key="'pb-' + idx">
                         <td colspan="4" class="p-2 border dark:border-gray-600 dark:text-white">
-                            <template v-if="field.label === 'Umur Ekonomis'">
-                                <Select v-if="pembandingOptions.length > 0" :default-value="pb.umur_ekonomis"
-                                    v-model="field.items[0]['pembanding' + (idx + 1)]" :options="pembandingOptions"
-                                    optionLabel="label" optionValue="value" placeholder="Pilih Umur Ekonomis"
-                                    class="w-full" @change="val => onTahunChange(val.value, idx)" />
+                            <!-- Jenis Bangunan -->
+                            <template v-if="field.label === 'Jenis Bangunan'">
+                                <Select v-model="field.items[0]['pembandingjbangunan' + (idx + 1)]"
+                                    :options="pembandingOptions" optionGroupLabel="label" optionGroupChildren="items"
+                                    optionLabel="label" optionValue="value" placeholder="Pilih Jenis Bangunan"
+                                    class="w-full" @change="e => onDataChange('jenis_bangunan', e.value, idx, pb.id)" />
                             </template>
+
+                            <!-- Umur Ekonomis -->
+                            <template v-else-if="field.label === 'Umur Ekonomis'">
+                                {{ field.items[0]?.['umur_ekonomis' + (idx + 1)] || '-' }}
+                            </template>
+
+                            <!-- Kondisi Fisik Bangunan (Visual) -->
+                            <template v-else-if="field.label === 'Kondisi Fisik Bangunan (Visual)'">
+                                <InputNumber v-model="field.items[0]['kondisi_fisik_bangunan' + (idx + 1)]"
+                                    class="w-full" :min="0" :max="100" :useGrouping="false" placeholder="Isi angka (%)"
+                                    @input="val => onDataChange('kondisi_fisik_bangunan', val, idx, pb.id)" />
+                            </template>
+
+
+                            <!-- Keusangan Fungsional -->
+                            <template v-else-if="field.label === 'Keusangan Fungsional'">
+                                <InputNumber v-model="field.items[0]['pembandings' + (idx + 1)]" class="w-full" :min="0"
+                                    :max="100" :useGrouping="false" placeholder="Isi angka (%)"
+                                    @input="val => onDataChange('keusangan_fungsional', val, idx, pb.id)" />
+                            </template>
+
+                            <!-- Keusangan Ekonomis -->
+                            <template v-else-if="field.label === 'Keusangan Ekonomis'">
+                                <InputNumber v-model="field.items[0]['pembandings' + (idx + 1)]" class="w-full" :min="0"
+                                    :max="100" :useGrouping="false" placeholder="Isi angka (%)"
+                                    @input="val => onDataChange('keusangan_ekonomis', val, idx, pb.id)" />
+                            </template>
+
+                            <!-- Default fallback -->
                             <template v-else>
                                 {{ field.items[0]?.['pembanding' + (idx + 1)] || '-' }}
                             </template>
                         </td>
                     </template>
+
+
 
 
                 </tr>
@@ -471,131 +567,68 @@ watch(
 
                 <template v-for="group in data.elemen_perbandingan" :key="group.kategori">
                     <template v-for="item in group.items" :key="item.label">
+                        <!-- Baris utama -->
+                        <tr>
+                            <!-- Label -->
+                            <td class="p-2 border dark:border-gray-600 dark:text-white">
+                                {{ item.label }}
+                            </td>
 
-                        <!-- Jika kategori khusus → 2 TR -->
-                        <!-- Jika kategori khusus → 2 TR -->
-                        <template v-if="[
-                            'Hak Atas Properti yang dialihkan',
-                            'Syarat Pembiayaan',
-                            'Kondisi Penjualan',
-                            'Pengeluaran yang dilakukan segera setelah pembelian'
-                        ].includes(item.label)">
-                            <!-- TR1 -->
-                            <tr>
-                                <td class="p-2 border dark:border-gray-600 dark:text-white ">
-                                    {{ item.label }}
-                                </td>
-
-                                <!-- Loop Object -->
-                                <template v-for="(obj, objIdx) in item.objects" :key="'obj1-' + objIdx">
-                                    <td class="p-2 border dark:border-gray-600 dark:text-white ">{{
-                                        obj.keterangan }}</td>
-                                    <td class="p-2 border dark:border-gray-600 dark:text-white " colspan="2">{{
-                                        obj.deskripsi }}</td>
-                                </template>
-
-                                <!-- Loop Pembanding TR1 -->
-                                <template v-for="(pb, pbIdx) in item.pembanding" :key="'pb1-' + pbIdx">
-                                    <td class="p-2 border dark:border-gray-600 dark:text-white align-middle text-center"
-                                        colspan="4">
-                                        {{ pb.deskripsi || '-' }}
-                                    </td>
-                                </template>
-                            </tr>
-
-                            <!-- TR2 -->
-                            <tr>
-                                <td class="p-2 border dark:border-gray-600 dark:text-white "></td>
-
-                                <!-- Loop Object kosong -->
-                                <template v-for="(obj, objIdx) in item.objects" :key="'obj2-' + objIdx">
-                                    <td class="p-2 border dark:border-gray-600 dark:text-white"></td>
-                                    <td class="p-2 border dark:border-gray-600 dark:text-white" colspan="2"></td>
-                                </template>
-
-                                <!-- Loop Pembanding TR2 -->
-                                <template v-for="(pb, pbIdx) in item.pembanding" :key="'pb2-' + pbIdx">
-                                    <td class="p-2 border dark:border-gray-600 dark:text-white align-middle text-center"
-                                        colspan="4">
-                                        {{ pb.detail || '12' }}
-                                    </td>
-                                </template>
-                            </tr>
-                        </template>
-
-                        <!-- Jika kategori Kondisi Pasar → 1 TR tapi bisa custom -->
-                        <template v-else-if="item.label === 'Kondisi Pasar'">
-                            <tr>
-                                <td class="p-2 border dark:border-gray-600 dark:text-white  font-bold">{{
-                                    item.label }}</td>
-
-                                <!-- Loop Object -->
-                                <template v-for="(obj, objIdx) in item.objects" :key="'obj-pasar-' + objIdx">
-                                    <td class="p-2 border dark:border-gray-600 dark:text-white ">{{
-                                        obj.keterangan }}</td>
-                                    <td class="p-2 border dark:border-gray-600 dark:text-white " colspan="2">{{
-                                        obj.deskripsi }}</td>
-                                </template>
-
-                                <!-- Loop Pembanding -->
-                                <template v-for="(pb, pbIdx) in item.pembanding" :key="'pb-pasar-' + pbIdx">
-                                    <td class="p-2 border dark:border-gray-600 dark:text-white " colspan="4">
-                                        {{ pb.deskripsi || '-' }}
-                                    </td>
-                                </template>
-                            </tr>
-                        </template>
-
-                        <!-- Jika kategori lain → 1 TR biasa -->
-                        <!-- Baris isi utama -->
-                        <template v-else>
-                            <tr>
-                                <!-- Label -->
+                            <!-- Objects -->
+                            <template v-for="(obj, objIdx) in item.objects" :key="'obj-' + objIdx">
                                 <td class="p-2 border dark:border-gray-600 dark:text-white">
-                                    {{ item.label }}
+                                    {{ obj.keterangan }}
+                                </td>
+                                <td class="p-2 border dark:border-gray-600 dark:text-white" colspan="2">
+                                    {{ obj.deskripsi }}
+                                </td>
+                            </template>
+
+                            <!-- Pembanding -->
+                            <template v-for="(pb, pbIdx) in item.pembanding" :key="'pb-' + pbIdx">
+                                <!-- Kiri -->
+                                <td class="p-2 border dark:border-gray-600 dark:text-white">
+                                    {{ pb.deskripsi || '-' }}
                                 </td>
 
-                                <!-- Objects -->
-                                <template v-for="(obj, objIdx) in item.objects" :key="'obj-' + objIdx">
-                                    <td class="p-2 border dark:border-gray-600 dark:text-white">
-                                        {{ obj.keterangan }}
-                                    </td>
-                                    <td class="p-2 border dark:border-gray-600 dark:text-white" colspan="2">
-                                        {{ obj.deskripsi }}
-                                    </td>
-                                </template>
+                                <!-- Input angka -->
+                                <td class="p-2 border dark:border-gray-600">
+                                    <input type="number" step="0.01" class="w-full border rounded p-1"
+                                        v-model.number="pb.raw_persen"
+                                        @input="onPersenInput(pb.raw_persen, item.label, pb.pembanding_id, 'karakter_fisik')" />
+                                </td>
 
-                                <template v-for="(pb, pbIdx) in item.pembanding" :key="'pb-' + pbIdx">
-                                    <!-- kiri 2 kolom (40%) -->
-                                    <td class="p-2 border dark:border-gray-600 dark:text-white" colspan="1">
-                                        {{ pb.deskripsi || '-' }}
-                                    </td>
+                                <!-- Kanan -->
+                                <td class="p-2 border dark:border-gray-600 dark:text-white" colspan="2">
+                                    {{ pb.penyesuaian || '-' }}
+                                </td>
+                            </template>
+                        </tr>
 
-                                    <!-- 🆕 Editable raw_persen field -->
-                                    <td class="p-2 border dark:border-gray-600">
-                                        <input type="number" step="0.01" class="" v-model.number="pb.raw_persen"
-                                            @change="onPersenInput(pb.raw_persen, item.label, pb.pembanding_id, 'karakter_fisik')" />
-                                    </td>
+                        <!-- Baris tambahan dengan sekat lurus -->
+                        <tr>
+                            <!-- Label kosong -->
+                            <td class="p-2 border dark:border-gray-600 dark:text-white">&nbsp;</td>
 
-                                    <!-- kanan 2 kolom (40%) -->
-                                    <td class="p-2 border dark:border-gray-600 dark:text-white" colspan="2">
-                                        {{ pb.penyesuaian || '-' }}
-                                    </td>
-                                </template>
+                            <!-- Objects kosong -->
+                            <template v-for="(obj, objIdx) in item.objects" :key="'obj-empty-' + objIdx">
+                                <td class="p-2 border dark:border-gray-600 dark:text-white">&nbsp;</td>
+                                <td class="p-2 border dark:border-gray-600 dark:text-white" colspan="2">&nbsp;</td>
+                            </template>
 
-                            </tr>
-                        </template>
-
-
-
+                            <!-- Pembanding kosong -->
+                            <template v-for="(pb, pbIdx) in item.pembanding" :key="'pb-empty-' + pbIdx">
+                                <td class="p-2 border dark:border-gray-600 dark:text-white">&nbsp;</td>
+                                <td class="p-2 border dark:border-gray-600">&nbsp;</td>
+                                <td class="p-2 border dark:border-gray-600 dark:text-white" colspan="2">&nbsp;</td>
+                            </template>
+                        </tr>
                     </template>
-
                 </template>
 
-
                 <!-- Table Header -->
-
                 <template v-for="k in data.lokasi" :key="k.kategori">
+                    <!-- Header kategori -->
                     <tr class="bg-gray-200 dark:bg-gray-700 font-semibold">
                         <td :colspan="5 + (k.items[0].objects.length * 2) + (k.items[0].pembanding.length * 3)"
                             class="p-2 border dark:border-gray-600 dark:text-white">
@@ -603,41 +636,69 @@ watch(
                         </td>
                     </tr>
 
-
-                    <tr v-for="item in k.items" :key="item.label">
-                        <!-- Label -->
-                        <td class="p-2 border dark:border-gray-600 dark:text-white">
-                            {{ item.label }}
-                        </td>
-
-                        <!-- Objects -->
-                        <template v-for="(obj, objIdx) in item.objects" :key="'obj-' + objIdx">
+                    <!-- Baris isi -->
+                    <template v-for="item in k.items" :key="item.label">
+                        <!-- Baris utama -->
+                        <tr>
+                            <!-- Label -->
                             <td class="p-2 border dark:border-gray-600 dark:text-white">
-                                {{ obj.keterangan }}
-                            </td>
-                            <td class="p-2 border dark:border-gray-600 dark:text-white" colspan="2">
-                                {{ obj.deskripsi }}
-                            </td>
-                        </template>
-
-                        <template v-for="(pb, pbIdx) in item.pembanding" :key="'pb-' + pbIdx">
-                            <!-- kiri 2 kolom (40%) -->
-                            <td class="p-2 border dark:border-gray-600 dark:text-white" colspan="1">
-                                {{ pb.deskripsi || '-' }}
+                                {{ item.label }}
                             </td>
 
-                            <!-- tengah 1 kolom (20%) -->
-                            <td class="p-2 border dark:border-gray-600 dark:text-white text-center">
-                                {{ pb.persen || '-' }}
-                            </td>
+                            <!-- Objects -->
+                            <template v-for="(obj, objIdx) in item.objects" :key="'obj-' + objIdx">
+                                <td class="p-2 border dark:border-gray-600 dark:text-white">
+                                    {{ obj.keterangan }}
+                                </td>
+                                <td class="p-2 border dark:border-gray-600 dark:text-white" colspan="2">
+                                    {{ obj.deskripsi }}
+                                </td>
+                            </template>
 
-                            <!-- kanan 2 kolom (40%) -->
-                            <td class="p-2 border dark:border-gray-600 dark:text-white" colspan="2">
-                                {{ pb.penyesuaian || '-' }}
-                            </td>
-                        </template>
-                    </tr>
+                            <!-- Pembanding -->
+                            <template v-for="(pb, pbIdx) in item.pembanding" :key="'pb-' + pbIdx">
+                                <!-- kiri 2 kolom -->
+                                <td class="p-2 border dark:border-gray-600 dark:text-white">
+                                    {{ pb.deskripsi || '-' }}
+                                </td>
+                                <td class="p-2 border dark:border-gray-600 dark:text-white text-center">
+                                    <input type="number" step="0.01" class="w-full border rounded p-1"
+                                        v-model.number="pb.raw_persen"
+                                        @input="onPersenInput(pb.raw_persen, item.label, pb.pembanding_id, 'karakter_fisik')" />
+                                </td>
+
+
+                                <!-- kanan 2 kolom -->
+                                <td class="p-2 border dark:border-gray-600 dark:text-white" colspan="2">
+                                    {{ pb.penyesuaian || '-' }}
+                                </td>
+                            </template>
+                        </tr>
+
+                        <!-- Baris input -->
+                        <tr>
+                            <!-- Label kosong -->
+                            <td class="p-2 border dark:border-gray-600 dark:text-white">&nbsp;</td>
+
+                            <!-- Objects kosong -->
+                            <template v-for="(obj, objIdx) in item.objects" :key="'obj-empty-' + objIdx">
+                                <td class="p-2 border dark:border-gray-600 dark:text-white">&nbsp;</td>
+                                <td class="p-2 border dark:border-gray-600 dark:text-white" colspan="2">&nbsp;</td>
+                            </template>
+
+                            <!-- Pembanding input -->
+                            <template v-for="(pb, pbIdx) in item.pembanding" :key="'pb-input-' + pbIdx">
+                                <td class="p-2 border dark:border-gray-600 dark:text-white">&nbsp;</td>
+                                <!-- tengah 1 kolom -->
+                                <td class="p-2 border dark:border-gray-600 dark:text-white text-center">
+                                    {{ pb.persen || '-' }}
+                                </td>
+                                <td class="p-2 border dark:border-gray-600 dark:text-white" colspan="2">&nbsp;</td>
+                            </template>
+                        </tr>
+                    </template>
                 </template>
+
             </tbody>
         </table>
 

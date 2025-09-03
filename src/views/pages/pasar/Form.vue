@@ -41,7 +41,7 @@ const form = ref({
 
 const save = async () => {
     form.value.loading = true;
-    const url = route.params.id ? `sewa/${route.params.id}` : 'sewa';
+    const url = route.params.id ? `pasar/${route.params.id}` : 'pasar';
 
     try {
         storeSchema.parse(form.value.data);
@@ -107,13 +107,13 @@ const fetchOptions = async () => {
         ]);
 
         objectOptions.value = objects.map(obj => ({
-            label: `${obj.name} | ${obj.jenis_object}`,
+            label: `${obj.id} - ${obj.name} (${obj.jenis_object})`,
             value: obj.id,
             jenis_object: obj.jenis_object
         }));
 
         pembandingOptions.value = pembandings.map(p => ({
-            label: p.name,
+            label: `${p.id} - ${p.name}`,
             value: p.id
         }));
     } catch (error) {
@@ -145,7 +145,7 @@ for (const key in form.value.data) {
 }
 
 const goBack = () => {
-    router.push('/pages/sewa');
+    router.push('/pages/pasar');
 };
 </script>
 
