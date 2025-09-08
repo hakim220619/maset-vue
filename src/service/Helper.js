@@ -335,9 +335,16 @@ export const Helper = {
         };
         const normalized = this.getStatusLabel(status); // gunakan label yang telah dinormalisasi
         return severityMap[normalized] || null;
+    },
+
+    formatRupiah(value) {
+        if (value == null || isNaN(value)) return "Rp 0";
+        return new Intl.NumberFormat("id-ID", {
+            style: "currency",
+            currency: "IDR",
+            minimumFractionDigits: 0,
+        }).format(value);
     }
-
-
 
 
 };
