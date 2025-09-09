@@ -749,6 +749,7 @@ const onChangeElemenPerbandinganKarakteristikFisik = async (fieldKey, selectedVa
             })
             .filter(Boolean)
             .join("&");
+        console.log(query);
 
         if (!query) return;
 
@@ -801,17 +802,30 @@ const updateTotalPenyesuaian = async (idx) => {
     try {
         const PasarId = route.params.id;
         if (!dataTotals.value?.length || !dataPersent.value?.length) return;
+        const target = dataElemenPerbandinganPasar.value.find(
+            (d) => d.label === "Perkiraan Harga Transaksi setelah Penyesuaian"
+        );
+        // console.log(target);
 
+        if (target && target.pembanding?.length) {
+            // console.log(target);
+
+            perkiraanHargaTransaksiSetelahPenyesuaian.value = target.pembanding.map(pb => pb.hasil);
+        }
         const query = data.value.pembandings
             .map((pb, i) => {
                 if (!pb?.id) return null;
                 const valTotal = parseFloat(dataTotals.value[i]) || 0;
                 const valPersent = parseFloat(dataPersent.value[i]) || 0;
-                return `pembanding_id=${pb.id}&total=${valTotal}&persent=${valPersent}&list_data=${i + 1}&idx=${idx}`;
+                const valPerkiraan = perkiraanHargaTransaksiSetelahPenyesuaian.value[i] ?? null;
+                const cleaned = valPerkiraan.replace(/[Rp\s\.]/g, '');
+
+                // Konversi ke float
+                const valueFloat = parseFloat(cleaned);
+                return `pembanding_id=${pb.id}&total=${valTotal}&persent=${valPersent}&perkiraan_harga_setelah_penyesuaian=${valueFloat}&list_data=${i + 1}&idx=${idx}`;
             })
             .filter(Boolean)
             .join("&");
-        console.log(query);
 
         if (!query) return;
 
@@ -827,7 +841,7 @@ const updateTotalPenyesuaian = async (idx) => {
             const oldPbById = new Map(oldPbs.filter(x => x?.id != null).map(x => [x.id, x]));
 
             const pembanding = (newField.pembanding || []).map((pb, i) => {
-                const oldPb = pb?.id != null ? oldPbById.get(pb.id) : oldPbs[i] || {};
+                const oldPb = (pb?.id != null ? oldPbById.get(pb.id) : oldPbs[i]) || {};
                 return {
                     ...oldPb,
                     ...pb,
@@ -838,6 +852,7 @@ const updateTotalPenyesuaian = async (idx) => {
                     totalPersent: pb?.totalPersent ?? oldPb.totalPersent ?? 0,
                 };
             });
+
 
             return {
                 ...newField,
@@ -1232,8 +1247,8 @@ watch(
 
                             <!-- Kondisi Fisik Bangunan (Visual) -->
                             <template v-else-if="field.label === 'Kondisi Fisik Bangunan (Visual)'">
-                                <InputNumber v-model="field.items[0]['kondisi_fisik_bangunan' + (idx + 1)]"
-                                    class="w-full" :min="0" :max="100" :useGrouping="false" placeholder="Isi angka (%)"
+                                <InputNumber v-model="field.items[0]['pembandings' + (idx + 1)]" class="w-full" :min="0"
+                                    :max="100" :useGrouping="false" placeholder="Isi angka (%)"
                                     @input="val => onDataChangeEstimasiBangunan('kondisi_fisik_bangunan', val, idx, pb.id)" />
                             </template>
 
@@ -1629,7 +1644,7 @@ watch(
 
 
                 </template>
-                <br>
+
                 <template v-for="item in dataSummaryPasar" :key="item.label">
                     <!-- Baris utama -->
                     <tr>
@@ -1668,11 +1683,32 @@ watch(
                             </template>
 
                             <!-- Kalau bukan Jumlah Penyesuaian -->
-                            <template v-else>
-                                <td class="p-2 border dark:border-gray-600 dark:text-white" colspan="4">
-                                    {{ pb.penyesuaian || '-' }}
+                            <template v-else-if="item.label === 'Total Bobot Absolut'">
+                                <td class="p-2 border dark:border-gray-600 dark:text-white text-center" colspan="4">
+                                    {{ pb.totalPersen || '-' }}
                                 </td>
                             </template>
+                            <template v-else-if="item.label === 'Proporsi'">
+                                <td class="p-2 border dark:border-gray-600 dark:text-white text-center" colspan="4">
+                                    {{ pb.totalPersen || '-' }}
+                                </td>
+                            </template>
+                            <template v-else-if="item.label === 'Inverse'">
+                                <td class="p-2 border dark:border-gray-600 dark:text-white text-center" colspan="4">
+                                    {{ pb.totalPersen || '-' }}
+                                </td>
+                            </template>
+                            <template v-else-if="item.label === 'Pembobotan Akhir'">
+                                <td class="p-2 border dark:border-gray-600 dark:text-white text-center" colspan="4">
+                                    {{ pb.totalPersen || '-' }}
+                                </td>
+                            </template>
+                            <template v-else>
+                                <td class="p-2 border dark:border-gray-600 dark:text-white text-center" colspan="4">
+                                    {{ pb.totalPenyesuaian || '-' }}
+                                </td>
+                            </template>
+
                         </template>
 
                     </tr>
@@ -1698,53 +1734,42 @@ watch(
                     <th class="p-2 border dark:border-gray-600 dark:text-white">Nilai</th>
                 </tr>
             </thead>
-            <tbody v-if="data.conclusions">
-                <tr v-for="(item, index) in data.conclusions?.items?.pembanding" :key="'kesimpulan-' + index">
-                    <td class="border p-2 dark:border-gray-600 dark:text-white">{{ item.label }}</td>
+            <tbody v-if="dataSummaryPasar && dataSummaryPasar.length">
+                <tr v-for="(item, index) in dataSummaryPasar[5].kesimpulanNilai" :key="'kesimpulan-' + index">
+                    <td class="border p-2 dark:border-gray-600 dark:text-white">{{ item.jenis_property }}</td>
                     <td class="border p-2 dark:border-gray-600 text-center">{{ item.bobot }}</td>
-                    <td class="border p-2 dark:border-gray-600 text-right">{{ item.value }}</td>
+                    <td class="border p-2 dark:border-gray-600 text-right">{{ item.nilai }}</td>
                 </tr>
-
-                <tr class="bg-gray-50 dark:bg-gray-700 font-semibold">
-                    <td class="border p-2 dark:border-gray-600 dark:text-white" colspan="2">
-                        Indikasi Nilai Sewa Pasar / m²
-                    </td>
-                    <td class="border p-2 dark:border-gray-600 text-right">
-                        {{ data.conclusions?.indikasi_nilai_m2 }}
-                    </td>
-                </tr>
-                <tr class="bg-gray-50 dark:bg-gray-700 font-semibold">
-                    <td class="border p-2 dark:border-gray-600 dark:text-white" colspan="2">
-                        Indikasi Nilai Sewa Pasar
-                    </td>
-                    <td class="border p-2 dark:border-gray-600 text-right">
-                        {{ data.conclusions?.indikasi_nilai }}
-                    </td>
-                </tr>
-
             </tbody>
         </table>
 
         <br>
-        <table v-if="data.final_summary" class="min-w-full border border-gray-300 text-sm mt-4 text-center">
+
+        <table v-if="dataSummaryPasar?.[5]?.nilaiMaxMinDeviasi"
+            class="min-w-full border border-gray-300 text-sm mt-4 text-center">
             <tbody>
+                <!-- Deviasi di atas -->
                 <tr>
                     <td class="border p-2 text-left font-semibold dark:text-white">Deviasi:</td>
-                    <td class="border p-2 dark:text-white font-semibold">{{ data.final_summary.deviasi }}</td>
-                    <td class="border p-2 font-bold align-middle dark:text-white" rowspan="3">
-                        {{ data.final_summary.status }}
+                    <td class="border p-2 dark:text-white font-semibold">
+                        {{
+                            dataSummaryPasar?.[5]?.nilaiMaxMinDeviasi?.find(item => item.label === 'Deviasi')?.value || '0'
+                        }}
+                    </td>
+                    <td class="border p-2 font-bold align-middle dark:text-white" :rowspan="2">
+                        {{ dataSummaryPasar?.[5].status || '0' }}
                     </td>
                 </tr>
-                <tr>
-                    <td class="border p-2 text-left dark:text-white">Min</td>
-                    <td class="border p-2">{{ data.final_summary.min }}</td>
-                </tr>
-                <tr>
-                    <td class="border p-2 text-left">Max</td>
-                    <td class="border p-2">{{ data.final_summary.max }}</td>
+                <!-- Loop untuk Min dan Max -->
+                <tr v-for="item in dataSummaryPasar?.[5]?.nilaiMaxMinDeviasi?.filter(i => i.label !== 'Deviasi') || [{ label: 'Min', value: '0' }, { label: 'Max', value: '0' }]"
+                    :key="item.label">
+                    <td class="border p-2 text-left dark:text-white">{{ item.label }}</td>
+                    <td class="border p-2">{{ item.value || '0' }}</td>
                 </tr>
             </tbody>
         </table>
+
+
 
     </div>
 </template>
