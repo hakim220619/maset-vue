@@ -296,66 +296,30 @@ const onChangeElemenPerbandingan = async (fieldKey, selectedValue, idx, pbId) =>
 
 
 const resetElemenPerbandinganLokasi = (idx, pbId) => {
-    // console.log(pbId);
-
-    // reset di state
-    jarakPusatKota.value[idx] = 0;
-    perkerasanJalan.value[idx] = 0;
-    aksesibilitasLokasi.value[idx] = 0;
-    kondisiLingkungan.value[idx] = 0;
-    posisiAset.value[idx] = 0;
-    lainnya.value[idx] = 0;
-    // console.log(idx);
-
-    // console.log(dataElemenPerbandinganLokasiPasar.value);
-
-    // reset langsung di dataElemenPerbandinganLokasiPasar biar input kosong/0
     if (Array.isArray(dataElemenPerbandinganLokasiPasar.value)) {
         dataElemenPerbandinganLokasiPasar.value.forEach(item => {
-            // console.log(item);
 
             if (Array.isArray(item.pembanding)) {
                 item.pembanding.forEach(pb => {
-
-
+                    jarakPusatKota.value[idx] = 0;
+                    perkerasanJalan.value[idx] = 0;
+                    aksesibilitasLokasi.value[idx] = 0;
+                    kondisiLingkungan.value[idx] = 0;
+                    posisiAset.value[idx] = 0;
+                    lainnya.value[idx] = 0;
                     if (pb.id === pbId) {
-                        pb.jarak_pusat_kota = 0;
-                        pb.perkerasan_jalan = 0;
-                        pb.aksesibilitas_lokasi = 0;
-                        pb.kondisi_lingkungan = 0;
-                        pb.posisi_aset = 0;
-                        pb.lainnya = 0;
+                        pb[`persen_${idx}`] = 0;
+                        pb[`penyesuaian_${idx}`] = 0;
 
-                        // reset penyesuaian & hasil
-                        pb.penyesuaian = 0;
                     }
+
                 });
             }
         });
     }
 
-
-    // reset perkiraan harga juga
     perkiraanHargaTransaksiSetelahPenyesuaian.value[idx] = 0;
 };
-const parseToFloat = (val) => {
-    if (val === null || val === undefined) return 0;
-
-    // ubah ke string, hilangkan "Rp" dan spasi
-    let str = String(val).replace(/Rp\s?/gi, "").trim();
-
-    // hilangkan semua titik ribuan
-    str = str.replace(/\./g, "");
-
-    // ganti koma (,) jadi titik (.) untuk decimal
-    str = str.replace(/,/g, ".");
-
-    // parse ke float
-    const num = parseFloat(str);
-    return isNaN(num) ? 0 : num;
-};
-
-
 
 const dataTotals = ref([]);
 const dataPersent = ref([]);
@@ -378,7 +342,7 @@ function hitungTotalPenyesuaian() {
 
     sumberData.forEach(dataArray => {
         dataArray.forEach(field => {
-            if (labelExclude.includes(field.label)) return; // skip field tertentu
+            if (labelExclude.includes(field.label)) return;
             field.pembanding?.forEach((pb, i) => {
                 totals[i] = (totals[i] || 0) + parseRpToFloat(pb.penyesuaian);
                 persets[i] = (persets[i] || 0) + (pb.persen || 0);
@@ -427,19 +391,19 @@ const onChangeElemenPerbandinganLokasi = async (fieldKey, selectedValue, idx, pb
 
 
         const PasarId = route.params.id;
-        const query = data.value.pembandings
+        const query = dataPasarAll.value.pembanding_id
             .map((pb, i) => {
-                if (!pb?.id) return null;
+
 
                 const idxPlus = i + 1;
 
-                let valJarak = jarakPusatKota.value[i] ?? null;
-                let valPerkerasan = perkerasanJalan.value[i] ?? null;
-                let valAkses = aksesibilitasLokasi.value[i] ?? null;
-                let valLingkungan = kondisiLingkungan.value[i] ?? null;
-                let valPosisi = posisiAset.value[i] ?? null;
-                let valLainnya = lainnya.value[i] ?? null;
-                let valPerkiraan = perkiraanHargaTransaksiSetelahPenyesuaian.value[i] ?? null;
+                let valJarak = jarakPusatKota.value[idxPlus] ?? null;
+                let valPerkerasan = perkerasanJalan.value[idxPlus] ?? null;
+                let valAkses = aksesibilitasLokasi.value[idxPlus] ?? null;
+                let valLingkungan = kondisiLingkungan.value[idxPlus] ?? null;
+                let valPosisi = posisiAset.value[idxPlus] ?? null;
+                let valLainnya = lainnya.value[idxPlus] ?? null;
+                let valPerkiraan = perkiraanHargaTransaksiSetelahPenyesuaian.value[idxPlus] ?? null;
 
                 // 🔹 helper ubah 0 → "data_kosong"
                 const toKosong = (v) => (v === 0 ? "data_kosong" : v);
@@ -461,7 +425,7 @@ const onChangeElemenPerbandinganLokasi = async (fieldKey, selectedValue, idx, pb
             .filter(Boolean)
             .join("&");
 
-        console.log(query);
+        // console.log(query);
 
         if (!query) return;
 
@@ -471,65 +435,22 @@ const onChangeElemenPerbandinganLokasi = async (fieldKey, selectedValue, idx, pb
 
         if (res.data.success) {
             const newData = res.data.data;
-
-            const oldByLabel = new Map(
-                (Array.isArray(dataElemenPerbandinganLokasiPasar.value)
-                    ? dataElemenPerbandinganLokasiPasar.value
-                    : []
-                ).map((f) => [f.label, f])
-            );
-
             dataElemenPerbandinganLokasiPasar.value = newData.map((newField) => {
-                const oldField =
-                    oldByLabel.get(newField.label) || { objects: [], pembanding: [] };
 
-                const oldObjects = Array.isArray(oldField.objects)
-                    ? oldField.objects
-                    : [];
-                const newObjects = Array.isArray(newField.objects)
-                    ? newField.objects
-                    : [];
-                const maxObj = Math.max(oldObjects.length, newObjects.length, 1);
-
-                const objects = Array.from({ length: maxObj }, (_, j) => ({
-                    ...(oldObjects[j] || {}),
-                    ...(newObjects[j] || {}),
-                }));
-
-                const oldPbs = Array.isArray(oldField.pembanding)
-                    ? oldField.pembanding
-                    : [];
-                const oldPbById = new Map(
-                    oldPbs.filter((x) => x && x.id != null).map((x) => [x.id, x])
-                );
-
+                const objects = Array.isArray(newField.objects) ? newField.objects : []
                 const pembanding = (newField.pembanding || []).map((pb, i) => {
-                    const oldPb =
-                        (pb && pb.id != null ? oldPbById.get(pb.id) : null) ||
-                        oldPbs[i] ||
-                        {};
-
-                    const persenOverride =
-                        i === idx && pb.id === pbId ? value : pb?.persen;
-
-
-
+                    const idxPlusOne = i + 1
 
                     return {
-                        ...oldPb,
-                        ...pb,
-                        deskripsi: pb?.deskripsi ?? oldPb.deskripsi ?? "-",
-                        persen: persenOverride ?? oldPb.persen ?? null,
-                        penyesuaian: pb?.penyesuaian ?? oldPb.penyesuaian ?? null,
-                        hasil: pb?.hasil ?? oldPb.hasil ?? null,
-                    };
-                });
+                        id: pb?.id ?? 0,
+                        [`deskripsi_${idxPlusOne}`]: pb?.[`deskripsi_${idxPlusOne}`] ?? "-",
+                        [`persen_${idxPlusOne}`]: pb?.[`persen_${idxPlusOne}`] ?? 0,
+                        [`penyesuaian_${idxPlusOne}`]: pb?.[`penyesuaian_${idxPlusOne}`] ?? 0,
+                        // [`hasil_${idxPlusOne}`]: pb?.[`hasil_${idxPlusOne}`] ?? 0,
+                    }
+                })
 
-                return {
-                    ...newField,
-                    objects,
-                    pembanding,
-                };
+                return { ...newField, objects, pembanding }
             });
             hitungTotalPenyesuaian()
             await updateTotalPenyesuaian(idx)
@@ -606,11 +527,34 @@ const resetElemenPerbandinganKarakteristikFisik = (idx, pbId) => {
 
 const onChangeElemenPerbandinganKarakteristikFisik = async (fieldKey, selectedValue, idx, pbId) => {
     try {
-        let value = parseFloat(selectedValue) || 0;
-        value = Math.min(Math.max(value, 0), 100); // Batas 0-100
+        let value = parseFloat(selectedValue.value) || 0;
 
-        if (fieldMap[fieldKey]) {
-            fieldMap[fieldKey].value[idx] = value;
+
+        // Batas 0–100
+        if (value > 100) value = 100;
+        if (value < 0) value = 0;
+
+        if (fieldKey === "luas_tanah") {
+            luasTanahFinal.value[idx] = value;
+        } else if (fieldKey === "luas_bangunan") {
+            luasBangunanFinal.value[idx] = value;
+        } else if (fieldKey === "bentuk") {
+            bentukFinal.value[idx] = value;
+
+        } else if (fieldKey === "elevasi") {
+            elevasiFinal.value[idx] = value;
+        } else if (fieldKey === "topografi") {
+            topografiFinal.value[idx] = value;
+        } else if (fieldKey === "lebar_muka") {
+            lebarMukaFinal.value[idx] = value;
+        } else if (fieldKey === "peruntukan") {
+            peruntukanFinal.value[idx] = value;
+        } else if (fieldKey === "kondisi_bangunan") {
+            kondisiBangunanFinal.value[idx] = value;
+        } else if (fieldKey === "lainnya") {
+            lainnyaFinal.value[idx] = value;
+        } else if (fieldKey === "perkiraan_harga_transaksi_setelah_penyesuaian") {
+            perkiraanHargaTransaksiSetelahPenyesuaian.value[idx] = value;
         }
 
         const target = dataElemenPerbandinganPasar.value.find(
@@ -621,19 +565,63 @@ const onChangeElemenPerbandinganKarakteristikFisik = async (fieldKey, selectedVa
         }
 
         const PasarId = route.params.id;
-        const query = data.value.pembandings
+        const toKosong = (v) => (v === 0 ? "data_kosong" : v);
+
+        const query = dataPasarAll.value.pembanding_id
             .map((pb, i) => {
-                if (!pb?.id) return null;
-                const params = Object.entries(fieldMap)
-                    .map(([key, ref]) => `${key}=${ref.value[i] ?? 0}`)
-                    .join("&");
-                const valPerkiraan = perkiraanHargaTransaksiSetelahPenyesuaian.value[i] ?? null;
-                return valPerkiraan !== null
-                    ? `pembanding_id=${pb.id}&${params}&perkiraan_harga_setelah_penyesuaian=${valPerkiraan}&list_data=${i + 1}`
-                    : null;
+
+                if (!pb) return null;
+
+                const idxPlus = i + 1;
+
+                let valLuasTanah = toKosong(luasTanahFinal.value[idxPlus] ?? 0);
+                let valLuasBangunan = toKosong(luasBangunanFinal.value[idxPlus] ?? 0);
+                let valBentuk = toKosong(bentukFinal.value[idxPlus] ?? 0);
+                let valElevasi = toKosong(elevasiFinal.value[idxPlus] ?? 0);
+                let valTopografi = toKosong(topografiFinal.value[idxPlus] ?? 0);
+                let valLebarMuka = toKosong(lebarMukaFinal.value[idxPlus] ?? 0);
+                let valPeruntukan = toKosong(peruntukanFinal.value[idxPlus] ?? 0);
+                let valKondisiBangunan = toKosong(kondisiBangunanFinal.value[idxPlus] ?? 0);
+                let valLainnya = toKosong(lainnyaFinal.value[idxPlus] ?? 0);
+                let valPerkiraan = toKosong(perkiraanHargaTransaksiSetelahPenyesuaian.value[idxPlus] ?? 0);
+
+
+                if (
+                    [
+                        valLuasTanah,
+                        valLuasBangunan,
+                        valBentuk,
+                        valElevasi,
+                        valTopografi,
+                        valLebarMuka,
+                        valPeruntukan,
+                        valKondisiBangunan,
+                        valLainnya,
+                        valPerkiraan,
+                    ].some((v) => v !== null)
+                ) {
+                    return (
+                        `pembanding_id=${pb}` +
+                        `&luas_tanah=${valLuasTanah}` +
+                        `&luas_bangunan=${valLuasBangunan}` +
+                        `&bentuk=${valBentuk}` +
+                        `&elevasi=${valElevasi}` +
+                        `&topografi=${valTopografi}` +
+                        `&lebar_muka=${valLebarMuka}` +
+                        `&peruntukan=${valPeruntukan}` +
+                        `&kondisi_bangunan=${valKondisiBangunan}` +
+                        `&lainnya=${valLainnya}` +
+                        `&perkiraan_harga_setelah_penyesuaian=${valPerkiraan}` +
+                        `&list_data=${idxPlus}`
+                    );
+                }
+
+                return null;
             })
             .filter(Boolean)
             .join("&");
+
+
         // console.log(query);
 
         if (!query) return;
@@ -645,32 +633,26 @@ const onChangeElemenPerbandinganKarakteristikFisik = async (fieldKey, selectedVa
         if (!res.data.success) return;
 
         const newData = res.data.data;
-        const oldByLabel = new Map((dataElemenPerbandinganKarakterFisikPasar.value || []).map(f => [f.label, f]));
+
 
         dataElemenPerbandinganKarakterFisikPasar.value = newData.map(newField => {
-            const oldField = oldByLabel.get(newField.label) || { objects: [], pembanding: [] };
-            const oldPbs = oldField.pembanding || [];
-            const oldPbById = new Map(oldPbs.filter(x => x?.id != null).map(x => [x.id, x]));
-
+            const objects = Array.isArray(newField.objects) ? newField.objects : []
             const pembanding = (newField.pembanding || []).map((pb, i) => {
-                const oldPb = pb?.id != null ? oldPbById.get(pb.id) : oldPbs[i] || {};
-                const persenOverride = i === idx && pb.id === pbId ? value : pb?.persen;
-                return {
-                    ...oldPb,
-                    ...pb,
-                    deskripsi: pb?.deskripsi ?? oldPb.deskripsi ?? "-",
-                    persen: persenOverride ?? oldPb.persen ?? null,
-                    penyesuaian: pb?.penyesuaian ?? oldPb.penyesuaian ?? 0,
-                    hasil: pb?.hasil ?? oldPb.hasil ?? null,
-                };
-            });
+                const idxPlusOne = i + 1
+                // console.log(pb);
 
-            return {
-                ...newField,
-                objects: newField.objects || [],
-                pembanding,
-            };
+                return {
+                    id: pb?.id ?? 0,
+                    [`deskripsi_${idxPlusOne}`]: pb?.[`deskripsi_${idxPlusOne}`] ?? "-",
+                    [`persen_${idxPlusOne}`]: pb?.[`persen_${idxPlusOne}`] ?? 0,
+                    [`penyesuaian_${idxPlusOne}`]: pb?.[`penyesuaian_${idxPlusOne}`] ?? 0,
+                    // [`hasil_${idxPlusOne}`]: pb?.[`hasil_${idxPlusOne}`] ?? 0,
+                }
+            })
+
+            return { ...newField, objects, pembanding }
         });
+
 
         // Hitung total setelah update
         hitungTotalPenyesuaian();
@@ -845,13 +827,15 @@ onBeforeMount(async () => {
             field.pembanding = Array.from({ length: totalPb }, (_, idx) => {
                 const existing = field.pembanding?.[idx] || {};
 
+
                 return {
-                    id: existing.id ?? data.value.pembandings[idx]?.id ?? null,
-                    deskripsi: existing.deskripsi ?? "",
-                    persen: existing.persen ?? null,
-                    penyesuaian: existing.penyesuaian ?? null,
-                    hasil: existing.hasil ?? null,
+                    id: existing?.id ?? null,
+                    [`deskripsi_${idx + 1}`]: existing?.[`deskripsi_${idx + 1}`] ?? "",
+                    [`persen_${idx + 1}`]: existing?.[`persen_${idx + 1}`] ?? null,
+                    [`penyesuaian_${idx + 1}`]: existing?.[`penyesuaian_${idx + 1}`] ?? null,
+                    [`hasil_${idx + 1}`]: existing?.[`hasil_${idx + 1}`] ?? 0,
                 };
+
             });
 
             return field;
@@ -868,16 +852,17 @@ onBeforeMount(async () => {
                 const existing = field.pembanding?.[idx] || {};
 
                 return {
-                    id: existing.id ?? data.value.pembandings[idx]?.id ?? null,
-                    deskripsi: existing.deskripsi ?? "",
-                    persen: existing.persen ?? null,
-                    penyesuaian: existing.penyesuaian ?? null,
-                    hasil: existing.hasil ?? null,
+                    id: existing?.id ?? 0,
+                    [`deskripsi_${idx + 1}`]: existing?.[`deskripsi_${idx + 1}`] ?? "",
+                    [`persen_${idx + 1}`]: existing?.[`persen_${idx + 1}`] ?? 0,
+                    [`penyesuaian_${idx + 1}`]: existing?.[`penyesuaian_${idx + 1}`] ?? 0,
+                    [`hasil_${idx + 1}`]: existing?.[`hasil_${idx + 1}`] ?? 0,
                 };
             });
 
             return field;
         });
+
 
     }
 });
@@ -1427,7 +1412,7 @@ const getJenisBangunanValue = (idx, field) => {
                         <template v-for="(pb, pbIdx) in item.pembanding" :key="'pb-' + pbIdx">
                             <!-- Kiri -->
                             <td class="p-2 border dark:border-gray-600 dark:text-white">
-                                {{ pb.deskripsi || '-' }}
+                                {{ pb[`deskripsi_${pbIdx + 1}`] || '-' }}
                             </td>
 
                             <!-- Input angka sesuai label -->
@@ -1473,19 +1458,12 @@ const getJenisBangunanValue = (idx, field) => {
                                         :useGrouping="false" placeholder="Isi angka (%)"
                                         @input="val => onChangeElemenPerbandinganLokasi('lainnya', val, pbIdx + 1, pb.id)" />
                                 </template>
-
-                                <!-- Perkiraan Harga Transaksi setelah Penyesuaian (readonly) -->
-                                <template v-else-if="item.label === 'Perkiraan Harga Transaksi setelah Penyesuaian'">
-                                    <span class="dark:text-white">
-                                        {{ pb.hasil || '-' }}
-                                    </span>
-                                </template>
                             </td>
 
 
                             <!-- Kanan -->
                             <td class="p-2 border dark:border-gray-600 dark:text-white" colspan="2">
-                                {{ pb.penyesuaian || '-' }}
+                                {{ pb[`penyesuaian_${pbIdx + 1}`] }}
                             </td>
                         </template>
 
@@ -1529,7 +1507,6 @@ const getJenisBangunanValue = (idx, field) => {
                             <td class="p-2 border dark:border-gray-600 dark:text-white">
                                 {{ pb.deskripsi || '-' }}
                             </td>
-
                             <!-- Input angka sesuai label -->
                             <td class="p-2 border dark:border-gray-600">
                                 <!-- Luas Tanah -->
@@ -1544,52 +1521,53 @@ const getJenisBangunanValue = (idx, field) => {
 
                                 <!-- Bentuk -->
                                 <template v-else-if="item.label === 'Bentuk'">
-                                    <input type="number" step="0.01" class="w-full rounded p-1"
-                                        v-model.number="pb.bentuk"
-                                        @input="e => onChangeElemenPerbandinganKarakteristikFisik('bentuk', pb.bentuk, pbIdx, pb.id)" />
+                                    <InputNumber v-model="pb[`persen_${pbIdx + 1}`]" class="w-full" :min="0" :max="100"
+                                        :useGrouping="false" placeholder="Isi angka (%)"
+                                        @input="val => onChangeElemenPerbandinganKarakteristikFisik('bentuk', val, pbIdx + 1, pb.id)" />
                                 </template>
 
                                 <!-- Elevasi -->
                                 <template v-else-if="item.label === 'Elevasi'">
-                                    <input type="number" step="0.01" class="w-full rounded p-1"
-                                        v-model.number="pb.elevasi"
-                                        @input="e => onChangeElemenPerbandinganKarakteristikFisik('elevasi', pb.elevasi, pbIdx, pb.id)" />
+                                    <InputNumber v-model="pb[`persen_${pbIdx + 1}`]" class="w-full" :min="0" :max="100"
+                                        :useGrouping="false" placeholder="Isi angka (%)"
+                                        @input="val => onChangeElemenPerbandinganKarakteristikFisik('elevasi', val, pbIdx + 1, pb.id)" />
                                 </template>
 
                                 <!-- Topografi -->
                                 <template v-else-if="item.label === 'Topografi'">
-                                    <input type="number" step="0.01" class="w-full rounded p-1"
-                                        v-model.number="pb.topografi"
-                                        @input="e => onChangeElemenPerbandinganKarakteristikFisik('topografi', pb.topografi, pbIdx, pb.id)" />
+                                    <InputNumber v-model="pb[`persen_${pbIdx + 1}`]" class="w-full" :min="0" :max="100"
+                                        :useGrouping="false" placeholder="Isi angka (%)"
+                                        @input="val => onChangeElemenPerbandinganKarakteristikFisik('topografi', val, pbIdx + 1, pb.id)" />
                                 </template>
 
                                 <!-- Lebar Muka -->
                                 <template v-else-if="item.label === 'Lebar Muka'">
-                                    <input type="number" step="0.01" class="w-full rounded p-1"
-                                        v-model.number="pb.lebar_muka"
-                                        @input="e => onChangeElemenPerbandinganKarakteristikFisik('lebar_muka', pb.lebar_muka, pbIdx, pb.id)" />
+                                    <InputNumber v-model="pb[`persen_${pbIdx + 1}`]" class="w-full" :min="0" :max="100"
+                                        :useGrouping="false" placeholder="Isi angka (%)"
+                                        @input="val => onChangeElemenPerbandinganKarakteristikFisik('lebar_muka', val, pbIdx + 1, pb.id)" />
                                 </template>
 
                                 <!-- Peruntukan -->
                                 <template v-else-if="item.label === 'Peruntukan'">
-                                    <input type="number" step="0.01" class="w-full rounded p-1"
-                                        v-model.number="pb.peruntukan"
-                                        @input="e => onChangeElemenPerbandinganKarakteristikFisik('peruntukan', pb.peruntukan, pbIdx, pb.id)" />
+                                    <InputNumber v-model="pb[`persen_${pbIdx + 1}`]" class="w-full" :min="0" :max="100"
+                                        :useGrouping="false" placeholder="Isi angka (%)"
+                                        @input="val => onChangeElemenPerbandinganKarakteristikFisik('peruntukan', val, pbIdx + 1, pb.id)" />
                                 </template>
 
                                 <!-- Kondisi Bangunan -->
                                 <template v-else-if="item.label === 'Kondisi Bangunan'">
-                                    <input type="number" step="0.01" class="w-full rounded p-1"
-                                        v-model.number="pb.kondisi_bangunan"
-                                        @input="e => onChangeElemenPerbandinganKarakteristikFisik('kondisi_bangunan', pb.kondisi_bangunan, pbIdx, pb.id)" />
+                                    <InputNumber v-model="pb[`persen_${pbIdx + 1}`]" class="w-full" :min="0" :max="100"
+                                        :useGrouping="false" placeholder="Isi angka (%)"
+                                        @input="val => onChangeElemenPerbandinganKarakteristikFisik('kondisi_bangunan', val, pbIdx + 1, pb.id)" />
                                 </template>
 
                                 <!-- Lainnya -->
                                 <template v-else-if="item.label === 'Lainnya (Sebutkan)'">
-                                    <input type="number" step="0.01" class="w-full rounded p-1"
-                                        v-model.number="pb.lainnya"
-                                        @input="e => onChangeElemenPerbandinganKarakteristikFisik('lainnya', pb.lainnya, pbIdx, pb.id)" />
+                                    <InputNumber v-model="pb[`persen_${pbIdx + 1}`]" class="w-full" :min="0" :max="100"
+                                        :useGrouping="false" placeholder="Isi angka (%)"
+                                        @input="val => onChangeElemenPerbandinganKarakteristikFisik('lainnya', val, pbIdx + 1, pb.id)" />
                                 </template>
+
 
                                 <!-- Default (kalau tidak ada) -->
                                 <template v-else>
@@ -1599,21 +1577,21 @@ const getJenisBangunanValue = (idx, field) => {
 
                             <!-- Kanan -->
                             <td class="p-2 border dark:border-gray-600 dark:text-white" colspan="2">
-                                {{ pb.penyesuaian || '-' }}
+                                {{ pb[`penyesuaian_${pbIdx + 1}`] || '-' }}
                             </td>
                         </template>
-
-
-
-
                     </tr>
+
 
                     <!-- Baris tambahan dengan sekat lurus -->
 
 
                 </template>
-
+                <tr>
+                    <td colspan="100%" style="height: 30px;"></td>
+                </tr>
                 <template v-for="item in dataSummaryPasar" :key="item.label">
+
                     <!-- Baris utama -->
                     <tr>
                         <!-- Label -->
@@ -1633,6 +1611,7 @@ const getJenisBangunanValue = (idx, field) => {
                         <template v-for="(pb, pbIdx) in item.pembanding" :key="'pb-' + pbIdx">
                             <!-- Kalau label = Jumlah Penyesuaian -->
                             <template v-if="item.label === 'Jumlah Penyesuaian'">
+
                                 <!-- Kiri -->
                                 <td class="p-2 border dark:border-gray-600 dark:text-white">
                                     {{ pb.deskripsi || '-' }}
