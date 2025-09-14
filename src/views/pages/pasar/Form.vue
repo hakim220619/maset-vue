@@ -77,7 +77,7 @@ const save = async () => {
                 text: 'Data sewa berhasil disimpan',
                 icon: 'success'
             });
-            router.push({ name: 'Sewa List' });
+            router.push({ name: 'Pasar List' });
         }
     } catch (error) {
         if (error instanceof z.ZodError) {
