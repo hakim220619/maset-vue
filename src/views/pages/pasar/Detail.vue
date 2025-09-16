@@ -1333,7 +1333,7 @@ const getJenisBangunanValue = (idx, field) => {
 
                 <tr class="bg-gray-100 dark:bg-gray-700 font-bold">
                     <td class="p-2 border dark:border-gray-600 dark:text-white"
-                        :colspan="11 + (data.object.length * 0) + (data.pembanding.length * 0)">
+                        :colspan="11 + (totalObject * 1) + (totalPembanding * 3)">
                         LOKASI
                     </td>
                     <!-- Dynamic Object Headers (2 columns each) -->
@@ -1425,7 +1425,7 @@ const getJenisBangunanValue = (idx, field) => {
                 </template>
                 <tr class="bg-gray-100 dark:bg-gray-700 font-bold">
                     <td class="p-2 border dark:border-gray-600 dark:text-white"
-                        :colspan="11 + (data.object.length * 0) + (data.pembanding.length * 0)">
+                        :colspan="11 + (totalObject * 1) + (totalPembanding * 3)">
                         KARAKTER FISIK
                     </td>
                     <!-- Dynamic Object Headers (2 columns each) -->
@@ -1683,7 +1683,7 @@ const getJenisBangunanValue = (idx, field) => {
                             dataSummaryPasar.nilaiMaxMinDeviasi?.find(item => item.label === 'Deviasi')?.value || '0'
                         }}
                     </td>
-                    <td class="border p-2 font-bold align-middle dark:text-white" :rowspan="2">
+                    <td class="border p-2 font-bold align-middle dark:text-white" :rowspan="3">
                         {{ dataSummaryPasar.status || '0' }}
                     </td>
                 </tr>
