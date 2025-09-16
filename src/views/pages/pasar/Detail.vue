@@ -668,65 +668,12 @@ const onChangeElemenPerbandinganKarakteristikFisik = async (fieldKey, selectedVa
 const updateTotalPenyesuaian = async (idx) => {
     try {
         const PasarId = route.params.id;
-        if (!dataTotals.value?.length || !dataPersent.value?.length) return;
-        const target = dataElemenPerbandinganPasar.value.find(
-            (d) => d.label === "Perkiraan Harga Transaksi setelah Penyesuaian"
-        );
-        // console.log(target);
 
-        if (target && target.pembanding?.length) {
-            // console.log(target);
 
-            perkiraanHargaTransaksiSetelahPenyesuaian.value = target.pembanding.map(pb => pb.hasil);
-        }
-        const query = data.value.pembandings
-            .map((pb, i) => {
-                if (!pb?.id) return null;
-                const valTotal = parseFloat(dataTotals.value[i]) || 0;
-                const valPersent = parseFloat(dataPersent.value[i]) || 0;
-                const valPerkiraan = perkiraanHargaTransaksiSetelahPenyesuaian.value[i] ?? null;
-                const cleaned = valPerkiraan.replace(/[Rp\s\.]/g, '');
-
-                // Konversi ke float
-                const valueFloat = parseFloat(cleaned);
-                return `pembanding_id=${pb.id}&total=${valTotal}&persent=${valPersent}&perkiraan_harga_setelah_penyesuaian=${valueFloat}&list_data=${i + 1}&idx=${idx}`;
-            })
-            .filter(Boolean)
-            .join("&");
-
-        if (!query) return;
-
-        const res = await AuthApi.client().get(`/getSummaryPasar/${PasarId}?${query}`);
+        const res = await AuthApi.client().get(`/getSummaryPasar/${PasarId}`);
         if (!res.data.success) return;
 
-        const newData = res.data.data;
-        const oldByLabel = new Map((dataSummaryPasar.value || []).map(f => [f.label, f]));
-
-        dataSummaryPasar.value = newData.map(newField => {
-            const oldField = oldByLabel.get(newField.label) || { objects: [], pembanding: [] };
-            const oldPbs = oldField.pembanding || [];
-            const oldPbById = new Map(oldPbs.filter(x => x?.id != null).map(x => [x.id, x]));
-
-            const pembanding = (newField.pembanding || []).map((pb, i) => {
-                const oldPb = (pb?.id != null ? oldPbById.get(pb.id) : oldPbs[i]) || {};
-                return {
-                    ...oldPb,
-                    ...pb,
-                    deskripsi: pb?.deskripsi ?? oldPb.deskripsi ?? "-",
-                    persen: pb?.persen ?? oldPb.persen ?? null,
-                    penyesuaian: pb?.penyesuaian ?? oldPb.penyesuaian ?? 0,
-                    totalPenyesuaian: pb?.totalPenyesuaian ?? oldPb.totalPenyesuaian ?? 0,
-                    totalPersent: pb?.totalPersent ?? oldPb.totalPersent ?? 0,
-                };
-            });
-
-
-            return {
-                ...newField,
-                objects: newField.objects || [],
-                pembanding,
-            };
-        });
+        dataSummaryPasar.value = res.data.data;
 
     } catch (err) {
         console.error("Error update total penyesuaian:", err);
@@ -777,6 +724,8 @@ onBeforeMount(async () => {
         dataElemenPerbandinganLokasiPasar.value = dataElemenPerbandinganLokasi;
         dataElemenPerbandinganKarakterFisikPasar.value = dataElemenPerbandinganKarakterFisik;
         dataSummaryPasar.value = dataSummary;
+
+
         dataEstimasiBangunan.value = EstimasiBangunan;
         // console.log(dataElemenPerbandinganKarakterFisikPasar);
 
@@ -979,11 +928,12 @@ const getJenisBangunanValue = (idx, field) => {
             <div class="border-t border-gray-200 dark:border-gray-600 pt-4 space-y-2">
                 <!-- ID Data Aset -->
                 <p v-if="data.tanahs.length" class="text-sm text-gray-700 dark:text-gray-300">
-                    <span class="font-medium">Nomor ID Data Aset:</span> {{ data.tanahs[0].judul_penilaian }}
+                    <span class="font-medium">Nomor ID Data Aset:</span> {{ data.tanahs[0].judul_penilaian || 'Data 1'
+                    }}
                 </p>
 
                 <!-- Loop ID Data Pembanding -->
-                <p v-for="(pembanding, index) in data.pembandings" :key="pembanding.id"
+                <p v-for="(pembanding, index) in dataPasarAll.length" :key="pembanding.id"
                     class="text-sm text-gray-700 dark:text-gray-300">
                     <span class="font-medium">
                         Nomor ID Data Pembanding {{ index + 1 }}:
@@ -1002,22 +952,21 @@ const getJenisBangunanValue = (idx, field) => {
                 Penilaian Nilai Pasar Tempat Usaha
             </p>
 
-            <div class="border-t border-gray-200 dark:border-gray-600 pt-5 space-y-3" v-if="data.tanahs.length">
+            <div class="border-t border-gray-200 dark:border-gray-600 pt-5 space-y-3">
                 <p class="text-base text-gray-700 dark:text-gray-300">
-                    <span class="font-medium">Nama Entitas:</span> {{ data.tanahs[0].nama_entitas }}
+                    <span class="font-medium">Nama Entitas:</span> asd
                 </p>
                 <p class="text-base text-gray-700 dark:text-gray-300">
-                    <span class="font-medium">Tanggal Inspeksi:</span> {{ formatDate(data.tanahs[0].tanggal_inspeksi) }}
+                    <span class="font-medium">Tanggal Inspeksi:</span> asd
                 </p>
                 <p class="text-base text-gray-700 dark:text-gray-300">
-                    <span class="font-medium">Tanggal Penilaian:</span> {{ formatDate(data.tanahs[0].tanggal_penilaian)
-                    }}
+                    <span class="font-medium">Tanggal Penilaian:</span> asd
                 </p>
                 <p class="text-base text-gray-700 dark:text-gray-300">
-                    <span class="font-medium">Penilai / Surveyor:</span> {{ data.tanahs[0].penilai }}
+                    <span class="font-medium">Penilai / Surveyor:</span> asd
                 </p>
                 <p class="text-base text-gray-700 dark:text-gray-300">
-                    <span class="font-medium">Tahun Penilaian:</span> {{ data.tanahs[0].tahun_penilaian }}
+                    <span class="font-medium">Tahun Penilaian:</span>as
                 </p>
             </div>
         </div>
@@ -1590,7 +1539,7 @@ const getJenisBangunanValue = (idx, field) => {
                 <tr>
                     <td colspan="100%" style="height: 30px;"></td>
                 </tr>
-                <template v-for="item in dataSummaryPasar" :key="item.label">
+                <template v-for="item in dataSummaryPasar.informasiUmumFields" :key="item.label">
 
                     <!-- Baris utama -->
                     <tr>
@@ -1598,14 +1547,41 @@ const getJenisBangunanValue = (idx, field) => {
                         <td class="p-2 border dark:border-gray-600 dark:text-white" colspan="2">
                             {{ item.label }}
                         </td>
+                        <template v-for="(pb, pbIdx) in 1" :key="'pb-' + pbIdx">
+                            <template v-if="item.label === 'Jumlah Penyesuaian'">
+                                <td class="p-2 border dark:border-gray-600 dark:text-white text-center" colspan="2">
 
-                        <!-- Objects -->
-                        <template v-for="(obj, objIdx) in item.objects" :key="'obj-' + objIdx">
+                                </td>
+                            </template>
+                            <template v-if="item.label === 'Indikasi Nilai Sewa Pasar setelah penyesuaian / m²'">
+                                <td class="p-2 border dark:border-gray-600 dark:text-white text-center" colspan="2">
 
-                            <td class="p-2 border dark:border-gray-600 dark:text-white" colspan="2">
-                                {{ obj.deskripsi }}
-                            </td>
+                                </td>
+                            </template>
+                            <template v-if="item.label === 'Proporsi'">
+                                <td class="p-2 border dark:border-gray-600 dark:text-white text-center" colspan="2">
+                                    {{ item.objects.totalProporsi }}
+                                </td>
+                            </template>
+                            <template v-else-if="item.label === 'Total Bobot Absolut'">
+                                <td class="p-2 border dark:border-gray-600 dark:text-white text-center" colspan="2">
+                                    {{ item.objects.totalBobotAbsolutAll }}
+                                </td>
+                            </template>
+                            <template v-else-if="item.label === 'Inverse'">
+                                <td class="p-2 border dark:border-gray-600 dark:text-white text-center" colspan="2">
+                                    {{ item.objects.totalInverse }}
+                                </td>
+                            </template>
+                            <template v-else-if="item.label === 'Pembobotan Akhir'">
+                                <td class="p-2 border dark:border-gray-600 dark:text-white text-center" colspan="2">
+                                    {{ item.objects.totalPembobotanAkhir }}
+                                </td>
+                            </template>
+                            <!-- Objects -->
+
                         </template>
+
 
                         <!-- Pembanding -->
                         <template v-for="(pb, pbIdx) in item.pembanding" :key="'pb-' + pbIdx">
@@ -1618,36 +1594,41 @@ const getJenisBangunanValue = (idx, field) => {
                                 </td>
 
                                 <!-- Input angka -->
-                                <td class="p-2 border dark:border-gray-600">
+                                <td class="p-2 border dark:border-gray-600 text-center">
                                     <!-- contoh input / angka -->
-                                    {{ pb.totalPersen || '-' }}
+                                    {{ pb.jumlahPenyesuaianPersen || '-' }}
                                 </td>
 
                                 <!-- Kanan -->
                                 <td class="p-2 border dark:border-gray-600 dark:text-white" colspan="2">
-                                    {{ pb.totalPenyesuaian || '-' }}
+                                    {{ pb.jumlahPenyesuaian || '-' }}
                                 </td>
                             </template>
 
                             <!-- Kalau bukan Jumlah Penyesuaian -->
+                            <template v-else-if="item.label === 'Indikasi Nilai Sewa Pasar setelah penyesuaian / m²'">
+                                <td class="p-2 border dark:border-gray-600 dark:text-white text-center" colspan="4">
+                                    {{ pb.indikasiNilai || '-' }}
+                                </td>
+                            </template>
                             <template v-else-if="item.label === 'Total Bobot Absolut'">
                                 <td class="p-2 border dark:border-gray-600 dark:text-white text-center" colspan="4">
-                                    {{ pb.totalPersen || '-' }}
+                                    {{ pb.totalBobotAbsolut || '-' }}
                                 </td>
                             </template>
                             <template v-else-if="item.label === 'Proporsi'">
                                 <td class="p-2 border dark:border-gray-600 dark:text-white text-center" colspan="4">
-                                    {{ pb.totalPersen || '-' }}
+                                    {{ pb.proporsi || '-' }}
                                 </td>
                             </template>
                             <template v-else-if="item.label === 'Inverse'">
                                 <td class="p-2 border dark:border-gray-600 dark:text-white text-center" colspan="4">
-                                    {{ pb.totalPersen || '-' }}
+                                    {{ pb.inverse || '-' }}
                                 </td>
                             </template>
                             <template v-else-if="item.label === 'Pembobotan Akhir'">
                                 <td class="p-2 border dark:border-gray-600 dark:text-white text-center" colspan="4">
-                                    {{ pb.totalPersen || '-' }}
+                                    {{ pb.pembobotanAkhir || '-' }}
                                 </td>
                             </template>
                             <template v-else>
@@ -1681,8 +1662,8 @@ const getJenisBangunanValue = (idx, field) => {
                     <th class="p-2 border dark:border-gray-600 dark:text-white">Nilai</th>
                 </tr>
             </thead>
-            <tbody v-if="dataSummaryPasar && dataSummaryPasar.length">
-                <tr v-for="(item, index) in dataSummaryPasar[5].kesimpulanNilai" :key="'kesimpulan-' + index">
+            <tbody>
+                <tr v-for="(item, index) in dataSummaryPasar.kesimpulanNilai" :key="'kesimpulan-' + index">
                     <td class="border p-2 dark:border-gray-600 dark:text-white">{{ item.jenis_property }}</td>
                     <td class="border p-2 dark:border-gray-600 text-center">{{ item.bobot }}</td>
                     <td class="border p-2 dark:border-gray-600 text-right">{{ item.nilai }}</td>
@@ -1692,23 +1673,22 @@ const getJenisBangunanValue = (idx, field) => {
 
         <br>
 
-        <table v-if="dataSummaryPasar?.[5]?.nilaiMaxMinDeviasi"
-            class="min-w-full border border-gray-300 text-sm mt-4 text-center">
+        <table class="min-w-full border border-gray-300 text-sm mt-4 text-center">
             <tbody>
                 <!-- Deviasi di atas -->
                 <tr>
                     <td class="border p-2 text-left font-semibold dark:text-white">Deviasi:</td>
                     <td class="border p-2 dark:text-white font-semibold">
                         {{
-                            dataSummaryPasar?.[5]?.nilaiMaxMinDeviasi?.find(item => item.label === 'Deviasi')?.value || '0'
+                            dataSummaryPasar.nilaiMaxMinDeviasi?.find(item => item.label === 'Deviasi')?.value || '0'
                         }}
                     </td>
                     <td class="border p-2 font-bold align-middle dark:text-white" :rowspan="2">
-                        {{ dataSummaryPasar?.[5].status || '0' }}
+                        {{ dataSummaryPasar.status || '0' }}
                     </td>
                 </tr>
                 <!-- Loop untuk Min dan Max -->
-                <tr v-for="item in dataSummaryPasar?.[5]?.nilaiMaxMinDeviasi?.filter(i => i.label !== 'Deviasi') || [{ label: 'Min', value: '0' }, { label: 'Max', value: '0' }]"
+                <tr v-for="item in dataSummaryPasar.nilaiMaxMinDeviasi?.filter(i => i.label !== 'Deviasi') || [{ label: 'Min', value: '0' }, { label: 'Max', value: '0' }]"
                     :key="item.label">
                     <td class="border p-2 text-left dark:text-white">{{ item.label }}</td>
                     <td class="border p-2">{{ item.value || '0' }}</td>
