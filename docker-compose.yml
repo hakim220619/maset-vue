@@ -1,5 +1,8 @@
 version: "3.8"
-
+networks:
+  caddy_network:
+    name: caddy_network
+    external: true
 services:
   app:
     container_name: maset
@@ -13,3 +16,5 @@ services:
     volumes:
       - .:/app
       - /app/node_modules
+    networks:
+      - caddy_network
