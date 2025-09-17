@@ -29,7 +29,7 @@ const search = ref({
     pembanding_id: ''
 });
 
-async function getSewaData() {
+async function getPasar() {
     isFiltering.value = true;
     const params = Helper.formatSearchParams(search.value);
     try {
@@ -93,7 +93,7 @@ const destroy = (id) => {
                         text: 'Data pasar berhasil dihapus',
                         icon: 'success'
                     });
-                    getSewaData();
+                    getPasar();
                 }
             }
         });
@@ -110,7 +110,7 @@ const add = () => {
 };
 
 onMounted(() => {
-    getSewaData();
+    getPasar();
 });
 </script>
 

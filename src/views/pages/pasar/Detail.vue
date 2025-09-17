@@ -18,6 +18,8 @@ const data = ref({
     final_summary: {},
 
 });
+const dataPasarAll = ref([]);
+const dataHeaderAll = ref([]);
 var judulPenilaianDataAsset = ref(null);
 var judulPenilaianDataPembanding1 = ref(null);
 var judulPenilaianDataPembanding2 = ref(null);
@@ -679,21 +681,36 @@ const updateTotalPenyesuaian = async (idx) => {
         console.error("Error update total penyesuaian:", err);
     }
 };
+const getHeaderAll = async (idx) => {
+    try {
+        const PasarId = route.params.id;
+
+
+        const res = await AuthApi.client().get(`/headerPasar/${PasarId}`);
+        if (!res.data.success) return;
+
+        dataHeaderAll.value = res.data.data;
+
+    } catch (err) {
+        console.error("Error update total penyesuaian:", err);
+    }
+};
 
 var totalObject = ref(0);
 var totalPembanding = ref(0);
 
-const dataPasarAll = ref([]);
+
 onBeforeMount(async () => {
 
     if (route.params.id) {
         await getMasterJenisBangunan();
+        await getHeaderAll()
         // await loadPasarDetail(route.params.id);
 
         if (data.value.pembandings && data.value.pembandings.length > 0) {
             selectedTahun.value = Array(data.value.pembandings.length).fill(null);
         }
-
+        const dataHeader = await Helper.getDataById('headerPasar', route.params.id);
         const dataPasar = await Helper.getDataById('pasar', route.params.id);
         const dataUnitPerbandingan = await Helper.getDataById('getDataUnitPerbandinganPasar', route.params.id);
         const dataTransaksi = await Helper.getDataById('getDataTransaksiPasar', route.params.id);
@@ -716,6 +733,8 @@ onBeforeMount(async () => {
         totalObject = dataPasar.tanah_id.length == 0 ? dataPasar.bangunan_id.length : dataPasar.tanah_id.length;
         totalPembanding = dataPasar.pembanding_id.length;
         dataPasarAll.value = dataPasar
+        dataHeaderAll.value = dataHeader
+
         informasiUmumFields.value = dataInformasiUmum;
         dataTransaksiFields.value = dataTransaksi;
         dataPropertiFields.value = dataProperti;
@@ -818,103 +837,6 @@ onBeforeMount(async () => {
 
 
 
-function formatDate(dateStr) {
-    if (!dateStr) return '-'
-    const options = { day: '2-digit', month: 'long', year: 'numeric' }
-    return new Date(dateStr).toLocaleDateString('id-ID', options)
-}
-
-
-// watch(
-//     [() => pembandingOptions.value, () => dataEstimasiBangunan.value],
-//     ([newOptions, newEstimasi]) => {
-//         if (!newEstimasi || newOptions.length === 0) return;
-
-//         newEstimasi.forEach((field) => {
-//             // Hanya untuk field tertentu
-//             if (
-//                 ["Keusangan Fungsional", "Keusangan Ekonomis", "Kondisi Fisik Bangunan (Visual)"].includes(field.label)
-//             ) {
-//                 if (field.items?.[0]) {
-//                     data.value.pembandings.forEach((_, idxx) => {
-//                         const key = "pembandings" + (idxx + 1);
-
-//                         // default dari pembandingOptions atau 0
-//                         if (!field.items[0][key]) {
-//                             field.items[0][key] = newOptions[0]?.value ?? 0;
-//                         }
-//                     });
-//                 }
-//             }
-//         });
-//     },
-//     { deep: true, immediate: true }
-// );
-// const defaultValues = {
-//     "Kondisi Fisik Bangunan (Visual)": [10, 20, 30],   // untuk pembanding 1,2,3
-//     "Keusangan Fungsional": [5, 15, 25],
-//     "Keusangan Ekonomis": [9, 10, 20]
-// };
-
-// watch(
-//     [() => pembandingOptions.value, () => dataEstimasiBangunan.value],
-//     ([newOptions, newEstimasi]) => {
-//         if (!newEstimasi || newOptions.length === 0) return;
-
-//         newEstimasi.forEach((field) => {
-//             if (
-//                 ["Keusangan Fungsional", "Keusangan Ekonomis", "Kondisi Fisik Bangunan (Visual)"].includes(field.label)
-//             ) {
-//                 if (field.items?.[0]) {
-//                     data.value.pembandings.forEach((pb, idxx) => {
-//                         const key = "pembandings" + (idxx + 1);
-//                         let val = field.items[0][key];
-
-//                         // kalau belum ada -> ambil default per idx dari defaultValues
-//                         if (val === undefined || val === null || val === "") {
-//                             val = defaultValues[field.label]?.[idxx] ?? 0; // fallback 0
-//                             field.items[0][key] = val;
-//                         }
-
-//                         // hanya panggil untuk field ini
-//                         if (val !== undefined && val !== null && val !== "") {
-//                             const map = {
-//                                 "Kondisi Fisik Bangunan (Visual)": "kondisi_fisik_bangunan",
-//                                 "Keusangan Fungsional": "keusangan_fungsional",
-//                                 "Keusangan Ekonomis": "keusangan_ekonomis",
-//                             };
-
-//                             // onDataChangeEstimasiBangunan(map[field.label], val, idxx, pb.id);
-//                         }
-//                     });
-//                 }
-//             }
-//         });
-//     },
-//     { deep: true, immediate: true }
-// );
-
-const getJenisBangunanValue = (idx, field) => {
-    const currentValue = field.items[0]['pembanding' + (idx + 1)];
-
-    // 🔹 cek umur_ekonomis
-    const umurEkonomis = field.items.find(f => f.umur_ekonomis)?.['pembanding' + (idx + 1)];
-
-    if (umurEkonomis) {
-        // cari opsi di pembandingOptions yang sesuai umur_ekonomis
-        for (const group of pembandingOptions) {
-            const match = group.items.find(opt => opt.umur_ekonomis === umurEkonomis);
-            if (match) {
-                return match.value;
-            }
-        }
-    }
-
-    // fallback ke value sekarang
-    return currentValue;
-};
-
-
 
 </script>
 
@@ -927,23 +849,19 @@ const getJenisBangunanValue = (idx, field) => {
 
             <div class="border-t border-gray-200 dark:border-gray-600 pt-4 space-y-2">
                 <!-- ID Data Aset -->
-                <p v-if="data.tanahs.length" class="text-sm text-gray-700 dark:text-gray-300">
-                    <span class="font-medium">Nomor ID Data Aset:</span> {{ data.tanahs[0].judul_penilaian || 'Data 1'
-                    }}
+                <p class="text-sm text-gray-700 dark:text-gray-300">
+                    <span class="font-medium">Nomor ID Data Aset:</span>
+                    {{ dataHeaderAll?.object?.id }}
                 </p>
 
                 <!-- Loop ID Data Pembanding -->
-                <p v-for="(pembanding, index) in dataPasarAll.length" :key="pembanding.id"
+                <p v-for="(item, index) in dataHeaderAll?.pembanding" :key="item.id"
                     class="text-sm text-gray-700 dark:text-gray-300">
-                    <span class="font-medium">
-                        Nomor ID Data Pembanding {{ index + 1 }}:
-                    </span>
-                    {{ pembanding.jenis_property }}
+                    <span class="font-medium">Nomor ID Data Pembanding {{ index + 1 }}:</span>
+                    {{ item.id }}
                 </p>
             </div>
         </div>
-
-
 
         <!-- Card 2 -->
         <div class="bg-white dark:bg-gray-800 shadow-lg rounded-2xl p-8 space-y-5">
@@ -954,19 +872,20 @@ const getJenisBangunanValue = (idx, field) => {
 
             <div class="border-t border-gray-200 dark:border-gray-600 pt-5 space-y-3">
                 <p class="text-base text-gray-700 dark:text-gray-300">
-                    <span class="font-medium">Nama Entitas:</span> asd
+                    <span class="font-medium">Nama Entitas:</span> {{ dataHeaderAll?.object?.nama_entitas }}
                 </p>
                 <p class="text-base text-gray-700 dark:text-gray-300">
-                    <span class="font-medium">Tanggal Inspeksi:</span> asd
+                    <span class="font-medium">Tanggal Inspeksi:</span> {{ dataHeaderAll?.object?.tanggal_inspeksi }}
                 </p>
                 <p class="text-base text-gray-700 dark:text-gray-300">
-                    <span class="font-medium">Tanggal Penilaian:</span> asd
+                    <span class="font-medium">Tanggal Penilaian:</span> {{ dataHeaderAll?.object?.tanggal_penilaian }}
                 </p>
                 <p class="text-base text-gray-700 dark:text-gray-300">
-                    <span class="font-medium">Penilai / Surveyor:</span> asd
+                    <span class="font-medium">Penilai / Surveyor:</span> {{ dataHeaderAll?.object?.penilai_surveyor }}
                 </p>
                 <p class="text-base text-gray-700 dark:text-gray-300">
-                    <span class="font-medium">Tahun Penilaian:</span>as
+                    <span class="font-medium">Tahun Penilaian:</span>{{ new
+                        Date(dataHeaderAll?.object?.created_at).getFullYear() }}
                 </p>
             </div>
         </div>
