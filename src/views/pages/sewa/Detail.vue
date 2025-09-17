@@ -32,6 +32,9 @@ const dataUnitPerbandinganField = ref([]);
 const route = useRoute();
 const sewaId = route.params.id;
 
+// Add debounce timer refs
+const debounceTimers = ref(new Map());
+
 // Computed properties to check if data is loaded
 const isElemenPerbandinganLoaded = computed(() => {
     return data.value.elemen_perbandingan &&
@@ -46,18 +49,36 @@ const isKarakterFisikLoaded = computed(() => {
 });
 
 async function onPersenInput(raw_persen, label, pembanding_id, type = 'elemen_perbandingan') {
-    try {
-        const url = type === 'elemen_perbandingan' ? `/sewa/${sewaId}/penyesuaian/elemen-perbandingan` : `/sewa/${sewaId}/penyesuaian/karakter-fisik`;
-        await AuthApi.client().put(url, {
-            label,
-            raw_persen,
-            pembanding_id
-        });
-    } catch (err) {
-        console.error("Failed to save persen:", err);
-    } finally {
-        await loadSewaDetail(sewaId);
+    // Create unique key for this specific input
+    const debounceKey = `${type}_${label}_${pembanding_id}`;
+
+    // Clear existing timer for this input
+    if (debounceTimers.value.has(debounceKey)) {
+        clearTimeout(debounceTimers.value.get(debounceKey));
     }
+
+    // Set new debounced timer
+    const timerId = setTimeout(async () => {
+        try {
+            const url = type === 'elemen_perbandingan' ? `/sewa/${sewaId}/penyesuaian/elemen-perbandingan` : `/sewa/${sewaId}/penyesuaian/karakter-fisik`;
+            await AuthApi.client().put(url, {
+                label,
+                raw_persen,
+                pembanding_id
+            });
+
+            // Only reload after successful update
+            await loadSewaDetail(sewaId);
+        } catch (err) {
+            console.error("Failed to save persen:", err);
+        } finally {
+            // Remove timer from map after execution
+            debounceTimers.value.delete(debounceKey);
+        }
+    }, 500); // 500ms debounce delay
+
+    // Store timer in map
+    debounceTimers.value.set(debounceKey, timerId);
 }
 
 function getValue(obj, key) {
