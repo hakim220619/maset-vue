@@ -892,729 +892,719 @@ onBeforeMount(async () => {
 
     </div>
     <br><br>
-    <div class="overflow-auto">
+    <div class="bg-white dark:bg-gray-800 shadow-lg rounded-2xl p-6">
+        <div class="overflow-auto">
 
-        <table class="min-w-full border border-gray-300 text-sm dark:border-gray-600">
-            <thead>
+            <table class="min-w-full border border-gray-300 text-sm dark:border-gray-600">
+                <thead>
 
 
-            </thead>
+                </thead>
 
-            <tbody>
-                <!-- Baris Foto -->
-                <!-- <tr class="h-32 text-center">
-                    <td class="border p-2  dark:border-gray-600 dark:text-white">Foto</td>
-                    <template v-for="(obj, i) in data.tanahs" :key="'foto-object-' + i">
-                        <td colspan="3" class="border p-2 dark:border-gray-600">
-                            <img :src="obj?.foto_foto" class="h-24 mx-auto" />
+                <tbody>
+                    <!-- INFORMASI UMUM -->
+                    <tr class="bg-gray-100 dark:bg-gray-700 font-bold">
+                        <td class="p-2 border dark:border-gray-600 dark:text-white"
+                            :colspan="5 + (totalObject * 2) + (totalPembanding * 3)">
+                            INFORMASI UMUM
                         </td>
-                    </template>
-<template v-for="(pb, i) in data.pembanding" :key="'foto-pembanding-' + i">
-                        <td colspan="4" class="border p-2 dark:border-gray-600">
-                            <img :src="pb?.foto" class="h-24 mx-auto" />
-                        </td>
-                    </template>
-</tr> -->
-                <!-- INFORMASI UMUM -->
-                <tr class="bg-gray-100 dark:bg-gray-700 font-bold">
-                    <td class="p-2 border dark:border-gray-600 dark:text-white"
-                        :colspan="5 + (totalObject * 2) + (totalPembanding * 3)">
-                        INFORMASI UMUM
-                    </td>
-                </tr>
+                    </tr>
 
-                <tr v-for="field in informasiUmumFields" :key="'inf-' + field.key">
-                    <!-- Label kolom -->
-                    <td class="p-2 border dark:border-gray-600 dark:text-white">
-                        {{ field.label }}
-                    </td>
-
-                    <template v-for="(item, idx) in field.items" :key="'obj-' + idx">
-                        <td colspan="3" class="p-2 border dark:border-gray-600 dark:text-white">
-                            {{ item.object || '-' }}
-                        </td>
-                    </template>
-
-                    <!-- Kolom Pembanding Dinamis -->
-                    <template
-                        v-for="(key, idx) in Object.keys(field.items?.[0] || {}).filter(k => k.startsWith('pembanding'))"
-                        :key="'info-pb-' + field.key + '-' + idx">
-                        <td colspan="4" class="p-2 border dark:border-gray-600 dark:text-white">
-                            {{ field.items[0][key] || '-' }}
-                        </td>
-                    </template>
-                </tr>
-
-
-                <!-- DATA PROPERTI -->
-                <tr class="bg-gray-100 dark:bg-gray-700 font-bold">
-                    <td class="p-2 border dark:border-gray-600 dark:text-white"
-                        :colspan="5 + (totalObject * 2) + (totalPembanding * 3)">
-                        DATA TRANSAKSI
-                    </td>
-                </tr>
-
-                <tr v-for="field in dataTransaksiFields" :key="'prop-' + field.key">
-                    <td class="p-2 border dark:border-gray-600 dark:text-white">{{ field.label }}</td>
-
-                    <template v-for="(item, idx) in field.items" :key="'obj-' + idx">
-                        <td colspan="3" class="p-2 border dark:border-gray-600 dark:text-white">
-                            {{ item.object || '-' }}
-                        </td>
-                    </template>
-
-
-                    <!-- Kolom Pembanding Dinamis -->
-                    <template
-                        v-for="(key, idx) in Object.keys(field.items?.[0] || {}).filter(k => k.startsWith('pembanding'))"
-                        :key="'info-pb-' + field.key + '-' + idx">
-                        <td colspan="4" class="p-2 border dark:border-gray-600 dark:text-white">
-                            {{ field.items[0][key] || '-' }}
-                        </td>
-                    </template>
-                </tr>
-                <!-- DATA PROPERTI -->
-                <tr class="bg-gray-100 dark:bg-gray-700 font-bold">
-                    <td class="p-2 border dark:border-gray-600 dark:text-white"
-                        :colspan="5 + (totalObject * 2) + (totalPembanding * 3)">
-                        DATA PROPERTI
-                    </td>
-                </tr>
-                <tr v-for="field in dataPropertiFields" :key="'prop-' + field.key">
-                    <td class="p-2 border dark:border-gray-600 dark:text-white">{{ field.label }}</td>
-
-                    <template v-for="(item, idx) in field.items" :key="'obj-' + field.key">
-                        <td colspan="3" class="p-2 border dark:border-gray-600 dark:text-white">
-                            {{ item.object || '-' }}
-                        </td>
-                    </template>
-
-                    <!-- Kolom Pembanding Dinamis -->
-                    <template
-                        v-for="(key, idx) in Object.keys(field.items?.[0] || {}).filter(k => k.startsWith('pembanding'))"
-                        :key="'info-pb-'">
-                        <td colspan="4" class="p-2 border dark:border-gray-600 dark:text-white">
-                            {{ field.items[0][key] || '-' }}
-                        </td>
-                    </template>
-
-                </tr>
-                <!-- UNIT PERBANDINGAN -->
-                <tr class="bg-gray-100 dark:bg-gray-700 font-bold">
-                    <td class="p-2 border dark:border-gray-600 dark:text-white"
-                        :colspan="5 + (totalObject * 2) + (totalPembanding * 3)">
-                        UNIT PERBANDINGAN
-                    </td>
-                </tr>
-                <tr v-for="(field, index) in dataUnitPerbandinganField" :key="'unit-field-' + index">
-                    <td class="p-2 border dark:border-gray-600 dark:text-white">{{ field.label }}</td>
-
-                    <template v-for="(item, idx) in field.items" :key="'obj-' + index + '-' + idx">
-                        <td colspan="3" class="p-2 border dark:border-gray-600 dark:text-white">
-                            {{ item.object || '-' }}
-                        </td>
-                    </template>
-
-                    <!-- Kolom Pembanding Dinamis -->
-                    <template
-                        v-for="(key, idx) in Object.keys(field.items?.[0] || {}).filter(k => k.startsWith('pembanding'))"
-                        :key="'info-pb-' + field.key + '-' + idx">
-                        <td colspan="4" class="p-2 border dark:border-gray-600 dark:text-white">
-                            {{ field.items[0][key] || '-' }}
-                        </td>
-                    </template>
-                </tr>
-
-
-                <tr class="bg-gray-100 dark:bg-gray-700 font-bold">
-                    <td class="p-2 border dark:border-gray-600 dark:text-white"
-                        :colspan="5 + (totalObject * 2) + (totalPembanding * 3)">
-                        ESTIMASI BANGUNAN
-                    </td>
-                </tr>
-                <tr v-for="(field, index) in dataEstimasiBangunan" :key="'unit-field-' + index">
-                    <td class="p-2 border dark:border-gray-600 dark:text-white">{{ field.label }}</td>
-
-                    <template v-for="(item, idx) in field.items" :key="'obj-' + index + '-' + idx">
-                        <td colspan="3" class="p-2 border dark:border-gray-600 dark:text-white">
-                            {{ item.object || '-' }}
-                        </td>
-                    </template>
-
-
-
-                    <!-- Loop pembanding -->
-                    <template
-                        v-for="(pb, idx) in Object.keys(field.items?.[0] || {}).filter(k => k.startsWith('pembanding'))">
-
-                        <td colspan="4" class="p-2 border dark:border-gray-600 dark:text-white">
-
-                            <!-- Jenis Bangunan -->
-                            <template v-if="field.label === 'Jenis Bangunan'">
-                                <Select :model-value="field.items[0]['pembanding' + (idx + 1)]"
-                                    :options="pembandingOptions" optionGroupLabel="label" optionGroupChildren="items"
-                                    optionLabel="label" optionValue="value" placeholder="Pilih Jenis Bangunan"
-                                    class="w-full"
-                                    @change="e => onDataChangeEstimasiBangunan('jenis_bangunan', e.value, idx, field.items[0]['data_id_' + (idx + 1)])" />
-                            </template>
-
-                            <!-- Umur Ekonomis -->
-                            <template v-else-if="field.label === 'Umur Ekonomis'">
-                                {{ field.items[0]?.['pembanding' + (idx + 1)] || '-' }}
-                            </template>
-
-                            <!-- Kondisi Fisik Bangunan (Visual) -->
-                            <template v-else-if="field.label === 'Kondisi Fisik Bangunan (Visual)'">
-                                <InputNumber v-model="field.items[0]['pembanding' + (idx + 1)]" class="w-full" :min="0"
-                                    :max="100" :useGrouping="false" placeholder="Isi angka (%)"
-                                    @input="val => onDataChangeEstimasiBangunan('kondisi_fisik_bangunan', val, idx, field.items[0]['data_id_' + (idx + 1)])" />
-                            </template>
-
-
-
-                            <!-- Keusangan Fungsional -->
-                            <template v-else-if="field.label === 'Keusangan Fungsional'">
-                                <InputNumber v-model="field.items[0]['pembanding' + (idx + 1)]" class="w-full" :min="0"
-                                    :max="100" :useGrouping="false" placeholder="Isi angka (%)"
-                                    @input="val => onDataChangeEstimasiBangunan('keusangan_fungsional', val, idx, field.items[0]['data_id_' + (idx + 1)])" />
-                            </template>
-
-                            <!-- Keusangan Ekonomis -->
-                            <template v-else-if="field.label === 'Keusangan Ekonomis'">
-                                <InputNumber v-model="field.items[0]['pembanding' + (idx + 1)]" class="w-full" :min="0"
-                                    :max="100" :useGrouping="false" placeholder="Isi angka (%)"
-                                    @input="val => onDataChangeEstimasiBangunan('keusangan_ekonomis', val, idx, field.items[0]['data_id_' + (idx + 1)])" />
-                            </template>
-
-                            <!-- Default fallback -->
-                            <template v-else>
-                                {{ field.items[0]?.['pembanding' + (idx + 1)] || '-' }}
-                            </template>
-                        </td>
-                    </template>
-
-
-
-
-                </tr>
-
-
-
-                <!-- Table Header -->
-
-                <!-- Header Elemen Perbandingan -->
-                <tr class="bg-gray-100 dark:bg-gray-700 font-bold">
-                    <td class="p-2 border dark:border-gray-600 dark:text-white" :colspan="1">
-                        ELEMEN PERBANDINGAN
-                    </td>
-
-                    <!-- Object headers (2 kolom per object) -->
-                    <template v-for="(_, objIdx) in (dataElemenPerbandinganPasar[0]?.objects || [])"
-                        :key="'obj-head-' + objIdx">
-                        <th class="p-2 border dark:border-gray-600 dark:text-white">Keterangan</th>
-                        <th class="p-2 border dark:border-gray-600 dark:text-white" colspan="2">Deskripsi</th>
-                    </template>
-
-                    <!-- Pembanding headers (3 kolom per pembanding) -->
-                    <template v-for="(_, pbIdx) in (dataElemenPerbandinganPasar[0]?.pembanding || [])"
-                        :key="'pb-head-elemen-perbandingan' + pbIdx">
-                        <th class="p-2 border dark:border-gray-600 dark:text-white">Deskripsi</th>
-                        <th class="p-2 border dark:border-gray-600 dark:text-white">(%)</th>
-                        <th class="p-2 border dark:border-gray-600 dark:text-white" colspan="2">+/- Penyesuaian (Rp)
-                        </th>
-                    </template>
-                </tr>
-
-
-
-                <template v-for="item in dataElemenPerbandinganPasar" :key="item.label">
-                    <!-- Baris utama -->
-                    <tr>
-                        <!-- Label -->
+                    <tr v-for="field in informasiUmumFields" :key="'inf-' + field.key">
+                        <!-- Label kolom -->
                         <td class="p-2 border dark:border-gray-600 dark:text-white">
-                            {{ item.label }}
+                            {{ field.label }}
                         </td>
 
-                        <!-- Objects -->
-                        <template v-for="(obj, objIdx) in item.objects" :key="'obj-' + objIdx">
-                            <td class="p-2 border dark:border-gray-600 dark:text-white">
-                                {{ obj.keterangan }}
-                            </td>
-                            <td class="p-2 border dark:border-gray-600 dark:text-white" colspan="2">
-                                {{ obj.deskripsi }}
+                        <template v-for="(item, idx) in field.items" :key="'obj-' + idx">
+                            <td colspan="3" class="p-2 border dark:border-gray-600 dark:text-white">
+                                {{ item.object || '-' }}
                             </td>
                         </template>
 
-                        <!-- Pembanding -->
-                        <template v-for="(pb, pbIdx) in item.pembanding" :key="'pb-elemen-perbandingan-' + pbIdx">
-                            <!-- Kiri -->
-                            <td class="p-2 border dark:border-gray-600 dark:text-white">
-                                {{ pb[`deskripsi_${pbIdx + 1}`] || '-' }}
+                        <!-- Kolom Pembanding Dinamis -->
+                        <template
+                            v-for="(key, idx) in Object.keys(field.items?.[0] || {}).filter(k => k.startsWith('pembanding'))"
+                            :key="'info-pb-' + field.key + '-' + idx">
+                            <td colspan="4" class="p-2 border dark:border-gray-600 dark:text-white">
+                                {{ field.items[0][key] || '-' }}
                             </td>
-
-                            <!-- Hak Atas Properti -->
-                            <template v-if="item.label === 'Hak Atas Properti yang dialihkan'">
-                                <td class="p-2 border dark:border-gray-600">
-                                    <InputNumber v-model="pb[`persen_${pbIdx + 1}`]" class="w-full" :min="0" :max="100"
-                                        :useGrouping="false" placeholder="Isi angka (%)"
-                                        @input="val => onChangeElemenPerbandingan('hak_atas_properti', val, pbIdx + 1, pb.id)" />
-                                </td>
-                            </template>
-
-                            <!-- Kondisi Lingkungan -->
-                            <template v-else-if="item.label === 'Syarat Pembiayaan'">
-                                <td class="p-2 border dark:border-gray-600">
-                                    <InputNumber v-model="pb[`persen_${pbIdx + 1}`]" class="w-full" :min="0" :max="100"
-                                        :useGrouping="false" placeholder="Isi angka (%)"
-                                        @input="val => onChangeElemenPerbandingan('syarat_pembiayaan', val, pbIdx + 1, pb.id)" />
-                                </td>
-                            </template>
-
-                            <!-- Jarak Pusat Kota -->
-                            <template v-else-if="item.label === 'Kondisi Penjualan'">
-                                <td class="p-2 border dark:border-gray-600">
-                                    <InputNumber v-model="pb[`persen_${pbIdx + 1}`]" class="w-full" :min="0" :max="100"
-                                        :useGrouping="false" placeholder="Isi angka (%)"
-                                        @input="val => onChangeElemenPerbandingan('kondisi_penjualan', val, pbIdx + 1, pb.id)" />
-                                </td>
-                            </template>
-
-                            <!-- Keusangan Fungsional -->
-                            <template v-else-if="item.label === 'Pengeluaran yang dilakukan segera setelah pembelian'">
-                                <td class="p-2 border dark:border-gray-600">
-                                    <InputNumber v-model="pb[`persen_${pbIdx + 1}`]" class="w-full" :min="0" :max="100"
-                                        :useGrouping="false" placeholder="Isi angka (%)"
-                                        @input="val => onChangeElemenPerbandingan('pengeluaran_setelah_pembelian', val, pbIdx + 1, pb.id)" />
-                                </td>
-                            </template>
-
-                            <template v-else-if="item.label === 'Kondisi Pasar'">
-                                <td class="p-2 border dark:border-gray-600">
-                                    <InputNumber v-model="pb[`persen_${pbIdx + 1}`]" class="w-full" :min="0" :max="100"
-                                        :useGrouping="false" placeholder="Isi angka (%)"
-                                        @input="val => onChangeElemenPerbandingan('kondisi_pasar', val, pbIdx + 1, pb.id)" />
-                                </td>
-                            </template>
-
-                            <template v-else>
-                                <td class="p-2 border dark:border-gray-600">
-
-                                </td>
-                            </template>
-
-                            <!-- Default kalau ada field lain -->
-
-                            <!-- Kanan -->
-                            <td v-if="item.label !== 'Perkiraan Harga Transaksi setelah Penyesuaian'"
-                                class="p-2 border dark:border-gray-600 dark:text-white" colspan="2">
-                                {{ pb[`penyesuaian_${pbIdx + 1}`] || 'Rp 0' }}
-                            </td>
-                            <td v-else class="p-2 border dark:border-gray-600 dark:text-white" colspan="2">
-                                {{ pb[`hasil_${pbIdx + 1}`] || 'Rp 0' }}
-                            </td>
-
                         </template>
+                    </tr>
+
+
+                    <!-- DATA PROPERTI -->
+                    <tr class="bg-gray-100 dark:bg-gray-700 font-bold">
+                        <td class="p-2 border dark:border-gray-600 dark:text-white"
+                            :colspan="5 + (totalObject * 2) + (totalPembanding * 3)">
+                            DATA TRANSAKSI
+                        </td>
+                    </tr>
+
+                    <tr v-for="field in dataTransaksiFields" :key="'prop-' + field.key">
+                        <td class="p-2 border dark:border-gray-600 dark:text-white">{{ field.label }}</td>
+
+                        <template v-for="(item, idx) in field.items" :key="'obj-' + idx">
+                            <td colspan="3" class="p-2 border dark:border-gray-600 dark:text-white">
+                                {{ item.object || '-' }}
+                            </td>
+                        </template>
+
+
+                        <!-- Kolom Pembanding Dinamis -->
+                        <template
+                            v-for="(key, idx) in Object.keys(field.items?.[0] || {}).filter(k => k.startsWith('pembanding'))"
+                            :key="'info-pb-' + field.key + '-' + idx">
+                            <td colspan="4" class="p-2 border dark:border-gray-600 dark:text-white">
+                                {{ field.items[0][key] || '-' }}
+                            </td>
+                        </template>
+                    </tr>
+                    <!-- DATA PROPERTI -->
+                    <tr class="bg-gray-100 dark:bg-gray-700 font-bold">
+                        <td class="p-2 border dark:border-gray-600 dark:text-white"
+                            :colspan="5 + (totalObject * 2) + (totalPembanding * 3)">
+                            DATA PROPERTI
+                        </td>
+                    </tr>
+                    <tr v-for="field in dataPropertiFields" :key="'prop-' + field.key">
+                        <td class="p-2 border dark:border-gray-600 dark:text-white">{{ field.label }}</td>
+
+                        <template v-for="(item, idx) in field.items" :key="'obj-' + field.key">
+                            <td colspan="3" class="p-2 border dark:border-gray-600 dark:text-white">
+                                {{ item.object || '-' }}
+                            </td>
+                        </template>
+
+                        <!-- Kolom Pembanding Dinamis -->
+                        <template
+                            v-for="(key, idx) in Object.keys(field.items?.[0] || {}).filter(k => k.startsWith('pembanding'))"
+                            :key="'info-pb-'">
+                            <td colspan="4" class="p-2 border dark:border-gray-600 dark:text-white">
+                                {{ field.items[0][key] || '-' }}
+                            </td>
+                        </template>
+
+                    </tr>
+                    <!-- UNIT PERBANDINGAN -->
+                    <tr class="bg-gray-100 dark:bg-gray-700 font-bold">
+                        <td class="p-2 border dark:border-gray-600 dark:text-white"
+                            :colspan="5 + (totalObject * 2) + (totalPembanding * 3)">
+                            UNIT PERBANDINGAN
+                        </td>
+                    </tr>
+                    <tr v-for="(field, index) in dataUnitPerbandinganField" :key="'unit-field-' + index">
+                        <td class="p-2 border dark:border-gray-600 dark:text-white">{{ field.label }}</td>
+
+                        <template v-for="(item, idx) in field.items" :key="'obj-' + index + '-' + idx">
+                            <td colspan="3" class="p-2 border dark:border-gray-600 dark:text-white">
+                                {{ item.object || '-' }}
+                            </td>
+                        </template>
+
+                        <!-- Kolom Pembanding Dinamis -->
+                        <template
+                            v-for="(key, idx) in Object.keys(field.items?.[0] || {}).filter(k => k.startsWith('pembanding'))"
+                            :key="'info-pb-' + field.key + '-' + idx">
+                            <td colspan="4" class="p-2 border dark:border-gray-600 dark:text-white">
+                                {{ field.items[0][key] || '-' }}
+                            </td>
+                        </template>
+                    </tr>
+
+
+                    <tr class="bg-gray-100 dark:bg-gray-700 font-bold">
+                        <td class="p-2 border dark:border-gray-600 dark:text-white"
+                            :colspan="5 + (totalObject * 2) + (totalPembanding * 3)">
+                            ESTIMASI BANGUNAN
+                        </td>
+                    </tr>
+                    <tr v-for="(field, index) in dataEstimasiBangunan" :key="'unit-field-' + index">
+                        <td class="p-2 border dark:border-gray-600 dark:text-white">{{ field.label }}</td>
+
+                        <template v-for="(item, idx) in field.items" :key="'obj-' + index + '-' + idx">
+                            <td colspan="3" class="p-2 border dark:border-gray-600 dark:text-white">
+                                {{ item.object || '-' }}
+                            </td>
+                        </template>
+
+
+
+                        <!-- Loop pembanding -->
+                        <template
+                            v-for="(pb, idx) in Object.keys(field.items?.[0] || {}).filter(k => k.startsWith('pembanding'))">
+
+                            <td colspan="4" class="p-2 border dark:border-gray-600 dark:text-white">
+
+                                <!-- Jenis Bangunan -->
+                                <template v-if="field.label === 'Jenis Bangunan'">
+                                    <Select :model-value="field.items[0]['pembanding' + (idx + 1)]"
+                                        :options="pembandingOptions" optionGroupLabel="label"
+                                        optionGroupChildren="items" optionLabel="label" optionValue="value"
+                                        placeholder="Pilih Jenis Bangunan" class="w-full"
+                                        @change="e => onDataChangeEstimasiBangunan('jenis_bangunan', e.value, idx, field.items[0]['data_id_' + (idx + 1)])" />
+                                </template>
+
+                                <!-- Umur Ekonomis -->
+                                <template v-else-if="field.label === 'Umur Ekonomis'">
+                                    {{ field.items[0]?.['pembanding' + (idx + 1)] || '-' }}
+                                </template>
+
+                                <!-- Kondisi Fisik Bangunan (Visual) -->
+                                <template v-else-if="field.label === 'Kondisi Fisik Bangunan (Visual)'">
+                                    <InputNumber v-model="field.items[0]['pembanding' + (idx + 1)]" class="w-full"
+                                        :min="0" :max="100" :useGrouping="false" placeholder="Isi angka (%)"
+                                        @input="val => onDataChangeEstimasiBangunan('kondisi_fisik_bangunan', val, idx, field.items[0]['data_id_' + (idx + 1)])" />
+                                </template>
+
+
+
+                                <!-- Keusangan Fungsional -->
+                                <template v-else-if="field.label === 'Keusangan Fungsional'">
+                                    <InputNumber v-model="field.items[0]['pembanding' + (idx + 1)]" class="w-full"
+                                        :min="0" :max="100" :useGrouping="false" placeholder="Isi angka (%)"
+                                        @input="val => onDataChangeEstimasiBangunan('keusangan_fungsional', val, idx, field.items[0]['data_id_' + (idx + 1)])" />
+                                </template>
+
+                                <!-- Keusangan Ekonomis -->
+                                <template v-else-if="field.label === 'Keusangan Ekonomis'">
+                                    <InputNumber v-model="field.items[0]['pembanding' + (idx + 1)]" class="w-full"
+                                        :min="0" :max="100" :useGrouping="false" placeholder="Isi angka (%)"
+                                        @input="val => onDataChangeEstimasiBangunan('keusangan_ekonomis', val, idx, field.items[0]['data_id_' + (idx + 1)])" />
+                                </template>
+
+                                <!-- Default fallback -->
+                                <template v-else>
+                                    {{ field.items[0]?.['pembanding' + (idx + 1)] || '-' }}
+                                </template>
+                            </td>
+                        </template>
+
 
 
 
                     </tr>
 
-                    <!-- Baris tambahan dengan sekat lurus -->
-                    <tr>
-                        <!-- Label kosong -->
-                        <template v-if="item.label !== 'Perkiraan Harga Transaksi setelah Penyesuaian'">
-                            <td class="p-2 border dark:border-gray-600 dark:text-white">&nbsp;</td>
+
+
+                    <!-- Table Header -->
+
+                    <!-- Header Elemen Perbandingan -->
+                    <tr class="bg-gray-100 dark:bg-gray-700 font-bold">
+                        <td class="p-2 border dark:border-gray-600 dark:text-white" :colspan="1">
+                            ELEMEN PERBANDINGAN
+                        </td>
+
+                        <!-- Object headers (2 kolom per object) -->
+                        <template v-for="(_, objIdx) in (dataElemenPerbandinganPasar[0]?.objects || [])"
+                            :key="'obj-head-' + objIdx">
+                            <th class="p-2 border dark:border-gray-600 dark:text-white">Keterangan</th>
+                            <th class="p-2 border dark:border-gray-600 dark:text-white" colspan="2">Deskripsi</th>
                         </template>
-                        <!-- Objects kosong -->
-                        <template v-for="(obj, objIdx) in item.objects" :key="'obj-empty-' + objIdx">
-                            <template v-if="item.label !== 'Perkiraan Harga Transaksi setelah Penyesuaian'">
-                                <td class="p-2 border dark:border-gray-600 dark:text-white">&nbsp;</td>
-                                <td class="p-2 border dark:border-gray-600 dark:text-white" colspan="2">&nbsp;</td>
-                            </template>
+
+                        <!-- Pembanding headers (3 kolom per pembanding) -->
+                        <template v-for="(_, pbIdx) in (dataElemenPerbandinganPasar[0]?.pembanding || [])"
+                            :key="'pb-head-elemen-perbandingan' + pbIdx">
+                            <th class="p-2 border dark:border-gray-600 dark:text-white">Deskripsi</th>
+                            <th class="p-2 border dark:border-gray-600 dark:text-white">(%)</th>
+                            <th class="p-2 border dark:border-gray-600 dark:text-white" colspan="2">+/- Penyesuaian (Rp)
+                            </th>
                         </template>
-                        <!-- Pembanding kosong -->
-                        <template v-for="(pb, pbIdx) in item.pembanding" :key="'pb-empty-' + pbIdx">
-                            <template v-if="item.label !== 'Perkiraan Harga Transaksi setelah Penyesuaian'">
-                                <td class="p-2 border dark:border-gray-600 dark:text-white">&nbsp;</td>
-                                <td class="p-2 border dark:border-gray-600">&nbsp;</td>
+                    </tr>
+
+
+
+                    <template v-for="item in dataElemenPerbandinganPasar" :key="item.label">
+                        <!-- Baris utama -->
+                        <tr>
+                            <!-- Label -->
+                            <td class="p-2 border dark:border-gray-600 dark:text-white">
+                                {{ item.label }}
+                            </td>
+
+                            <!-- Objects -->
+                            <template v-for="(obj, objIdx) in item.objects" :key="'obj-' + objIdx">
+                                <td class="p-2 border dark:border-gray-600 dark:text-white">
+                                    {{ obj.keterangan }}
+                                </td>
                                 <td class="p-2 border dark:border-gray-600 dark:text-white" colspan="2">
-                                    {{ pb[`hasil_${pbIdx + 1}`] || 'Rp 0' }}
+                                    {{ obj.deskripsi }}
                                 </td>
                             </template>
 
-                        </template>
+                            <!-- Pembanding -->
+                            <template v-for="(pb, pbIdx) in item.pembanding" :key="'pb-elemen-perbandingan-' + pbIdx">
+                                <!-- Kiri -->
+                                <td class="p-2 border dark:border-gray-600 dark:text-white">
+                                    {{ pb[`deskripsi_${pbIdx + 1}`] || '-' }}
+                                </td>
 
-
-                    </tr>
-                </template>
-
-
-
-                <tr class="bg-gray-100 dark:bg-gray-700 font-bold">
-                    <td class="p-2 border dark:border-gray-600 dark:text-white"
-                        :colspan="11 + (totalObject * 1) + (totalPembanding * 3)">
-                        LOKASI
-                    </td>
-                    <!-- Dynamic Object Headers (2 columns each) -->
-
-                </tr>
-                <template v-for="item in dataElemenPerbandinganLokasiPasar" :key="item.label">
-                    <!-- Baris utama -->
-                    <tr>
-                        <!-- Label -->
-                        <td class="p-2 border dark:border-gray-600 dark:text-white">
-                            {{ item.label }}
-                        </td>
-
-                        <!-- Objects -->
-                        <template v-for="(obj, objIdx) in item.objects" :key="'obj-' + objIdx">
-                            <td class="p-2 border dark:border-gray-600 dark:text-white">
-                                {{ obj.keterangan }}
-                            </td>
-                            <td class="p-2 border dark:border-gray-600 dark:text-white" colspan="2">
-                                {{ obj.deskripsi }}
-                            </td>
-                        </template>
-
-                        <!-- Pembanding -->
-                        <template v-for="(pb, pbIdx) in item.pembanding" :key="'pb-' + pbIdx">
-                            <!-- Kiri -->
-                            <td class="p-2 border dark:border-gray-600 dark:text-white">
-                                {{ pb[`deskripsi_${pbIdx + 1}`] || '-' }}
-                            </td>
-
-                            <!-- Input angka sesuai label -->
-                            <td class="p-2 border dark:border-gray-600">
-                                <!-- Jarak terhadap pusat kota -->
-                                <template v-if="item.label === 'Jarak terhadap pusat kota'">
-                                    <InputNumber v-model="pb[`persen_${pbIdx + 1}`]" class="w-full" :min="0" :max="100"
-                                        :useGrouping="false" placeholder="Isi angka (%)"
-                                        @input="val => onChangeElemenPerbandinganLokasi('jarak_pusat_kota', val, pbIdx + 1, pb.id)" />
-                                </template>
-
-                                <!-- Perkerasan Jalan/Lebar Jalan -->
-                                <template v-else-if="item.label === 'Perkerasan Jalan/Lebar Jalan'">
-                                    <InputNumber v-model="pb[`persen_${pbIdx + 1}`]" class="w-full" :min="0" :max="100"
-                                        :useGrouping="false" placeholder="Isi angka (%)"
-                                        @input="val => onChangeElemenPerbandinganLokasi('perkerasan_jalan', val, pbIdx + 1, pb.id)" />
-                                </template>
-
-                                <!-- Aksesibilitas & Lokasi -->
-                                <template v-else-if="item.label === 'Aksesibilitas & Lokasi'">
-                                    <InputNumber v-model="pb[`persen_${pbIdx + 1}`]" class="w-full" :min="0" :max="100"
-                                        :useGrouping="false" placeholder="Isi angka (%)"
-                                        @input="val => onChangeElemenPerbandinganLokasi('aksesibilitas_lokasi', val, pbIdx + 1, pb.id)" />
+                                <!-- Hak Atas Properti -->
+                                <template v-if="item.label === 'Hak Atas Properti yang dialihkan'">
+                                    <td class="p-2 border dark:border-gray-600">
+                                        <InputNumber v-model="pb[`persen_${pbIdx + 1}`]" class="w-full" :min="0"
+                                            :max="100" :useGrouping="false" placeholder="Isi angka (%)"
+                                            @input="val => onChangeElemenPerbandingan('hak_atas_properti', val, pbIdx + 1, pb.id)" />
+                                    </td>
                                 </template>
 
                                 <!-- Kondisi Lingkungan -->
-                                <template v-else-if="item.label === 'Kondisi Lingkungan'">
-                                    <InputNumber v-model="pb[`persen_${pbIdx + 1}`]" class="w-full" :min="0" :max="100"
-                                        :useGrouping="false" placeholder="Isi angka (%)"
-                                        @input="val => onChangeElemenPerbandinganLokasi('kondisi_lingkungan', val, pbIdx + 1, pb.id)" />
+                                <template v-else-if="item.label === 'Syarat Pembiayaan'">
+                                    <td class="p-2 border dark:border-gray-600">
+                                        <InputNumber v-model="pb[`persen_${pbIdx + 1}`]" class="w-full" :min="0"
+                                            :max="100" :useGrouping="false" placeholder="Isi angka (%)"
+                                            @input="val => onChangeElemenPerbandingan('syarat_pembiayaan', val, pbIdx + 1, pb.id)" />
+                                    </td>
                                 </template>
 
-                                <!-- Posisi Aset -->
-                                <template v-else-if="item.label === 'Posisi Aset'">
-                                    <InputNumber v-model="pb[`persen_${pbIdx + 1}`]" class="w-full" :min="0" :max="100"
-                                        :useGrouping="false" placeholder="Isi angka (%)"
-                                        @input="val => onChangeElemenPerbandinganLokasi('posisi_aset', val, pbIdx + 1, pb.id)" />
+                                <!-- Jarak Pusat Kota -->
+                                <template v-else-if="item.label === 'Kondisi Penjualan'">
+                                    <td class="p-2 border dark:border-gray-600">
+                                        <InputNumber v-model="pb[`persen_${pbIdx + 1}`]" class="w-full" :min="0"
+                                            :max="100" :useGrouping="false" placeholder="Isi angka (%)"
+                                            @input="val => onChangeElemenPerbandingan('kondisi_penjualan', val, pbIdx + 1, pb.id)" />
+                                    </td>
                                 </template>
 
-                                <!-- Lainnya (Sebutkan) -->
-                                <template v-else-if="item.label === 'Lainnya (Sebutkan)'">
-                                    <InputNumber v-model="pb[`persen_${pbIdx + 1}`]" class="w-full" :min="0" :max="100"
-                                        :useGrouping="false" placeholder="Isi angka (%)"
-                                        @input="val => onChangeElemenPerbandinganLokasi('lainnya', val, pbIdx + 1, pb.id)" />
-                                </template>
-                            </td>
-
-
-                            <!-- Kanan -->
-                            <td class="p-2 border dark:border-gray-600 dark:text-white" colspan="2">
-                                {{ pb[`penyesuaian_${pbIdx + 1}`] }}
-                            </td>
-                        </template>
-
-
-
-                    </tr>
-
-                    <!-- Baris tambahan dengan sekat lurus -->
-
-                </template>
-                <tr class="bg-gray-100 dark:bg-gray-700 font-bold">
-                    <td class="p-2 border dark:border-gray-600 dark:text-white"
-                        :colspan="11 + (totalObject * 1) + (totalPembanding * 3)">
-                        KARAKTER FISIK
-                    </td>
-                    <!-- Dynamic Object Headers (2 columns each) -->
-
-                </tr>
-                <template v-for="item in dataElemenPerbandinganKarakterFisikPasar" :key="item.label">
-                    <!-- Baris utama -->
-
-                    <tr>
-                        <!-- Label -->
-                        <td class="p-2 border dark:border-gray-600 dark:text-white">
-                            {{ item.label }}
-                        </td>
-
-                        <!-- Objects -->
-                        <template v-for="(obj, objIdx) in item.objects" :key="'obj-' + objIdx">
-                            <td class="p-2 border dark:border-gray-600 dark:text-white">
-                                {{ obj.keterangan }}
-                            </td>
-                            <td class="p-2 border dark:border-gray-600 dark:text-white" colspan="2">
-                                {{ obj.deskripsi }}
-                            </td>
-                        </template>
-
-                        <!-- Pembanding -->
-                        <template v-for="(pb, pbIdx) in item.pembanding" :key="'pb-' + pbIdx">
-                            <!-- Kiri -->
-                            <td class="p-2 border dark:border-gray-600 dark:text-white">
-                                {{ pb.deskripsi || '-' }}
-                            </td>
-                            <!-- Input angka sesuai label -->
-                            <td class="p-2 border dark:border-gray-600">
-                                <!-- Luas Tanah -->
-                                <template v-if="item.label === 'Luas Tanah'">
-                                    -
+                                <!-- Keusangan Fungsional -->
+                                <template
+                                    v-else-if="item.label === 'Pengeluaran yang dilakukan segera setelah pembelian'">
+                                    <td class="p-2 border dark:border-gray-600">
+                                        <InputNumber v-model="pb[`persen_${pbIdx + 1}`]" class="w-full" :min="0"
+                                            :max="100" :useGrouping="false" placeholder="Isi angka (%)"
+                                            @input="val => onChangeElemenPerbandingan('pengeluaran_setelah_pembelian', val, pbIdx + 1, pb.id)" />
+                                    </td>
                                 </template>
 
-                                <!-- Luas Bangunan -->
-                                <template v-else-if="item.label === 'Luas Bangunan'">
-                                    -
+                                <template v-else-if="item.label === 'Kondisi Pasar'">
+                                    <td class="p-2 border dark:border-gray-600">
+                                        <InputNumber v-model="pb[`persen_${pbIdx + 1}`]" class="w-full" :min="0"
+                                            :max="100" :useGrouping="false" placeholder="Isi angka (%)"
+                                            @input="val => onChangeElemenPerbandingan('kondisi_pasar', val, pbIdx + 1, pb.id)" />
+                                    </td>
                                 </template>
 
-                                <!-- Bentuk -->
-                                <template v-else-if="item.label === 'Bentuk'">
-                                    <InputNumber v-model="pb[`persen_${pbIdx + 1}`]" class="w-full" :min="0" :max="100"
-                                        :useGrouping="false" placeholder="Isi angka (%)"
-                                        @input="val => onChangeElemenPerbandinganKarakteristikFisik('bentuk', val, pbIdx + 1, pb.id)" />
-                                </template>
-
-                                <!-- Elevasi -->
-                                <template v-else-if="item.label === 'Elevasi'">
-                                    <InputNumber v-model="pb[`persen_${pbIdx + 1}`]" class="w-full" :min="0" :max="100"
-                                        :useGrouping="false" placeholder="Isi angka (%)"
-                                        @input="val => onChangeElemenPerbandinganKarakteristikFisik('elevasi', val, pbIdx + 1, pb.id)" />
-                                </template>
-
-                                <!-- Topografi -->
-                                <template v-else-if="item.label === 'Topografi'">
-                                    <InputNumber v-model="pb[`persen_${pbIdx + 1}`]" class="w-full" :min="0" :max="100"
-                                        :useGrouping="false" placeholder="Isi angka (%)"
-                                        @input="val => onChangeElemenPerbandinganKarakteristikFisik('topografi', val, pbIdx + 1, pb.id)" />
-                                </template>
-
-                                <!-- Lebar Muka -->
-                                <template v-else-if="item.label === 'Lebar Muka'">
-                                    <InputNumber v-model="pb[`persen_${pbIdx + 1}`]" class="w-full" :min="0" :max="100"
-                                        :useGrouping="false" placeholder="Isi angka (%)"
-                                        @input="val => onChangeElemenPerbandinganKarakteristikFisik('lebar_muka', val, pbIdx + 1, pb.id)" />
-                                </template>
-
-                                <!-- Peruntukan -->
-                                <template v-else-if="item.label === 'Peruntukan'">
-                                    <InputNumber v-model="pb[`persen_${pbIdx + 1}`]" class="w-full" :min="0" :max="100"
-                                        :useGrouping="false" placeholder="Isi angka (%)"
-                                        @input="val => onChangeElemenPerbandinganKarakteristikFisik('peruntukan', val, pbIdx + 1, pb.id)" />
-                                </template>
-
-                                <!-- Kondisi Bangunan -->
-                                <template v-else-if="item.label === 'Kondisi Bangunan'">
-                                    <InputNumber v-model="pb[`persen_${pbIdx + 1}`]" class="w-full" :min="0" :max="100"
-                                        :useGrouping="false" placeholder="Isi angka (%)"
-                                        @input="val => onChangeElemenPerbandinganKarakteristikFisik('kondisi_bangunan', val, pbIdx + 1, pb.id)" />
-                                </template>
-
-                                <!-- Lainnya -->
-                                <template v-else-if="item.label === 'Lainnya (Sebutkan)'">
-                                    <InputNumber v-model="pb[`persen_${pbIdx + 1}`]" class="w-full" :min="0" :max="100"
-                                        :useGrouping="false" placeholder="Isi angka (%)"
-                                        @input="val => onChangeElemenPerbandinganKarakteristikFisik('lainnya', val, pbIdx + 1, pb.id)" />
-                                </template>
-
-
-                                <!-- Default (kalau tidak ada) -->
                                 <template v-else>
-                                    <span class="dark:text-white">-</span>
+                                    <td class="p-2 border dark:border-gray-600">
+
+                                    </td>
                                 </template>
-                            </td>
 
-                            <!-- Kanan -->
-                            <td class="p-2 border dark:border-gray-600 dark:text-white" colspan="2">
-                                {{ pb[`penyesuaian_${pbIdx + 1}`] || '-' }}
-                            </td>
-                        </template>
-                    </tr>
+                                <!-- Default kalau ada field lain -->
+
+                                <!-- Kanan -->
+                                <td v-if="item.label !== 'Perkiraan Harga Transaksi setelah Penyesuaian'"
+                                    class="p-2 border dark:border-gray-600 dark:text-white" colspan="2">
+                                    {{ pb[`penyesuaian_${pbIdx + 1}`] || 'Rp 0' }}
+                                </td>
+                                <td v-else class="p-2 border dark:border-gray-600 dark:text-white" colspan="2">
+                                    {{ pb[`hasil_${pbIdx + 1}`] || 'Rp 0' }}
+                                </td>
+
+                            </template>
 
 
-                    <!-- Baris tambahan dengan sekat lurus -->
+
+                        </tr>
+
+                        <!-- Baris tambahan dengan sekat lurus -->
+                        <tr>
+                            <!-- Label kosong -->
+                            <template v-if="item.label !== 'Perkiraan Harga Transaksi setelah Penyesuaian'">
+                                <td class="p-2 border dark:border-gray-600 dark:text-white">&nbsp;</td>
+                            </template>
+                            <!-- Objects kosong -->
+                            <template v-for="(obj, objIdx) in item.objects" :key="'obj-empty-' + objIdx">
+                                <template v-if="item.label !== 'Perkiraan Harga Transaksi setelah Penyesuaian'">
+                                    <td class="p-2 border dark:border-gray-600 dark:text-white">&nbsp;</td>
+                                    <td class="p-2 border dark:border-gray-600 dark:text-white" colspan="2">&nbsp;</td>
+                                </template>
+                            </template>
+                            <!-- Pembanding kosong -->
+                            <template v-for="(pb, pbIdx) in item.pembanding" :key="'pb-empty-' + pbIdx">
+                                <template v-if="item.label !== 'Perkiraan Harga Transaksi setelah Penyesuaian'">
+                                    <td class="p-2 border dark:border-gray-600 dark:text-white">&nbsp;</td>
+                                    <td class="p-2 border dark:border-gray-600">&nbsp;</td>
+                                    <td class="p-2 border dark:border-gray-600 dark:text-white" colspan="2">
+                                        {{ pb[`hasil_${pbIdx + 1}`] || 'Rp 0' }}
+                                    </td>
+                                </template>
+
+                            </template>
 
 
-                </template>
-                <tr>
-                    <td colspan="100%" style="height: 30px;"></td>
-                </tr>
-                <template v-for="item in dataSummaryPasar.informasiUmumFields" :key="item.label">
+                        </tr>
+                    </template>
 
-                    <!-- Baris utama -->
-                    <tr>
-                        <!-- Label -->
-                        <td class="p-2 border dark:border-gray-600 dark:text-white" colspan="2">
-                            {{ item.label }}
+
+
+                    <tr class="bg-gray-100 dark:bg-gray-700 font-bold">
+                        <td class="p-2 border dark:border-gray-600 dark:text-white"
+                            :colspan="11 + (totalObject * 1) + (totalPembanding * 3)">
+                            LOKASI
                         </td>
-                        <template v-for="(pb, pbIdx) in 1" :key="'pb-' + pbIdx">
-                            <template v-if="item.label === 'Jumlah Penyesuaian'">
-                                <td class="p-2 border dark:border-gray-600 dark:text-white text-center" colspan="2">
+                        <!-- Dynamic Object Headers (2 columns each) -->
 
-                                </td>
-                            </template>
-                            <template v-if="item.label === 'Indikasi Nilai Sewa Pasar setelah penyesuaian / m²'">
-                                <td class="p-2 border dark:border-gray-600 dark:text-white text-center" colspan="2">
+                    </tr>
+                    <template v-for="item in dataElemenPerbandinganLokasiPasar" :key="item.label">
+                        <!-- Baris utama -->
+                        <tr>
+                            <!-- Label -->
+                            <td class="p-2 border dark:border-gray-600 dark:text-white">
+                                {{ item.label }}
+                            </td>
 
-                                </td>
-                            </template>
-                            <template v-if="item.label === 'Proporsi'">
-                                <td class="p-2 border dark:border-gray-600 dark:text-white text-center" colspan="2">
-                                    {{ item.objects.totalProporsi }}
-                                </td>
-                            </template>
-                            <template v-else-if="item.label === 'Total Bobot Absolut'">
-                                <td class="p-2 border dark:border-gray-600 dark:text-white text-center" colspan="2">
-                                    {{ item.objects.totalBobotAbsolutAll }}
-                                </td>
-                            </template>
-                            <template v-else-if="item.label === 'Inverse'">
-                                <td class="p-2 border dark:border-gray-600 dark:text-white text-center" colspan="2">
-                                    {{ item.objects.totalInverse }}
-                                </td>
-                            </template>
-                            <template v-else-if="item.label === 'Pembobotan Akhir'">
-                                <td class="p-2 border dark:border-gray-600 dark:text-white text-center" colspan="2">
-                                    {{ item.objects.totalPembobotanAkhir }}
-                                </td>
-                            </template>
                             <!-- Objects -->
+                            <template v-for="(obj, objIdx) in item.objects" :key="'obj-' + objIdx">
+                                <td class="p-2 border dark:border-gray-600 dark:text-white">
+                                    {{ obj.keterangan }}
+                                </td>
+                                <td class="p-2 border dark:border-gray-600 dark:text-white" colspan="2">
+                                    {{ obj.deskripsi }}
+                                </td>
+                            </template>
 
-                        </template>
+                            <!-- Pembanding -->
+                            <template v-for="(pb, pbIdx) in item.pembanding" :key="'pb-' + pbIdx">
+                                <!-- Kiri -->
+                                <td class="p-2 border dark:border-gray-600 dark:text-white">
+                                    {{ pb[`deskripsi_${pbIdx + 1}`] || '-' }}
+                                </td>
+
+                                <!-- Input angka sesuai label -->
+                                <td class="p-2 border dark:border-gray-600">
+                                    <!-- Jarak terhadap pusat kota -->
+                                    <template v-if="item.label === 'Jarak terhadap pusat kota'">
+                                        <InputNumber v-model="pb[`persen_${pbIdx + 1}`]" class="w-full" :min="0"
+                                            :max="100" :useGrouping="false" placeholder="Isi angka (%)"
+                                            @input="val => onChangeElemenPerbandinganLokasi('jarak_pusat_kota', val, pbIdx + 1, pb.id)" />
+                                    </template>
+
+                                    <!-- Perkerasan Jalan/Lebar Jalan -->
+                                    <template v-else-if="item.label === 'Perkerasan Jalan/Lebar Jalan'">
+                                        <InputNumber v-model="pb[`persen_${pbIdx + 1}`]" class="w-full" :min="0"
+                                            :max="100" :useGrouping="false" placeholder="Isi angka (%)"
+                                            @input="val => onChangeElemenPerbandinganLokasi('perkerasan_jalan', val, pbIdx + 1, pb.id)" />
+                                    </template>
+
+                                    <!-- Aksesibilitas & Lokasi -->
+                                    <template v-else-if="item.label === 'Aksesibilitas & Lokasi'">
+                                        <InputNumber v-model="pb[`persen_${pbIdx + 1}`]" class="w-full" :min="0"
+                                            :max="100" :useGrouping="false" placeholder="Isi angka (%)"
+                                            @input="val => onChangeElemenPerbandinganLokasi('aksesibilitas_lokasi', val, pbIdx + 1, pb.id)" />
+                                    </template>
+
+                                    <!-- Kondisi Lingkungan -->
+                                    <template v-else-if="item.label === 'Kondisi Lingkungan'">
+                                        <InputNumber v-model="pb[`persen_${pbIdx + 1}`]" class="w-full" :min="0"
+                                            :max="100" :useGrouping="false" placeholder="Isi angka (%)"
+                                            @input="val => onChangeElemenPerbandinganLokasi('kondisi_lingkungan', val, pbIdx + 1, pb.id)" />
+                                    </template>
+
+                                    <!-- Posisi Aset -->
+                                    <template v-else-if="item.label === 'Posisi Aset'">
+                                        <InputNumber v-model="pb[`persen_${pbIdx + 1}`]" class="w-full" :min="0"
+                                            :max="100" :useGrouping="false" placeholder="Isi angka (%)"
+                                            @input="val => onChangeElemenPerbandinganLokasi('posisi_aset', val, pbIdx + 1, pb.id)" />
+                                    </template>
+
+                                    <!-- Lainnya (Sebutkan) -->
+                                    <template v-else-if="item.label === 'Lainnya (Sebutkan)'">
+                                        <InputNumber v-model="pb[`persen_${pbIdx + 1}`]" class="w-full" :min="0"
+                                            :max="100" :useGrouping="false" placeholder="Isi angka (%)"
+                                            @input="val => onChangeElemenPerbandinganLokasi('lainnya', val, pbIdx + 1, pb.id)" />
+                                    </template>
+                                </td>
 
 
-                        <!-- Pembanding -->
-                        <template v-for="(pb, pbIdx) in item.pembanding" :key="'pb-' + pbIdx">
-                            <!-- Kalau label = Jumlah Penyesuaian -->
-                            <template v-if="item.label === 'Jumlah Penyesuaian'">
+                                <!-- Kanan -->
+                                <td class="p-2 border dark:border-gray-600 dark:text-white" colspan="2">
+                                    {{ pb[`penyesuaian_${pbIdx + 1}`] }}
+                                </td>
+                            </template>
 
+
+
+                        </tr>
+
+                        <!-- Baris tambahan dengan sekat lurus -->
+
+                    </template>
+                    <tr class="bg-gray-100 dark:bg-gray-700 font-bold">
+                        <td class="p-2 border dark:border-gray-600 dark:text-white"
+                            :colspan="11 + (totalObject * 1) + (totalPembanding * 3)">
+                            KARAKTER FISIK
+                        </td>
+                        <!-- Dynamic Object Headers (2 columns each) -->
+
+                    </tr>
+                    <template v-for="item in dataElemenPerbandinganKarakterFisikPasar" :key="item.label">
+                        <!-- Baris utama -->
+
+                        <tr>
+                            <!-- Label -->
+                            <td class="p-2 border dark:border-gray-600 dark:text-white">
+                                {{ item.label }}
+                            </td>
+
+                            <!-- Objects -->
+                            <template v-for="(obj, objIdx) in item.objects" :key="'obj-' + objIdx">
+                                <td class="p-2 border dark:border-gray-600 dark:text-white">
+                                    {{ obj.keterangan }}
+                                </td>
+                                <td class="p-2 border dark:border-gray-600 dark:text-white" colspan="2">
+                                    {{ obj.deskripsi }}
+                                </td>
+                            </template>
+
+                            <!-- Pembanding -->
+                            <template v-for="(pb, pbIdx) in item.pembanding" :key="'pb-' + pbIdx">
                                 <!-- Kiri -->
                                 <td class="p-2 border dark:border-gray-600 dark:text-white">
                                     {{ pb.deskripsi || '-' }}
                                 </td>
+                                <!-- Input angka sesuai label -->
+                                <td class="p-2 border dark:border-gray-600">
+                                    <!-- Luas Tanah -->
+                                    <template v-if="item.label === 'Luas Tanah'">
+                                        -
+                                    </template>
 
-                                <!-- Input angka -->
-                                <td class="p-2 border dark:border-gray-600 text-center">
-                                    <!-- contoh input / angka -->
-                                    {{ pb.jumlahPenyesuaianPersen || '-' }}
+                                    <!-- Luas Bangunan -->
+                                    <template v-else-if="item.label === 'Luas Bangunan'">
+                                        -
+                                    </template>
+
+                                    <!-- Bentuk -->
+                                    <template v-else-if="item.label === 'Bentuk'">
+                                        <InputNumber v-model="pb[`persen_${pbIdx + 1}`]" class="w-full" :min="0"
+                                            :max="100" :useGrouping="false" placeholder="Isi angka (%)"
+                                            @input="val => onChangeElemenPerbandinganKarakteristikFisik('bentuk', val, pbIdx + 1, pb.id)" />
+                                    </template>
+
+                                    <!-- Elevasi -->
+                                    <template v-else-if="item.label === 'Elevasi'">
+                                        <InputNumber v-model="pb[`persen_${pbIdx + 1}`]" class="w-full" :min="0"
+                                            :max="100" :useGrouping="false" placeholder="Isi angka (%)"
+                                            @input="val => onChangeElemenPerbandinganKarakteristikFisik('elevasi', val, pbIdx + 1, pb.id)" />
+                                    </template>
+
+                                    <!-- Topografi -->
+                                    <template v-else-if="item.label === 'Topografi'">
+                                        <InputNumber v-model="pb[`persen_${pbIdx + 1}`]" class="w-full" :min="0"
+                                            :max="100" :useGrouping="false" placeholder="Isi angka (%)"
+                                            @input="val => onChangeElemenPerbandinganKarakteristikFisik('topografi', val, pbIdx + 1, pb.id)" />
+                                    </template>
+
+                                    <!-- Lebar Muka -->
+                                    <template v-else-if="item.label === 'Lebar Muka'">
+                                        <InputNumber v-model="pb[`persen_${pbIdx + 1}`]" class="w-full" :min="0"
+                                            :max="100" :useGrouping="false" placeholder="Isi angka (%)"
+                                            @input="val => onChangeElemenPerbandinganKarakteristikFisik('lebar_muka', val, pbIdx + 1, pb.id)" />
+                                    </template>
+
+                                    <!-- Peruntukan -->
+                                    <template v-else-if="item.label === 'Peruntukan'">
+                                        <InputNumber v-model="pb[`persen_${pbIdx + 1}`]" class="w-full" :min="0"
+                                            :max="100" :useGrouping="false" placeholder="Isi angka (%)"
+                                            @input="val => onChangeElemenPerbandinganKarakteristikFisik('peruntukan', val, pbIdx + 1, pb.id)" />
+                                    </template>
+
+                                    <!-- Kondisi Bangunan -->
+                                    <template v-else-if="item.label === 'Kondisi Bangunan'">
+                                        <InputNumber v-model="pb[`persen_${pbIdx + 1}`]" class="w-full" :min="0"
+                                            :max="100" :useGrouping="false" placeholder="Isi angka (%)"
+                                            @input="val => onChangeElemenPerbandinganKarakteristikFisik('kondisi_bangunan', val, pbIdx + 1, pb.id)" />
+                                    </template>
+
+                                    <!-- Lainnya -->
+                                    <template v-else-if="item.label === 'Lainnya (Sebutkan)'">
+                                        <InputNumber v-model="pb[`persen_${pbIdx + 1}`]" class="w-full" :min="0"
+                                            :max="100" :useGrouping="false" placeholder="Isi angka (%)"
+                                            @input="val => onChangeElemenPerbandinganKarakteristikFisik('lainnya', val, pbIdx + 1, pb.id)" />
+                                    </template>
+
+
+                                    <!-- Default (kalau tidak ada) -->
+                                    <template v-else>
+                                        <span class="dark:text-white">-</span>
+                                    </template>
                                 </td>
 
                                 <!-- Kanan -->
                                 <td class="p-2 border dark:border-gray-600 dark:text-white" colspan="2">
-                                    {{ pb.jumlahPenyesuaian || '-' }}
+                                    {{ pb[`penyesuaian_${pbIdx + 1}`] || '-' }}
                                 </td>
                             </template>
+                        </tr>
 
-                            <!-- Kalau bukan Jumlah Penyesuaian -->
-                            <template v-else-if="item.label === 'Indikasi Nilai Sewa Pasar setelah penyesuaian / m²'">
-                                <td class="p-2 border dark:border-gray-600 dark:text-white text-center" colspan="4">
-                                    {{ pb.indikasiNilai || '-' }}
-                                </td>
-                            </template>
-                            <template v-else-if="item.label === 'Total Bobot Absolut'">
-                                <td class="p-2 border dark:border-gray-600 dark:text-white text-center" colspan="4">
-                                    {{ pb.totalBobotAbsolut || '-' }}
-                                </td>
-                            </template>
-                            <template v-else-if="item.label === 'Proporsi'">
-                                <td class="p-2 border dark:border-gray-600 dark:text-white text-center" colspan="4">
-                                    {{ pb.proporsi || '-' }}
-                                </td>
-                            </template>
-                            <template v-else-if="item.label === 'Inverse'">
-                                <td class="p-2 border dark:border-gray-600 dark:text-white text-center" colspan="4">
-                                    {{ pb.inverse || '-' }}
-                                </td>
-                            </template>
-                            <template v-else-if="item.label === 'Pembobotan Akhir'">
-                                <td class="p-2 border dark:border-gray-600 dark:text-white text-center" colspan="4">
-                                    {{ pb.pembobotanAkhir || '-' }}
-                                </td>
-                            </template>
-                            <template v-else>
-                                <td class="p-2 border dark:border-gray-600 dark:text-white text-center" colspan="4">
-                                    {{ pb.totalPenyesuaian || '-' }}
-                                </td>
-                            </template>
 
-                        </template>
+                        <!-- Baris tambahan dengan sekat lurus -->
 
+
+                    </template>
+                    <tr>
+                        <td colspan="100%" style="height: 30px;"></td>
                     </tr>
+                    <template v-for="item in dataSummaryPasar.informasiUmumFields" :key="item.label">
 
-                    <!-- Baris tambahan dengan sekat lurus -->
+                        <!-- Baris utama -->
+                        <tr>
+                            <!-- Label -->
+                            <td class="p-2 border dark:border-gray-600 dark:text-white" colspan="2">
+                                {{ item.label }}
+                            </td>
+                            <template v-for="(pb, pbIdx) in 1" :key="'pb-' + pbIdx">
+                                <template v-if="item.label === 'Jumlah Penyesuaian'">
+                                    <td class="p-2 border dark:border-gray-600 dark:text-white text-center" colspan="2">
 
-                </template>
-            </tbody>
-        </table>
+                                    </td>
+                                </template>
+                                <template v-if="item.label === 'Indikasi Nilai Sewa Pasar setelah penyesuaian / m²'">
+                                    <td class="p-2 border dark:border-gray-600 dark:text-white text-center" colspan="2">
 
-        <br><br>
+                                    </td>
+                                </template>
+                                <template v-if="item.label === 'Proporsi'">
+                                    <td class="p-2 border dark:border-gray-600 dark:text-white text-center" colspan="2">
+                                        {{ item.objects.totalProporsi }}
+                                    </td>
+                                </template>
+                                <template v-else-if="item.label === 'Total Bobot Absolut'">
+                                    <td class="p-2 border dark:border-gray-600 dark:text-white text-center" colspan="2">
+                                        {{ item.objects.totalBobotAbsolutAll }}
+                                    </td>
+                                </template>
+                                <template v-else-if="item.label === 'Inverse'">
+                                    <td class="p-2 border dark:border-gray-600 dark:text-white text-center" colspan="2">
+                                        {{ item.objects.totalInverse }}
+                                    </td>
+                                </template>
+                                <template v-else-if="item.label === 'Pembobotan Akhir'">
+                                    <td class="p-2 border dark:border-gray-600 dark:text-white text-center" colspan="2">
+                                        {{ item.objects.totalPembobotanAkhir }}
+                                    </td>
+                                </template>
+                                <!-- Objects -->
 
-        <table class="min-w-full mt-6 border border-gray-300 text-sm dark:border-gray-600">
-            <thead>
-                <tr class="bg-gray-100 dark:bg-gray-800">
-                    <th colspan="3" class="p-2 border text-center font-semibold dark:border-gray-600 dark:text-white">
-                        Kesimpulan Nilai
-                    </th>
-                </tr>
-                <tr class="bg-gray-100 text-center dark:bg-gray-800 text-left">
-                    <th class="p-2 border dark:border-gray-600 dark:text-white">Data Pembanding</th>
-                    <th class="p-2 border dark:border-gray-600 dark:text-white">Bobot</th>
-                    <th class="p-2 border dark:border-gray-600 dark:text-white">Nilai</th>
-                </tr>
-            </thead>
-            <tbody>
-                <tr v-for="(item, index) in dataSummaryPasar.kesimpulanNilai" :key="'kesimpulan-' + index">
-                    <td class="border p-2 dark:border-gray-600 dark:text-white">{{ item.jenis_property }}</td>
-                    <td class="border p-2 dark:border-gray-600 text-center">{{ item.bobot }}</td>
-                    <td class="border p-2 dark:border-gray-600 text-right">{{ item.nilai }}</td>
-                </tr>
-            </tbody>
-        </table>
+                            </template>
 
-        <br>
 
-        <table class="min-w-full border border-gray-300 text-sm mt-4 text-center">
-            <tbody>
-                <!-- Deviasi di atas -->
-                <tr>
-                    <td class="border p-2 text-left font-semibold dark:text-white">Deviasi:</td>
-                    <td class="border p-2 dark:text-white font-semibold">
-                        {{
-                            dataSummaryPasar.nilaiMaxMinDeviasi?.find(item => item.label === 'Deviasi')?.value || '0'
-                        }}
-                    </td>
-                    <td class="border p-2 font-bold align-middle dark:text-white" :rowspan="3">
-                        {{ dataSummaryPasar.status || '0' }}
-                    </td>
-                </tr>
-                <!-- Loop untuk Min dan Max -->
-                <tr v-for="item in dataSummaryPasar.nilaiMaxMinDeviasi?.filter(i => i.label !== 'Deviasi') || [{ label: 'Min', value: '0' }, { label: 'Max', value: '0' }]"
-                    :key="item.label">
-                    <td class="border p-2 text-left dark:text-white">{{ item.label }}</td>
-                    <td class="border p-2">{{ item.value || '0' }}</td>
-                </tr>
-            </tbody>
-        </table>
+                            <!-- Pembanding -->
+                            <template v-for="(pb, pbIdx) in item.pembanding" :key="'pb-' + pbIdx">
+                                <!-- Kalau label = Jumlah Penyesuaian -->
+                                <template v-if="item.label === 'Jumlah Penyesuaian'">
 
+                                    <!-- Kiri -->
+                                    <td class="p-2 border dark:border-gray-600 dark:text-white">
+                                        {{ pb.deskripsi || '-' }}
+                                    </td>
+
+                                    <!-- Input angka -->
+                                    <td class="p-2 border dark:border-gray-600 text-center">
+                                        <!-- contoh input / angka -->
+                                        {{ pb.jumlahPenyesuaianPersen || '-' }}
+                                    </td>
+
+                                    <!-- Kanan -->
+                                    <td class="p-2 border dark:border-gray-600 dark:text-white" colspan="2">
+                                        {{ pb.jumlahPenyesuaian || '-' }}
+                                    </td>
+                                </template>
+
+                                <!-- Kalau bukan Jumlah Penyesuaian -->
+                                <template
+                                    v-else-if="item.label === 'Indikasi Nilai Sewa Pasar setelah penyesuaian / m²'">
+                                    <td class="p-2 border dark:border-gray-600 dark:text-white text-center" colspan="4">
+                                        {{ pb.indikasiNilai || '-' }}
+                                    </td>
+                                </template>
+                                <template v-else-if="item.label === 'Total Bobot Absolut'">
+                                    <td class="p-2 border dark:border-gray-600 dark:text-white text-center" colspan="4">
+                                        {{ pb.totalBobotAbsolut || '-' }}
+                                    </td>
+                                </template>
+                                <template v-else-if="item.label === 'Proporsi'">
+                                    <td class="p-2 border dark:border-gray-600 dark:text-white text-center" colspan="4">
+                                        {{ pb.proporsi || '-' }}
+                                    </td>
+                                </template>
+                                <template v-else-if="item.label === 'Inverse'">
+                                    <td class="p-2 border dark:border-gray-600 dark:text-white text-center" colspan="4">
+                                        {{ pb.inverse || '-' }}
+                                    </td>
+                                </template>
+                                <template v-else-if="item.label === 'Pembobotan Akhir'">
+                                    <td class="p-2 border dark:border-gray-600 dark:text-white text-center" colspan="4">
+                                        {{ pb.pembobotanAkhir || '-' }}
+                                    </td>
+                                </template>
+                                <template v-else>
+                                    <td class="p-2 border dark:border-gray-600 dark:text-white text-center" colspan="4">
+                                        {{ pb.totalPenyesuaian || '-' }}
+                                    </td>
+                                </template>
+
+                            </template>
+
+                        </tr>
+
+                        <!-- Baris tambahan dengan sekat lurus -->
+
+                    </template>
+                </tbody>
+            </table>
+
+            <br><br>
+
+            <table class="min-w-full mt-6 border border-gray-300 text-sm dark:border-gray-600">
+                <thead>
+                    <tr class="bg-gray-100 dark:bg-gray-800">
+                        <th colspan="3"
+                            class="p-2 border text-center font-semibold dark:border-gray-600 dark:text-white">
+                            Kesimpulan Nilai
+                        </th>
+                    </tr>
+                    <tr class="bg-gray-100 text-center dark:bg-gray-800 text-left">
+                        <th class="p-2 border dark:border-gray-600 dark:text-white">Data Pembanding</th>
+                        <th class="p-2 border dark:border-gray-600 dark:text-white">Bobot</th>
+                        <th class="p-2 border dark:border-gray-600 dark:text-white">Nilai</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr v-for="(item, index) in dataSummaryPasar.kesimpulanNilai" :key="'kesimpulan-' + index">
+                        <td class="border p-2 dark:border-gray-600 dark:text-white">{{ item.jenis_property }}</td>
+                        <td class="border p-2 dark:border-gray-600 text-center">{{ item.bobot }}</td>
+                        <td class="border p-2 dark:border-gray-600 text-right">{{ item.nilai }}</td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <br>
+
+            <table class="min-w-full border border-gray-300 text-sm mt-4 text-center">
+                <tbody>
+                    <!-- Deviasi di atas -->
+                    <tr>
+                        <td class="border p-2 text-left font-semibold dark:text-white">Deviasi:</td>
+                        <td class="border p-2 dark:text-white font-semibold">
+                            {{
+                                dataSummaryPasar.nilaiMaxMinDeviasi?.find(item => item.label === 'Deviasi')?.value || '0'
+                            }}
+                        </td>
+                        <td class="border p-2 font-bold align-middle dark:text-white" :rowspan="3">
+                            {{ dataSummaryPasar.status || '0' }}
+                        </td>
+                    </tr>
+                    <!-- Loop untuk Min dan Max -->
+                    <tr v-for="item in dataSummaryPasar.nilaiMaxMinDeviasi?.filter(i => i.label !== 'Deviasi') || [{ label: 'Min', value: '0' }, { label: 'Max', value: '0' }]"
+                        :key="item.label">
+                        <td class="border p-2 text-left dark:text-white">{{ item.label }}</td>
+                        <td class="border p-2">{{ item.value || '0' }}</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
 
 
     </div>
