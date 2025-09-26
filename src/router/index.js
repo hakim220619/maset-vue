@@ -19,6 +19,16 @@ const routes = [
                 }
             },
             {
+                path: '/pages/reports',
+                name: 'reports',
+                exact: true,
+                component: () => import('@/views/pages/reports/Index.vue'),
+                meta: {
+                    requiresAuth: true,
+                    breadcrumb: [{ parent: 'Dashboard' }]
+                }
+            },
+            {
                 path: '/dashboard-banking',
                 name: 'dashboard-banking',
                 component: () => import('@/views/dashboards/Banking.vue'),
