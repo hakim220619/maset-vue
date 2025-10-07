@@ -19,11 +19,12 @@ const loading = ref(true);
 
 const filters = ref({
     global: { value: '', matchMode: 'contains' },
-    nama_bangunan: { value: '', matchMode: 'contains' }
+    judul_penilaian: { value: '', matchMode: 'contains' },
+    tanggal_penilaian: { value: '', matchMode: 'contains' }
 });
 
 const search = ref({
-    nama_bangunan: ''
+    judul_penilaian: ''
 });
 
 async function getBangunanData() {
@@ -33,7 +34,7 @@ async function getBangunanData() {
         const response = await AuthApi.client().get('/bangunan/?' + new URLSearchParams(params));
         const filteredData = response.data.data;
         const sortedData = filteredData.sort((a, b) => {
-            return new Date(b.tahun_dibangun) - new Date(a.tahun_dibangun);
+            return new Date(b.tanggal_penilaian) - new Date(a.tanggal_penilaian);
         });
         data.value = sortedData;
     } catch (error) {
@@ -53,7 +54,7 @@ const items = [
     {
         label: 'Hapus',
         command: (e) => {
-            destroy(e.item.data.id, e.item.data.nama_bangunan);
+            destroy(e.item.data.id, e.item.data.judul_penilaian);
         }
     }
 ];
@@ -77,6 +78,8 @@ const destroy = (id, name) => {
         .then(async (result) => {
             if (result.isConfirmed) {
                 const response = await AuthApi.client().delete('bangunan/' + id);
+                console.log(response);
+
                 if (response.data.success) {
                     swal.fire({
                         title: 'Success',
@@ -140,40 +143,40 @@ onMounted(() => {
                     </template>
                 </Column>
 
-                <Column field="nama_bangunan" sortable header="Nama Bangunan" style="min-width: 14rem">
-                    <template #body="{ data }">{{ data.nama_bangunan }}</template>
+                <Column field="judul_penilaian" sortable header="Judul Penilaian" style="min-width: 14rem">
+                    <template #body="{ data }">{{ data.judul_penilaian }}</template>
                     <template #filter="{ filterModel }">
-                        <InputText v-model="filterModel.value" placeholder="Cari Nama Bangunan" />
+                        <InputText v-model="filterModel.value" placeholder="Cari Judul Penilaian" />
                     </template>
                 </Column>
 
-                <Column field="bentuk_bangunan" header="Bentuk" style="min-width: 10rem">
-                    <template #body="{ data }">{{ data.bentuk_bangunan }}</template>
+                <Column field="object_type" sortable header="Tipe Object" style="min-width: 14rem">
+                    <template #body="{ data }">{{ data.object_type }}</template>
+                    <template #filter="{ filterModel }">
+                        <InputText v-model="filterModel.value" placeholder="Cari Tipe Object" />
+                    </template>
                 </Column>
 
-                <Column field="grade_gudang" header="Grade" style="min-width: 8rem">
-                    <template #body="{ data }">{{ data.grade_gudang }}</template>
+                <Column field="nama_entitas" sortable header="Nama Entitas" style="min-width: 14rem">
+                    <template #body="{ data }">{{ data.nama_entitas }}</template>
                 </Column>
 
-                <Column field="jumlah_lantai" header="Lantai" style="min-width: 8rem">
-                    <template #body="{ data }">{{ data.jumlah_lantai }}</template>
+                <Column field="tanggal_inspeksi" sortable header="Tanggal Inspeksi" style="min-width: 14rem">
+                    <template #body="{ data }">{{ new Date(data.tanggal_inspeksi).toLocaleDateString() }}</template>
                 </Column>
 
-                <Column field="basement" header="Basement" style="min-width: 8rem">
-                    <template #body="{ data }">{{ data.basement ? 'Ya' : 'Tidak' }}</template>
+                <Column field="tanggal_penilaian" sortable header="Tanggal Penilaian" style="min-width: 14rem">
+                    <template #body="{ data }">{{ new Date(data.tanggal_penilaian).toLocaleDateString() }}</template>
                 </Column>
 
-                <Column field="tahun_dibangun" header="Tahun Dibangun" style="min-width: 10rem">
-                    <template #body="{ data }">{{ data.tahun_dibangun }}</template>
+                <Column field="penilai_surveyor" header="Penilai / Surveyor" style="min-width: 14rem">
+                    <template #body="{ data }">{{ data.penilai_surveyor }}</template>
                 </Column>
 
-                <Column field="tahun_renovasi" header="Tahun Renovasi" style="min-width: 10rem">
-                    <template #body="{ data }">{{ data.tahun_renovasi }}</template>
-                </Column>
-
-                <Column field="kondisi_visual" header="Kondisi" style="min-width: 10rem">
-                    <template #body="{ data }">{{ data.kondisi_visual }}</template>
-                </Column>
+                <Column field="batas_utara" header="Batas Utara" style="min-width: 14rem" />
+                <Column field="batas_selatan" header="Batas Selatan" style="min-width: 14rem" />
+                <Column field="batas_timur" header="Batas Timur" style="min-width: 14rem" />
+                <Column field="batas_barat" header="Batas Barat" style="min-width: 14rem" />
 
                 <Column>
                     <template #body="{ data }">

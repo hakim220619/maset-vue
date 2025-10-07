@@ -150,6 +150,13 @@ onMounted(() => {
                     </template>
                 </Column>
 
+                <Column field="object_type" sortable header="Tipe Object" style="min-width: 14rem">
+                    <template #body="{ data }">{{ data.object_type }}</template>
+                    <template #filter="{ filterModel }">
+                        <InputText v-model="filterModel.value" placeholder="Cari Tipe Object" />
+                    </template>
+                </Column>
+
                 <Column field="nama_entitas" sortable header="Nama Entitas" style="min-width: 14rem">
                     <template #body="{ data }">{{ data.nama_entitas }}</template>
                 </Column>
