@@ -52,13 +52,9 @@ const save = async () => {
             obj => form.value.data.object_id === obj.value
         );
 
-        const tanah_id = selectedObject?.jenis_object === 'Tanah' ? [selectedObject.value] : [];
-        const bangunan_id = selectedObject?.jenis_object === 'Bangunan' ? [selectedObject.value] : [];
-
 
         const payload = {
-            tanah_id,
-            bangunan_id,
+            object_id: selectedObject.value,
             pembanding_id: form.value.data.pembanding_id
         };
 
@@ -123,7 +119,7 @@ const fetchOptions = async () => {
 
 onBeforeMount(async () => {
     if (route.params.id) {
-        const data = await Helper.getDataById('sewa', route.params.id);
+        const data = await Helper.getDataById('pasar', route.params.id);
         if (data) {
             form.value.assign(data);
         }

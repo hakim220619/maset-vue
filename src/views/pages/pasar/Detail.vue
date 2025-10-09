@@ -20,10 +20,6 @@ const data = ref({
 });
 const dataPasarAll = ref([]);
 const dataHeaderAll = ref([]);
-var judulPenilaianDataAsset = ref(null);
-var judulPenilaianDataPembanding1 = ref(null);
-var judulPenilaianDataPembanding2 = ref(null);
-var judulPenilaianDataPembanding3 = ref(null);
 
 const dataEstimasiBangunan = ref([]);
 const informasiUmumFields = ref([]);
@@ -111,9 +107,77 @@ const resetElemenPerbandingan = (idx, pbId) => {
     }
 }
 
+
+const resetElemenPerbandinganLokasi = (idx, pbId) => {
+    if (Array.isArray(dataElemenPerbandinganLokasiPasar.value)) {
+        dataElemenPerbandinganLokasiPasar.value.forEach(item => {
+
+            if (Array.isArray(item.pembanding)) {
+                item.pembanding.forEach((pb, _idx) => {
+
+                    if (pb.id === pbId) {
+                        jarakPusatKota.value[_idx + 1] = 0;
+                        perkerasanJalan.value[_idx + 1] = 0;
+                        aksesibilitasLokasi.value[_idx + 1] = 0;
+                        kondisiLingkungan.value[_idx + 1] = 0;
+                        posisiAset.value[_idx + 1] = 0;
+                        lainnya.value[_idx + 1] = 0;
+
+                        pb[`persen_${_idx + 1}`] = 0;
+                        pb[`penyesuaian_${_idx + 1}`] = 0;
+
+                    }
+
+                });
+            }
+        });
+    }
+
+    perkiraanHargaTransaksiSetelahPenyesuaian.value[idx] = 0;
+};
+
+
+const resetElemenPerbandinganKarakteristikFisik = (idx, pbId) => {
+
+    // reset di state (ref)
+
+
+    // reset langsung di dataElemenPerbandinganKarakterFisikPasar biar input kosong/0
+    if (Array.isArray(dataElemenPerbandinganKarakterFisikPasar.value)) {
+        dataElemenPerbandinganKarakterFisikPasar.value.forEach(item => {
+            if (Array.isArray(item.pembanding)) {
+                item.pembanding.forEach((pb, _idx) => {
+                    if (pb.id === pbId) {
+                        luasTanahFinal.value[_idx + 1] = 0;
+                        luasBangunanFinal.value[_idx + 1] = 0;
+                        bentukFinal.value[_idx + 1] = 0;
+                        elevasiFinal.value[_idx + 1] = 0;
+                        topografiFinal.value[_idx + 1] = 0;
+                        lebarMukaFinal.value[_idx + 1] = 0;
+                        peruntukanFinal.value[_idx + 1] = 0;
+                        kondisiBangunanFinal.value[_idx + 1] = 0;
+                        lainnyaFinal.value[_idx + 1] = 0;
+
+                        // reset penyesuaian & hasil
+                        pb[`persen_${_idx + 1}`] = 0;
+                        pb[`penyesuaian_${_idx + 1}`] = 0;
+                        pb[`tempPersen_${_idx + 1}`] = 0;
+                    }
+                });
+            }
+        });
+    }
+
+    // reset perkiraan harga juga
+    perkiraanHargaTransaksiSetelahPenyesuaian.value[idx] = 0;
+};
+
+
 const onDataChangeEstimasiBangunan = async (fieldKey, selectedValue, idx, pbId) => {
     try {
         resetElemenPerbandingan(idx, pbId);
+        resetElemenPerbandinganLokasi(idx, pbId)
+        resetElemenPerbandinganKarakteristikFisik(idx, pbId)
 
         if (fieldKey === "jenis_bangunan") {
             let tahun = null;
@@ -211,6 +275,8 @@ const onDataChangeEstimasiBangunan = async (fieldKey, selectedValue, idx, pbId) 
 
 const onChangeElemenPerbandingan = async (fieldKey, selectedValue, idx, pbId) => {
     try {
+        console.log(idx);
+
         resetElemenPerbandinganLokasi(idx, pbId)
         resetElemenPerbandinganKarakteristikFisik(idx, pbId)
 
@@ -297,31 +363,6 @@ const onChangeElemenPerbandingan = async (fieldKey, selectedValue, idx, pbId) =>
 }
 
 
-const resetElemenPerbandinganLokasi = (idx, pbId) => {
-    if (Array.isArray(dataElemenPerbandinganLokasiPasar.value)) {
-        dataElemenPerbandinganLokasiPasar.value.forEach(item => {
-
-            if (Array.isArray(item.pembanding)) {
-                item.pembanding.forEach(pb => {
-                    jarakPusatKota.value[idx] = 0;
-                    perkerasanJalan.value[idx] = 0;
-                    aksesibilitasLokasi.value[idx] = 0;
-                    kondisiLingkungan.value[idx] = 0;
-                    posisiAset.value[idx] = 0;
-                    lainnya.value[idx] = 0;
-                    if (pb.id === pbId) {
-                        pb[`persen_${idx}`] = 0;
-                        pb[`penyesuaian_${idx}`] = 0;
-
-                    }
-
-                });
-            }
-        });
-    }
-
-    perkiraanHargaTransaksiSetelahPenyesuaian.value[idx] = 0;
-};
 
 const dataTotals = ref([]);
 const dataPersent = ref([]);
@@ -363,7 +404,7 @@ const onChangeElemenPerbandinganLokasi = async (fieldKey, selectedValue, idx, pb
         if (value > 100) value = 100;
         if (value < 0) value = 0;
 
-
+        resetElemenPerbandinganKarakteristikFisik(idx, pbId)
 
         if (fieldKey === "jarak_pusat_kota") {
             jarakPusatKota.value[idx] = value;
@@ -419,7 +460,7 @@ const onChangeElemenPerbandinganLokasi = async (fieldKey, selectedValue, idx, pb
                 valPerkiraan = toKosong(valPerkiraan);
 
                 if ([valJarak, valPerkerasan, valAkses, valLingkungan, valPosisi, valLainnya, valPerkiraan].some(v => v !== null)) {
-                    return `pembanding_id=${pb.id}&jarak_pusat_kota=${valJarak ?? ""}&perkerasan_jalan=${valPerkerasan ?? ""}&aksesibilitas_lokasi=${valAkses ?? ""}&kondisi_lingkungan=${valLingkungan ?? ""}&posisi_aset=${valPosisi ?? ""}&lainnya=${valLainnya ?? ""}&perkiraan_harga_setelah_penyesuaian=${valPerkiraan ?? ""}&list_data=${idxPlus}`;
+                    return `pembanding_id=${pbId}&jarak_pusat_kota=${valJarak ?? ""}&perkerasan_jalan=${valPerkerasan ?? ""}&aksesibilitas_lokasi=${valAkses ?? ""}&kondisi_lingkungan=${valLingkungan ?? ""}&posisi_aset=${valPosisi ?? ""}&lainnya=${valLainnya ?? ""}&perkiraan_harga_setelah_penyesuaian=${valPerkiraan ?? ""}&list_data=${idxPlus}&updateElemenPerbandingan=true`;
                 }
 
                 return null;
@@ -484,55 +525,12 @@ const fieldMap = {
     lainnya: lainnyaFinal,
 };
 
-const resetElemenPerbandinganKarakteristikFisik = (idx, pbId) => {
-    // reset di state (ref)
-    luasTanahFinal.value[idx] = 0;
-    luasBangunanFinal.value[idx] = 0;
-    bentukFinal.value[idx] = 0;
-    elevasiFinal.value[idx] = 0;
-    topografiFinal.value[idx] = 0;
-    lebarMukaFinal.value[idx] = 0;
-    peruntukanFinal.value[idx] = 0;
-    kondisiBangunanFinal.value[idx] = 0;
-    lainnyaFinal.value[idx] = 0;
-
-    // reset langsung di dataElemenPerbandinganKarakterFisikPasar biar input kosong/0
-    if (Array.isArray(dataElemenPerbandinganKarakterFisikPasar.value)) {
-        dataElemenPerbandinganKarakterFisikPasar.value.forEach(item => {
-            if (Array.isArray(item.pembanding)) {
-                item.pembanding.forEach(pb => {
-                    if (pb.id === pbId) {
-                        pb.luas_tanah = 0;
-                        pb.luas_bangunan = 0;
-                        pb.bentuk = 0;
-                        pb.elevasi = 0;
-                        pb.topografi = 0;
-                        pb.lebar_muka = 0;
-                        pb.peruntukan = 0;
-                        pb.kondisi_bangunan = 0;
-                        pb.lainnya = 0;
-
-                        // reset penyesuaian & hasil
-                        pb.penyesuaian = 0;
-                        pb.hasil = 0;
-                    }
-                });
-            }
-        });
-    }
-
-    // reset perkiraan harga juga
-    perkiraanHargaTransaksiSetelahPenyesuaian.value[idx] = 0;
-};
-
 
 
 const onChangeElemenPerbandinganKarakteristikFisik = async (fieldKey, selectedValue, idx, pbId) => {
     try {
         let value = parseFloat(selectedValue.value) || 0;
 
-
-        // Batas 0–100
         if (value > 100) value = 100;
         if (value < 0) value = 0;
 
@@ -542,7 +540,6 @@ const onChangeElemenPerbandinganKarakteristikFisik = async (fieldKey, selectedVa
             luasBangunanFinal.value[idx] = value;
         } else if (fieldKey === "bentuk") {
             bentukFinal.value[idx] = value;
-
         } else if (fieldKey === "elevasi") {
             elevasiFinal.value[idx] = value;
         } else if (fieldKey === "topografi") {
@@ -558,6 +555,7 @@ const onChangeElemenPerbandinganKarakteristikFisik = async (fieldKey, selectedVa
         } else if (fieldKey === "perkiraan_harga_transaksi_setelah_penyesuaian") {
             perkiraanHargaTransaksiSetelahPenyesuaian.value[idx] = value;
         }
+        console.log(luasTanahFinal.value[idx]);
 
         const target = dataElemenPerbandinganPasar.value.find(
             d => d.label === "Perkiraan Harga Transaksi setelah Penyesuaian"
@@ -567,7 +565,7 @@ const onChangeElemenPerbandinganKarakteristikFisik = async (fieldKey, selectedVa
         }
 
         const PasarId = route.params.id;
-        const toKosong = (v) => (v === 0 ? "data_kosong" : v);
+        const toKosong = (v) => (v === null ? "data_kosong" : v);
 
         const query = dataPasarAll.value.pembanding_id
             .map((pb, i) => {
@@ -624,7 +622,7 @@ const onChangeElemenPerbandinganKarakteristikFisik = async (fieldKey, selectedVa
             .join("&");
 
 
-        // console.log(query);
+        console.log(query);
 
         if (!query) return;
 
@@ -636,9 +634,9 @@ const onChangeElemenPerbandinganKarakteristikFisik = async (fieldKey, selectedVa
 
         const newData = res.data.data;
 
-
         dataElemenPerbandinganKarakterFisikPasar.value = newData.map(newField => {
             const objects = Array.isArray(newField.objects) ? newField.objects : []
+
             const pembanding = (newField.pembanding || []).map((pb, i) => {
                 const idxPlusOne = i + 1
                 // console.log(pb);
@@ -646,6 +644,7 @@ const onChangeElemenPerbandinganKarakteristikFisik = async (fieldKey, selectedVa
                 return {
                     id: pb?.id ?? 0,
                     [`deskripsi_${idxPlusOne}`]: pb?.[`deskripsi_${idxPlusOne}`] ?? "-",
+                    [`tempPersen_${idxPlusOne}`]: pb?.[`tempPersen_${idxPlusOne}`] ?? 0,
                     [`persen_${idxPlusOne}`]: pb?.[`persen_${idxPlusOne}`] ?? 0,
                     [`penyesuaian_${idxPlusOne}`]: pb?.[`penyesuaian_${idxPlusOne}`] ?? 0,
                     // [`hasil_${idxPlusOne}`]: pb?.[`hasil_${idxPlusOne}`] ?? 0,
@@ -667,7 +666,7 @@ const onChangeElemenPerbandinganKarakteristikFisik = async (fieldKey, selectedVa
     }
 };
 
-const updateTotalPenyesuaian = async (idx) => {
+const updateTotalPenyesuaian = async () => {
     try {
         const PasarId = route.params.id;
 
@@ -720,8 +719,6 @@ onBeforeMount(async () => {
         const dataElemenPerbandinganLokasi = await Helper.getDataById('getElemenPerbandinganLokasiPasar', route.params.id);
         const dataElemenPerbandinganKarakterFisik = await Helper.getDataById('getElemenPerbandinganKarakterFisikPasar', route.params.id);
 
-
-
         const dataSummary = await Helper.getDataById('getSummaryPasar', route.params.id);
         const EstimasiBangunan = await Helper.getDataById(
             'getDataEstimasiBangunanPasar',
@@ -729,8 +726,7 @@ onBeforeMount(async () => {
             selectedTahun.value ? { tahun_id: selectedTahun.value } : {}
         );
 
-
-        totalObject = dataPasar.tanah_id.length == 0 ? dataPasar.bangunan_id.length : dataPasar.tanah_id.length;
+        totalObject = 1;
         totalPembanding = dataPasar.pembanding_id.length;
         dataPasarAll.value = dataPasar
         dataHeaderAll.value = dataHeader
@@ -744,12 +740,8 @@ onBeforeMount(async () => {
         dataElemenPerbandinganKarakterFisikPasar.value = dataElemenPerbandinganKarakterFisik;
         dataSummaryPasar.value = dataSummary;
 
-
         dataEstimasiBangunan.value = EstimasiBangunan;
-        // console.log(dataElemenPerbandinganKarakterFisikPasar);
 
-
-        // ✅ Set default value setelah pembandingOptions sudah ada
         dataEstimasiBangunan.value.forEach(field => {
             if (field.key === "estimasi_nilai_pasar_tanah_per_m2") {
 
@@ -759,14 +751,12 @@ onBeforeMount(async () => {
             }
         });
 
-
         dataElemenPerbandinganPasar.value = dataElemenPerbandinganPasar.value.map((field) => {
-            // pastikan objek utama ada
+
             if (!Array.isArray(field.objects) || field.objects.length === 0) {
                 field.objects = [{ keterangan: "", deskripsi: "" }];
             }
 
-            // pastikan pembanding sesuai jumlah data.value.pembandings
             const totalPb = totalPembanding;
             field.pembanding = Array.from({ length: totalPb }, (_, _idx) => {
                 const existing = field.pembanding?.[_idx] || {};
@@ -785,12 +775,11 @@ onBeforeMount(async () => {
         });
 
         dataElemenPerbandinganLokasiPasar.value = dataElemenPerbandinganLokasiPasar.value.map((field) => {
-            // pastikan objek utama ada
+
             if (!Array.isArray(field.objects) || field.objects.length === 0) {
                 field.objects = [{ keterangan: "", deskripsi: "" }];
             }
 
-            // pastikan pembanding sesuai jumlah data.value.pembandings
             const totalPb = totalPembanding;
             field.pembanding = Array.from({ length: totalPb }, (_, idx) => {
                 const existing = field.pembanding?.[idx] || {};
@@ -809,12 +798,10 @@ onBeforeMount(async () => {
             return field;
         });
         dataElemenPerbandinganKarakterFisikPasar.value = dataElemenPerbandinganKarakterFisikPasar.value.map((field) => {
-            // pastikan objek utama ada
             if (!Array.isArray(field.objects) || field.objects.length === 0) {
                 field.objects = [{ keterangan: "", deskripsi: "" }];
             }
 
-            // pastikan pembanding sesuai jumlah data.value.pembandings
             const totalPb = totalPembanding;
             field.pembanding = Array.from({ length: totalPb }, (_, idx) => {
                 const existing = field.pembanding?.[idx] || {};
@@ -835,11 +822,7 @@ onBeforeMount(async () => {
     }
 });
 
-
-
-
 </script>
-
 <template>
     <div class="max-w-3xl ml-0 space-y-6">
         <!-- Card 1 -->
@@ -875,11 +858,15 @@ onBeforeMount(async () => {
                     <span class="font-medium">Nama Entitas:</span> {{ dataHeaderAll?.object?.nama_entitas }}
                 </p>
                 <p class="text-base text-gray-700 dark:text-gray-300">
-                    <span class="font-medium">Tanggal Inspeksi:</span> {{ dataHeaderAll?.object?.tanggal_inspeksi }}
+                    <span class="font-medium">Tanggal Inspeksi:</span>
+                    {{ new Date(dataHeaderAll?.object?.tanggal_inspeksi).toLocaleDateString('id-ID') }}
                 </p>
+
                 <p class="text-base text-gray-700 dark:text-gray-300">
-                    <span class="font-medium">Tanggal Penilaian:</span> {{ dataHeaderAll?.object?.tanggal_penilaian }}
+                    <span class="font-medium">Tanggal Penilaian:</span>
+                    {{ new Date(dataHeaderAll?.object?.tanggal_penilaian).toLocaleDateString('id-ID') }}
                 </p>
+
                 <p class="text-base text-gray-700 dark:text-gray-300">
                     <span class="font-medium">Penilai / Surveyor:</span> {{ dataHeaderAll?.object?.penilai_surveyor }}
                 </p>
@@ -896,33 +883,45 @@ onBeforeMount(async () => {
         <div class="overflow-auto">
 
             <table class="min-w-full border border-gray-300 text-sm dark:border-gray-600">
-                <thead>
-
-
-                </thead>
-
                 <tbody>
-                    <!-- INFORMASI UMUM -->
                     <tr class="bg-gray-100 dark:bg-gray-700 font-bold">
-                        <td class="p-2 border dark:border-gray-600 dark:text-white"
-                            :colspan="5 + (totalObject * 2) + (totalPembanding * 3)">
+                        <!-- Judul utama -->
+                        <td class="p-2 border dark:border-gray-600 dark:text-white">
                             INFORMASI UMUM
                         </td>
+
+                        <!-- Header Object dinamis -->
+                        <template v-for="(obj, idx) in totalObject" :key="'obj-head-' + idx">
+                            <td colspan="3" class="p-2 border dark:border-gray-600 dark:text-white">
+                                OBJECT {{ idx + 1 }}
+                            </td>
+                        </template>
+
+                        <!-- Header Pembanding dinamis -->
+                        <template v-for="(pb, idx) in totalPembanding" :key="'pb-head-' + idx">
+                            <td colspan="4" class="p-2 border dark:border-gray-600 dark:text-white">
+                                PEMBANDING {{ idx + 1 }}
+                            </td>
+                        </template>
                     </tr>
 
+
+
+                    <!-- Isi dinamis -->
                     <tr v-for="field in informasiUmumFields" :key="'inf-' + field.key">
                         <!-- Label kolom -->
                         <td class="p-2 border dark:border-gray-600 dark:text-white">
                             {{ field.label }}
                         </td>
 
-                        <template v-for="(item, idx) in field.items" :key="'obj-' + idx">
+                        <!-- Data Object -->
+                        <template v-for="(item, idx) in field.items" :key="'obj-' + field.key + '-' + idx">
                             <td colspan="3" class="p-2 border dark:border-gray-600 dark:text-white">
                                 {{ item.object || '-' }}
                             </td>
                         </template>
 
-                        <!-- Kolom Pembanding Dinamis -->
+                        <!-- Data Pembanding -->
                         <template
                             v-for="(key, idx) in Object.keys(field.items?.[0] || {}).filter(k => k.startsWith('pembanding'))"
                             :key="'info-pb-' + field.key + '-' + idx">
@@ -931,6 +930,7 @@ onBeforeMount(async () => {
                             </td>
                         </template>
                     </tr>
+
 
 
                     <!-- DATA PROPERTI -->
@@ -1053,7 +1053,8 @@ onBeforeMount(async () => {
                                 <!-- Kondisi Fisik Bangunan (Visual) -->
                                 <template v-else-if="field.label === 'Kondisi Fisik Bangunan (Visual)'">
                                     <InputNumber v-model="field.items[0]['pembanding' + (idx + 1)]" class="w-full"
-                                        :min="0" :max="100" :useGrouping="false" placeholder="Isi angka (%)"
+                                        input-style="border: 2px solid;" :min="0" :max="100" :useGrouping="false"
+                                        placeholder="Isi angka (%)"
                                         @input="val => onDataChangeEstimasiBangunan('kondisi_fisik_bangunan', val, idx, field.items[0]['data_id_' + (idx + 1)])" />
                                 </template>
 
@@ -1062,14 +1063,16 @@ onBeforeMount(async () => {
                                 <!-- Keusangan Fungsional -->
                                 <template v-else-if="field.label === 'Keusangan Fungsional'">
                                     <InputNumber v-model="field.items[0]['pembanding' + (idx + 1)]" class="w-full"
-                                        :min="0" :max="100" :useGrouping="false" placeholder="Isi angka (%)"
+                                        input-style="border: 2px solid;" :min="0" :max="100" :useGrouping="false"
+                                        placeholder="Isi angka (%)"
                                         @input="val => onDataChangeEstimasiBangunan('keusangan_fungsional', val, idx, field.items[0]['data_id_' + (idx + 1)])" />
                                 </template>
 
                                 <!-- Keusangan Ekonomis -->
                                 <template v-else-if="field.label === 'Keusangan Ekonomis'">
                                     <InputNumber v-model="field.items[0]['pembanding' + (idx + 1)]" class="w-full"
-                                        :min="0" :max="100" :useGrouping="false" placeholder="Isi angka (%)"
+                                        input-style="border: 2px solid;" :min="0" :max="100" :useGrouping="false"
+                                        placeholder="Isi angka (%)"
                                         @input="val => onDataChangeEstimasiBangunan('keusangan_ekonomis', val, idx, field.items[0]['data_id_' + (idx + 1)])" />
                                 </template>
 
@@ -1143,7 +1146,8 @@ onBeforeMount(async () => {
                                 <template v-if="item.label === 'Hak Atas Properti yang dialihkan'">
                                     <td class="p-2 border dark:border-gray-600">
                                         <InputNumber v-model="pb[`persen_${pbIdx + 1}`]" class="w-full" :min="0"
-                                            :max="100" :useGrouping="false" placeholder="Isi angka (%)"
+                                            input-style="border: 2px solid;" :max="100" :useGrouping="false"
+                                            placeholder="Isi angka (%)"
                                             @input="val => onChangeElemenPerbandingan('hak_atas_properti', val, pbIdx + 1, pb.id)" />
                                     </td>
                                 </template>
@@ -1152,7 +1156,8 @@ onBeforeMount(async () => {
                                 <template v-else-if="item.label === 'Syarat Pembiayaan'">
                                     <td class="p-2 border dark:border-gray-600">
                                         <InputNumber v-model="pb[`persen_${pbIdx + 1}`]" class="w-full" :min="0"
-                                            :max="100" :useGrouping="false" placeholder="Isi angka (%)"
+                                            input-style="border: 2px solid;" :max="100" :useGrouping="false"
+                                            placeholder="Isi angka (%)"
                                             @input="val => onChangeElemenPerbandingan('syarat_pembiayaan', val, pbIdx + 1, pb.id)" />
                                     </td>
                                 </template>
@@ -1161,7 +1166,8 @@ onBeforeMount(async () => {
                                 <template v-else-if="item.label === 'Kondisi Penjualan'">
                                     <td class="p-2 border dark:border-gray-600">
                                         <InputNumber v-model="pb[`persen_${pbIdx + 1}`]" class="w-full" :min="0"
-                                            :max="100" :useGrouping="false" placeholder="Isi angka (%)"
+                                            input-style="border: 2px solid;" :max="100" :useGrouping="false"
+                                            placeholder="Isi angka (%)"
                                             @input="val => onChangeElemenPerbandingan('kondisi_penjualan', val, pbIdx + 1, pb.id)" />
                                     </td>
                                 </template>
@@ -1171,7 +1177,8 @@ onBeforeMount(async () => {
                                     v-else-if="item.label === 'Pengeluaran yang dilakukan segera setelah pembelian'">
                                     <td class="p-2 border dark:border-gray-600">
                                         <InputNumber v-model="pb[`persen_${pbIdx + 1}`]" class="w-full" :min="0"
-                                            :max="100" :useGrouping="false" placeholder="Isi angka (%)"
+                                            input-style="border: 2px solid;" :max="100" :useGrouping="false"
+                                            placeholder="Isi angka (%)"
                                             @input="val => onChangeElemenPerbandingan('pengeluaran_setelah_pembelian', val, pbIdx + 1, pb.id)" />
                                     </td>
                                 </template>
@@ -1179,7 +1186,8 @@ onBeforeMount(async () => {
                                 <template v-else-if="item.label === 'Kondisi Pasar'">
                                     <td class="p-2 border dark:border-gray-600">
                                         <InputNumber v-model="pb[`persen_${pbIdx + 1}`]" class="w-full" :min="0"
-                                            :max="100" :useGrouping="false" placeholder="Isi angka (%)"
+                                            input-style="border: 2px solid;" :max="100" :useGrouping="false"
+                                            placeholder="Isi angka (%)"
                                             @input="val => onChangeElemenPerbandingan('kondisi_pasar', val, pbIdx + 1, pb.id)" />
                                     </td>
                                 </template>
@@ -1276,42 +1284,48 @@ onBeforeMount(async () => {
                                     <!-- Jarak terhadap pusat kota -->
                                     <template v-if="item.label === 'Jarak terhadap pusat kota'">
                                         <InputNumber v-model="pb[`persen_${pbIdx + 1}`]" class="w-full" :min="0"
-                                            :max="100" :useGrouping="false" placeholder="Isi angka (%)"
+                                            input-style="border: 2px solid;" :max="100" :useGrouping="false"
+                                            placeholder="Isi angka (%)"
                                             @input="val => onChangeElemenPerbandinganLokasi('jarak_pusat_kota', val, pbIdx + 1, pb.id)" />
                                     </template>
 
                                     <!-- Perkerasan Jalan/Lebar Jalan -->
                                     <template v-else-if="item.label === 'Perkerasan Jalan/Lebar Jalan'">
                                         <InputNumber v-model="pb[`persen_${pbIdx + 1}`]" class="w-full" :min="0"
-                                            :max="100" :useGrouping="false" placeholder="Isi angka (%)"
+                                            input-style="border: 2px solid;" :max="100" :useGrouping="false"
+                                            placeholder="Isi angka (%)"
                                             @input="val => onChangeElemenPerbandinganLokasi('perkerasan_jalan', val, pbIdx + 1, pb.id)" />
                                     </template>
 
                                     <!-- Aksesibilitas & Lokasi -->
                                     <template v-else-if="item.label === 'Aksesibilitas & Lokasi'">
                                         <InputNumber v-model="pb[`persen_${pbIdx + 1}`]" class="w-full" :min="0"
-                                            :max="100" :useGrouping="false" placeholder="Isi angka (%)"
+                                            input-style="border: 2px solid;" :max="100" :useGrouping="false"
+                                            placeholder="Isi angka (%)"
                                             @input="val => onChangeElemenPerbandinganLokasi('aksesibilitas_lokasi', val, pbIdx + 1, pb.id)" />
                                     </template>
 
                                     <!-- Kondisi Lingkungan -->
                                     <template v-else-if="item.label === 'Kondisi Lingkungan'">
                                         <InputNumber v-model="pb[`persen_${pbIdx + 1}`]" class="w-full" :min="0"
-                                            :max="100" :useGrouping="false" placeholder="Isi angka (%)"
+                                            input-style="border: 2px solid;" :max="100" :useGrouping="false"
+                                            placeholder="Isi angka (%)"
                                             @input="val => onChangeElemenPerbandinganLokasi('kondisi_lingkungan', val, pbIdx + 1, pb.id)" />
                                     </template>
 
                                     <!-- Posisi Aset -->
                                     <template v-else-if="item.label === 'Posisi Aset'">
                                         <InputNumber v-model="pb[`persen_${pbIdx + 1}`]" class="w-full" :min="0"
-                                            :max="100" :useGrouping="false" placeholder="Isi angka (%)"
+                                            input-style="border: 2px solid;" :max="100" :useGrouping="false"
+                                            placeholder="Isi angka (%)"
                                             @input="val => onChangeElemenPerbandinganLokasi('posisi_aset', val, pbIdx + 1, pb.id)" />
                                     </template>
 
                                     <!-- Lainnya (Sebutkan) -->
                                     <template v-else-if="item.label === 'Lainnya (Sebutkan)'">
                                         <InputNumber v-model="pb[`persen_${pbIdx + 1}`]" class="w-full" :min="0"
-                                            :max="100" :useGrouping="false" placeholder="Isi angka (%)"
+                                            input-style="border: 2px solid;" :max="100" :useGrouping="false"
+                                            placeholder="Isi angka (%)"
                                             @input="val => onChangeElemenPerbandinganLokasi('lainnya', val, pbIdx + 1, pb.id)" />
                                     </template>
                                 </td>
@@ -1361,66 +1375,101 @@ onBeforeMount(async () => {
                             <template v-for="(pb, pbIdx) in item.pembanding" :key="'pb-' + pbIdx">
                                 <!-- Kiri -->
                                 <td class="p-2 border dark:border-gray-600 dark:text-white">
-                                    {{ pb.deskripsi || '-' }}
+                                    {{ pb[`deskripsi_${pbIdx + 1}`] || '-' }}
                                 </td>
                                 <!-- Input angka sesuai label -->
                                 <td class="p-2 border dark:border-gray-600">
                                     <!-- Luas Tanah -->
                                     <template v-if="item.label === 'Luas Tanah'">
-                                        -
+                                        <div class="flex items-center w-full">
+                                            <!-- Kolom kiri (50%) -->
+                                            <div class="w-1/2 text-center">
+                                                <p class="text-sm dark:text-white">
+                                                    {{ pb[`tempPersen_${pbIdx + 1}`] ?? '-' }}
+                                                </p>
+                                            </div>
+
+                                            <!-- Kolom kanan (50%) -->
+                                            <div class="w-1/2 flex justify-end">
+                                                <InputNumber v-model="pb[`persen_${pbIdx + 1}`]"
+                                                    :input-style="{ width: '50%', border: '2px solid', }" :min="0"
+                                                    :max="100" :useGrouping="false" placeholder="Isi angka (%)"
+                                                    @input="val => onChangeElemenPerbandinganKarakteristikFisik('luas_tanah', val, pbIdx + 1, pb.id)" />
+                                            </div>
+                                        </div>
                                     </template>
+
 
                                     <!-- Luas Bangunan -->
                                     <template v-else-if="item.label === 'Luas Bangunan'">
-                                        -
+                                        <div class="flex items-center w-full">
+                                            <div class="w-1/2 text-center">
+                                                <p>{{ pb[`tempPersen_${pbIdx + 1}`] ?? '-' }}</p>
+                                            </div>
+
+                                            <div class="w-1/2 flex justify-end">
+                                                <InputNumber v-model="pb[`persen_${pbIdx + 1}`]"
+                                                    :input-style="{ width: '50%', border: '2px solid', }" :min="0"
+                                                    :max="100" :useGrouping="false" placeholder="Isi angka (%)"
+                                                    @input="val => onChangeElemenPerbandinganKarakteristikFisik('luas_bangunan', val, pbIdx + 1, pb.id)" />
+                                            </div>
+                                        </div>
                                     </template>
+
 
                                     <!-- Bentuk -->
                                     <template v-else-if="item.label === 'Bentuk'">
                                         <InputNumber v-model="pb[`persen_${pbIdx + 1}`]" class="w-full" :min="0"
-                                            :max="100" :useGrouping="false" placeholder="Isi angka (%)"
+                                            input-style="border: 2px solid;" :max="100" :useGrouping="false"
+                                            placeholder="Isi angka (%)"
                                             @input="val => onChangeElemenPerbandinganKarakteristikFisik('bentuk', val, pbIdx + 1, pb.id)" />
                                     </template>
 
                                     <!-- Elevasi -->
                                     <template v-else-if="item.label === 'Elevasi'">
                                         <InputNumber v-model="pb[`persen_${pbIdx + 1}`]" class="w-full" :min="0"
-                                            :max="100" :useGrouping="false" placeholder="Isi angka (%)"
+                                            input-style="border: 2px solid;" :max="100" :useGrouping="false"
+                                            placeholder="Isi angka (%)"
                                             @input="val => onChangeElemenPerbandinganKarakteristikFisik('elevasi', val, pbIdx + 1, pb.id)" />
                                     </template>
 
                                     <!-- Topografi -->
                                     <template v-else-if="item.label === 'Topografi'">
                                         <InputNumber v-model="pb[`persen_${pbIdx + 1}`]" class="w-full" :min="0"
-                                            :max="100" :useGrouping="false" placeholder="Isi angka (%)"
+                                            input-style="border: 2px solid;" :max="100" :useGrouping="false"
+                                            placeholder="Isi angka (%)"
                                             @input="val => onChangeElemenPerbandinganKarakteristikFisik('topografi', val, pbIdx + 1, pb.id)" />
                                     </template>
 
                                     <!-- Lebar Muka -->
                                     <template v-else-if="item.label === 'Lebar Muka'">
                                         <InputNumber v-model="pb[`persen_${pbIdx + 1}`]" class="w-full" :min="0"
-                                            :max="100" :useGrouping="false" placeholder="Isi angka (%)"
+                                            input-style="border: 2px solid;" :max="100" :useGrouping="false"
+                                            placeholder="Isi angka (%)"
                                             @input="val => onChangeElemenPerbandinganKarakteristikFisik('lebar_muka', val, pbIdx + 1, pb.id)" />
                                     </template>
 
                                     <!-- Peruntukan -->
                                     <template v-else-if="item.label === 'Peruntukan'">
                                         <InputNumber v-model="pb[`persen_${pbIdx + 1}`]" class="w-full" :min="0"
-                                            :max="100" :useGrouping="false" placeholder="Isi angka (%)"
+                                            input-style="border: 2px solid;" :max="100" :useGrouping="false"
+                                            placeholder="Isi angka (%)"
                                             @input="val => onChangeElemenPerbandinganKarakteristikFisik('peruntukan', val, pbIdx + 1, pb.id)" />
                                     </template>
 
                                     <!-- Kondisi Bangunan -->
                                     <template v-else-if="item.label === 'Kondisi Bangunan'">
                                         <InputNumber v-model="pb[`persen_${pbIdx + 1}`]" class="w-full" :min="0"
-                                            :max="100" :useGrouping="false" placeholder="Isi angka (%)"
+                                            input-style="border: 2px solid;" :max="100" :useGrouping="false"
+                                            placeholder="Isi angka (%)"
                                             @input="val => onChangeElemenPerbandinganKarakteristikFisik('kondisi_bangunan', val, pbIdx + 1, pb.id)" />
                                     </template>
 
                                     <!-- Lainnya -->
                                     <template v-else-if="item.label === 'Lainnya (Sebutkan)'">
                                         <InputNumber v-model="pb[`persen_${pbIdx + 1}`]" class="w-full" :min="0"
-                                            :max="100" :useGrouping="false" placeholder="Isi angka (%)"
+                                            input-style="border: 2px solid;" :max="100" :useGrouping="false"
+                                            placeholder="Isi angka (%)"
                                             @input="val => onChangeElemenPerbandinganKarakteristikFisik('lainnya', val, pbIdx + 1, pb.id)" />
                                     </template>
 

@@ -127,7 +127,7 @@ onMounted(() => {
     <div class="mt-4">
         <div class="card space-y-4 mt-2 p-4 rounded-lg shadow-md">
             <div class="grid grid-cols-1 gap-4 md:grid-cols-3">
-                <StatusCard label="Total Sewa" :value="data?.length || 0" iconBg="bg-gray-100 dark:bg-gray-700"
+                <StatusCard label="Total Pasar" :value="data?.length || 0" iconBg="bg-gray-100 dark:bg-gray-700"
                     valueColor="text-gray-900 dark:text-white" />
             </div>
         </div>
