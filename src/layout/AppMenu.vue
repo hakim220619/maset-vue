@@ -1,15 +1,27 @@
 <script setup>
 import { AuthApi } from '@/service/Api';
+import { Helper } from '@/service/Helper';
 import { onMounted, ref } from 'vue';
 import AppMenuItem from './AppMenuItem.vue';
 
 const menu = ref([]);
 
+
 onMounted(async () => {
     try {
-        const response = await AuthApi.client().get('/menus');
-        if (response.data.success) {
+        const { role, role_structure, role_access } = Helper.getUsersLocalStorage()
 
+        // ✅ Kirim ke endpoint /menus sebagai query params
+        const response = await AuthApi.client().get('/menus', {
+            params: {
+                role_id: role,
+                role_structure_id: role_structure,
+                role_access_id: role_access
+            }
+        });
+
+        // ✅ Cek response dan ubah data ke format frontend
+        if (response.data.success) {
             const apiMenu = response.data.data;
             menu.value = transformMenu(apiMenu);
         }
@@ -30,13 +42,14 @@ function transformMenu(apiMenu) {
 
 
         return items.map(item => {
+
             const transformedItem = {
                 label: item.name,
                 icon: item.icon || 'pi pi-fw pi-cog',
                 to: `/${item.address}`,
             };
 
-            const children = createMenuItems(item.id);
+            const children = createMenuItems(item.menu_id);
             if (children.length > 0) {
                 transformedItem.items = children;
             }

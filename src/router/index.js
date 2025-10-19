@@ -625,6 +625,26 @@ const routes = [
             },
 
             {
+                path: 'pages/menu_management/access',
+                name: 'menuManagement-list-access',
+                component: () => import('@/views/pages/menu_management/access/Index.vue'),
+                meta: {
+                    requiresAuth: true,
+                    breadcrumb: [{ parent: 'Setting', label: 'Menu Management' }]
+                }
+            },
+            {
+                path: '/pages/menu_management/access/:id/detail',
+                name: 'menuManagement-access-detail',
+                component: () => import('@/views/pages/menu_management/access/Detail.vue'),
+                meta: {
+                    requiresAuth: true,
+                    breadcrumb: [
+                        { parent: 'Setting', label: 'Menu Management Access Detail' }
+                    ]
+                }
+            },
+            {
                 path: 'pages/menu_management',
                 name: 'menuManagement-list',
                 component: () => import('@/views/pages/menu_management/Index.vue'),
@@ -651,15 +671,7 @@ const routes = [
                     breadcrumb: [{ parent: 'Setting', label: 'Menu Management', item: 'Edit Menu Management' }]
                 }
             },
-            {
-                path: 'pages/menu_management/:id/detail',
-                name: 'menuManagement-detail',
-                component: () => import('@/views/pages/menu_management/Detail.vue'),
-                meta: {
-                    requiresAuth: true,
-                    breadcrumb: [{ parent: 'Setting', label: 'Menu Management', item: 'Detail Menu Management' }]
-                }
-            },
+
             {
                 path: 'pages/role_structure',
                 name: 'roleStructure-list',

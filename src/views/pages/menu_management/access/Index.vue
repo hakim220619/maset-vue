@@ -1,8 +1,7 @@
 <script setup>
-import DropdownButton from '@/components/DropdownButton.vue';
 import { AuthApi } from '@/service/Api';
 import { Helper } from '@/service/Helper';
-import { inject, onMounted, ref } from 'vue';
+import { inject, onMounted, reactive, ref } from 'vue';
 import { useRouter } from 'vue-router';
 
 const swal = inject('$swal');
@@ -19,9 +18,9 @@ const first = ref(0);
 const loading = ref(true);
 
 // ✅ Inisialisasi filters secara lengkap untuk menghindari error reaktif
-const filters = ref({
+const filters = reactive({
     global: { value: '', matchMode: 'contains' },
-    name: { value: '', matchMode: 'contains' },
+    rs_name: { value: '', matchMode: 'contains' },
     icon: { value: '', matchMode: 'contains' },
     address: { value: '', matchMode: 'contains' },
     order_list: { value: '', matchMode: 'contains' },
@@ -49,7 +48,8 @@ async function getMenuManagement() {
     isFiltering.value = true;
     const params = Helper.formatSearchParams(search.value);
     try {
-        const response = await AuthApi.client().get('/menus/?' + new URLSearchParams(params));
+        const response = await AuthApi.client().get('/role_structure/?' + new URLSearchParams(params));
+        console.log(response);
 
         const filteredData = response.data.data;
         const sortedData = filteredData.sort((a, b) => {
@@ -63,29 +63,6 @@ async function getMenuManagement() {
         loading.value = false;
     }
 }
-
-const items = [
-    {
-        label: 'Detail',
-        command: (e) => {
-            console.log(e.item.data.menu_id);
-
-            router.push({ name: 'menuManagement-detail', params: { id: e.item.data.menu_id } });
-        }
-    },
-    {
-        label: 'Ubah',
-        command: (e) => {
-            router.push({ name: 'menuManagement-edit', params: { id: e.item.data.menu_id } });
-        }
-    },
-    {
-        label: 'Hapus',
-        command: (e) => {
-            destroy(e.item.data.menu_id, e.item.data.name);
-        }
-    }
-];
 
 const destroy = (id, name) => {
     swal
@@ -106,6 +83,7 @@ const destroy = (id, name) => {
         .then(async (result) => {
             if (result.isConfirmed) {
                 const response = await AuthApi.client().delete('menus/' + id);
+                console.log(response);
 
                 if (response.data.success) {
                     swal.fire({
@@ -124,10 +102,16 @@ const exportExcel = async () => {
     await Helper.exportExcelFromApi('gateway/idp/menu/export', 'menu.xlsx', params);
 };
 
-const add = () => {
-    router.push('/pages/menu_management/create');
+const showDetail = (data) => {
+
+    router.push({
+        name: 'menuManagement-access-detail',
+        params: { id: data.rs_id }
+    });
     isRedirect.value = true;
 };
+
+
 
 onMounted(() => {
     getMenuManagement();
@@ -136,15 +120,6 @@ onMounted(() => {
 
 
 <template>
-    <div class="flex items-center justify-between flex-wrap">
-        <p></p>
-
-        <ButtonGroup class="w-full md:w-auto flex justify-between mt-4 md:mt-0">
-            <Button label="Export" icon="pi pi-upload" @click="exportExcel" :loading="isExport"
-                class="w-full md:w-auto mb-2 md:mb-0" />
-            <Button label="Create" icon="pi pi-plus" @click="add" class="w-full md:w-auto mb-2 md:mb-0" />
-        </ButtonGroup>
-    </div>
 
 
     <div class="mt-4">
@@ -188,74 +163,54 @@ onMounted(() => {
         <div class="card mt-5">
             <div class="font-semibold text-xl mb-2">List of Data</div>
             <div class="card mt-4">
-                <DataTable v-model:filters="filters" :value="data" paginator showGridlines :rows="10" dataKey="id"
-                    filterDisplay="menu" :loading="loading" :globalFilterFields="['name', 'icon', 'address']">
+                <DataTable v-model:filters="filters" :value="data" paginator showGridlines :rows="50" dataKey="id"
+                    filterDisplay="menu" :loading="loading" :globalFilterFields="['rs_name', 'icon', 'address']">
                     <template #header>
-                        <div class="flex justify-between">
+                        <div class="flex justify-between items-center">
                             <p></p>
-                            <IconField>
-                                <InputIcon>
-                                    <i class="pi pi-search" />
-                                </InputIcon>
-                                <InputText v-model="filters['global'].value" placeholder="Keyword Search" />
-                            </IconField>
+                            <div class="flex items-center gap-2">
+                                <i class="pi pi-search text-gray-500"></i>
+                                <InputText v-model="filters['global'].value" placeholder="Keyword Search"
+                                    class="p-inputtext-sm" />
+                            </div>
                         </div>
                     </template>
-                    <template #empty> No data found. </template>
-                    <template #loading> Loading data data. Please wait. </template>
 
-                    <Column field="no" header="No" style="min-width: 6rem">
+                    <template #empty> No data found. </template>
+                    <template #loading> Loading data. Please wait. </template>
+
+                    <Column field="no" header="No" style="width: 1rem">
                         <template #body="{ index }">{{ index + 1 }}</template>
                     </Column>
 
-                    <Column field="name" header="User" style="min-width: 12rem">
-                        <template #body="{ data }">{{ data.name }}</template>
-                        <template #filter="{ filterModel }">
-                            <InputText v-model="filterModel.value" type="text" placeholder="Search by name" />
-                        </template>
-                    </Column>
-
-                    <Column field="icon" header="Icon" style="min-width: 12rem">
-                        <template #body="{ data }">{{ data.icon }}</template>
-                        <template #filter="{ filterModel }">
-                            <InputText v-model="filterModel.value" type="text" placeholder="Search by Icon" />
-                        </template>
-                    </Column>
-
-                    <Column field="address" header="Address" style="min-width: 20rem">
-                        <template #body="{ data }">{{ data.address }}</template>
-                        <template #filter="{ filterModel }">
-                            <InputText v-model="filterModel.value" type="text" placeholder="Search by Address" />
-                        </template>
-                    </Column>
-
-                    <Column field="order_list" header="Order List" style="min-width: 14rem">
-                        <template #body="{ data }">{{ data.order_list }}</template>
-                        <template #filter="{ filterModel }">
-                            <InputText v-model="filterModel.value" type="text" placeholder="Search by Order List" />
-                        </template>
-                    </Column>
-
-                    <Column field="status" header="Status" style="min-width: 10rem">
+                    <Column header="Actions" :bodyStyle="{ textAlign: 'center' }" style="width: 1rem;">
                         <template #body="{ data }">
-                            <Tag :value="Helper.getStatusLabel(data.status)"
-                                :severity="Helper.getStatusSeverity(data.status)" />
+                            <Button icon="pi pi-eye" class="p-button-rounded p-button-info p-button-text"
+                                style="width: 2.5rem; height: 2.5rem; font-size: 1.5rem;" @click="showDetail(data)"
+                                v-tooltip.top="'View Detail'" />
+                        </template>
+                    </Column>
+
+                    <Column field="rs_name" sortable header="Role Name" style="min-width: 12rem">
+                        <template #body="{ data }">{{ data.rs_name }}</template>
+                        <template #filter="{ filterModel }">
+                            <InputText v-model="filterModel.value" placeholder="Search by Role Name" />
+                        </template>
+                    </Column>
+
+                    <Column field="rs_status" sortable header="Status" style="min-width: 10rem">
+                        <template #body="{ data }">
+                            <Tag :value="Helper.getStatusLabel(data.rs_status)"
+                                :severity="Helper.getStatusSeverity(data.rs_status)" />
                         </template>
                         <template #filter="{ filterModel }">
                             <Dropdown v-model="filterModel.value" :options="statusOptions" placeholder="Filter Status"
                                 optionLabel="label" optionValue="value" />
                         </template>
                     </Column>
-
-                    <Column>
-                        <template #body="{ data }">
-                            <div class="flex gap-1 justify-end">
-                                <DropdownButton :items="items" :data="data" :menu-key="data.id" />
-                            </div>
-                        </template>
-                    </Column>
                 </DataTable>
             </div>
         </div>
+
     </div>
 </template>
