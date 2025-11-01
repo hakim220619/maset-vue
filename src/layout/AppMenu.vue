@@ -1,17 +1,26 @@
 <script setup>
 import { AuthApi } from '@/service/Api';
 import { Helper } from '@/service/Helper';
-import { onMounted, ref } from 'vue';
+import { onMounted, onUnmounted, ref } from 'vue';
 import AppMenuItem from './AppMenuItem.vue';
 
 const menu = ref([]);
-
+let intervalId = null;
 
 onMounted(async () => {
-    try {
-        const { role, role_structure, role_access } = Helper.getUsersLocalStorage()
+    await fetchMenu();
 
-        // ✅ Kirim ke endpoint /menus sebagai query params
+    intervalId = setInterval(fetchMenu, 3000);
+});
+
+onUnmounted(() => {
+    if (intervalId) clearInterval(intervalId);
+});
+
+async function fetchMenu() {
+
+    try {
+        const { role, role_structure, role_access } = Helper.getUsersLocalStorage();
         const response = await AuthApi.client().get('/menus', {
             params: {
                 role_id: role,
@@ -20,15 +29,16 @@ onMounted(async () => {
             }
         });
 
-        // ✅ Cek response dan ubah data ke format frontend
         if (response.data.success) {
-            const apiMenu = response.data.data;
-            menu.value = transformMenu(apiMenu);
+            const accessibleMenu = response.data.data.filter(item => item.can_access == 1);
+            menu.value = transformMenu(accessibleMenu);
         }
     } catch (error) {
         console.error('Error fetching menu:', error);
     }
-});
+}
+
+
 function transformMenu(apiMenu) {
     const grouped = apiMenu.reduce((acc, item) => {
         const { parent_id } = item;
@@ -40,9 +50,7 @@ function transformMenu(apiMenu) {
     function createMenuItems(parentId) {
         const items = (grouped[parentId] || []).sort((a, b) => a.order_list - b.order_list);
 
-
         return items.map(item => {
-
             const transformedItem = {
                 label: item.name,
                 icon: item.icon || 'pi pi-fw pi-cog',
@@ -58,11 +66,8 @@ function transformMenu(apiMenu) {
         });
     }
 
-    return createMenuItems(null).sort((a, b) => a.order_list - b.order_list);
+    return createMenuItems(null);
 }
-
-
-
 </script>
 
 <template>

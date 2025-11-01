@@ -339,7 +339,7 @@ function changeScene(item) {
 }
 
 function changeDarkMode() {
-    // layoutConfigSession.value = layoutConfig;
+    layoutConfigSession.value = layoutConfig;
     toggleDarkMode();
 }
 

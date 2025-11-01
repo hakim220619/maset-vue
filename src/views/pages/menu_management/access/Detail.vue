@@ -22,6 +22,7 @@ const roleData = ref([]);
 
 const filters = ref({
     global: { value: '', matchMode: 'contains' },
+    name: { value: '', matchMode: 'contains' },
 });
 
 const form = ref({
@@ -207,7 +208,6 @@ const toggleRowSelectAll = async (row) => {
 
     row.isAll = newValue;
 
-    // 🔹 Panggil API untuk menyimpan perubahan
     try {
         const payload = {
             menu_id: row.menu_id,
@@ -224,7 +224,7 @@ const toggleRowSelectAll = async (row) => {
 
         await AuthApi.client().put(`menuPermissionAll/${role_structure}`, payload);
 
-        console.log('✅ Menu permission updated successfully:', payload);
+        // console.log('✅ Menu permission updated successfully:', payload);
     } catch (error) {
         console.error('❌ Failed to update menu permission:', error);
     }
@@ -250,7 +250,7 @@ const onPermissionChange = async (row) => {
         // 🔹 Siapkan payload sesuai struktur data backend
         const payload = {
             menu_id: row.menu_id,
-            role_structure_id: role_structure,
+            role_structure_id: row.role_structure_id,
             can_access: row.access,
             can_create: row.create,
             can_read: row.read,
@@ -261,7 +261,7 @@ const onPermissionChange = async (row) => {
         };
 
         // 🔹 Kirim PUT request ke API
-        await AuthApi.client().put(`menuAccessById/${role_structure}`, payload);
+        await AuthApi.client().put(`menuAccessById/${row.role_structure_id}`, payload);
 
     } catch (error) {
         console.error(`❌ Failed to update menu access for menu_id=${row.menu_id}:`, error);
@@ -309,7 +309,7 @@ const goBack = () => {
                     {{ slotProps.index + 1 }}
                 </template>
             </Column>
-            <Column header="Menu" style="width: 4rem">
+            <Column field="name" header="Menu" style="width: 4rem">
                 <template #body="{ data }">
                     {{ data.name }}
                 </template>

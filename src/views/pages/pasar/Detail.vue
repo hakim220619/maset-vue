@@ -809,6 +809,7 @@ onBeforeMount(async () => {
                 return {
                     id: existing?.id ?? 0,
                     [`deskripsi_${idx + 1}`]: existing?.[`deskripsi_${idx + 1}`] ?? "",
+                    [`tempPersen_${idx + 1}`]: existing?.[`tempPersen_${idx + 1}`] ?? 0,
                     [`persen_${idx + 1}`]: existing?.[`persen_${idx + 1}`] ?? 0,
                     [`penyesuaian_${idx + 1}`]: existing?.[`penyesuaian_${idx + 1}`] ?? 0,
                     [`hasil_${idx + 1}`]: existing?.[`hasil_${idx + 1}`] ?? 0,
