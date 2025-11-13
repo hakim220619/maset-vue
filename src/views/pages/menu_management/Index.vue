@@ -66,14 +66,6 @@ async function getMenuManagement() {
 
 const items = [
     {
-        label: 'Detail',
-        command: (e) => {
-            console.log(e.item.data.menu_id);
-
-            router.push({ name: 'menuManagement-detail', params: { id: e.item.data.menu_id } });
-        }
-    },
-    {
         label: 'Ubah',
         command: (e) => {
             router.push({ name: 'menuManagement-edit', params: { id: e.item.data.menu_id } });
@@ -188,7 +180,7 @@ onMounted(() => {
         <div class="card mt-5">
             <div class="font-semibold text-xl mb-2">List of Data</div>
             <div class="card mt-4">
-                <DataTable v-model:filters="filters" :value="data" paginator showGridlines :rows="10" dataKey="id"
+                <DataTable v-model:filters="filters" :value="data" paginator showGridlines :rows="50" dataKey="id"
                     filterDisplay="menu" :loading="loading" :globalFilterFields="['name', 'icon', 'address']">
                     <template #header>
                         <div class="flex justify-between">

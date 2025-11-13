@@ -119,6 +119,7 @@ async function getMenuManagement() {
     try {
         const response = await AuthApi.client().get('menus/');
         const filteredData = response.data.data.filter(item => item.status === 1);
+
         const sortedData = filteredData.sort((a, b) => {
             return a.parent_id - b.parent_id;
         });
@@ -170,7 +171,7 @@ const formattedName = computed({
 });
 
 const parentIdOptions = computed(() => [
-    { id: null, name: '— No Parent —' },
+    { menu_id: null, name: '— No Parent —' },
     ...parentIdDataHeader.value
 ]);
 
@@ -215,7 +216,7 @@ const goBack = () => {
                 <div class="col-span-6">
                     <Label for="parent_id" class="block mb-1 text-gray-700 dark:text-white">Parent ID</Label>
                     <Select v-model="form.data.parent_id" :options="parentIdOptions" show-clear option-label="name"
-                        option-value="id" :virtualScrollerOptions="{ itemSize: 38 }" filter
+                        option-value="menu_id" :virtualScrollerOptions="{ itemSize: 38 }" filter
                         placeholder="Select a parent name" class="w-full" :invalid="!!form.errors.parent_id" />
                     <InputError :message="form.errors.parent_id" />
                 </div>

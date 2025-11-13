@@ -673,6 +673,15 @@ const routes = [
             },
 
             {
+                path: 'pages/whatsapp',
+                name: 'Whatsapp-list-setting',
+                component: () => import('@/views/pages/whatsapp/Index.vue'),
+                meta: {
+                    requiresAuth: true,
+                    breadcrumb: [{ parent: 'Setting', label: 'Whatsapp' }]
+                }
+            },
+            {
                 path: 'pages/role_structure',
                 name: 'roleStructure-list',
                 component: () => import('@/views/pages/role_structure/Index.vue'),

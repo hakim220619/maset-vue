@@ -10,7 +10,7 @@ const swal = inject('$swal');
 const data = ref([]);
 const loading = ref(true);
 
-const selectedMenu = ref(null);
+const selectedRole = ref(null);
 const broadcastMessage = ref('');
 const sending = ref(false);
 
@@ -55,7 +55,7 @@ async function getMenuManagement() {
 }
 
 async function sendBroadcast() {
-    if (!selectedMenu.value) {
+    if (!selectedRole.value) {
         swal.fire('Error', 'Please select a menu to broadcast', 'error');
         return;
     }
@@ -64,30 +64,61 @@ async function sendBroadcast() {
         return;
     }
 
+    if (!selectedUsers.value.length) {
+        swal.fire('Error', 'No users selected for broadcast', 'error');
+        return;
+    }
+
     sending.value = true;
+
     try {
-        const payload = {
-            menu_id: selectedMenu.value,
-            message: broadcastMessage.value.trim()
-        };
-        const response = await AuthApi.client().post('/broadcast/send', payload);
-        if (response.data.success) {
-            swal.fire('Success', 'Broadcast message sent!', 'success');
-            broadcastMessage.value = '';
-            selectedMenu.value = null;
-            selectedUsers.value = [];
-        } else {
-            swal.fire('Failed', response.data.message || 'Broadcast failed', 'error');
+        const total = selectedUsers.value.length;
+        let successCount = 0;
+        let failCount = 0;
+
+        for (const user of selectedUsers.value) {
+            if (!user.contact) continue;
+
+            const payload = {
+                session_id: 'appgodigii1ea7f46c7f910a404938f7f8a8c184',
+                number: user.contact, // ambil dari field contact
+                message: broadcastMessage.value.trim(),
+            };
+
+            try {
+                const response = await AuthApi.client().post('/whatsapp_gateway/send-message', payload);
+
+                if (response.data?.success) {
+                    successCount++;
+                } else {
+                    failCount++;
+                }
+            } catch (err) {
+                console.error(`Failed to send to ${user.contact}:`, err.message);
+                failCount++;
+            }
         }
+
+        swal.fire(
+            'Broadcast Finished',
+            `✅ Sent: ${successCount}\n❌ Failed: ${failCount}\n📱 Total: ${total}`,
+            successCount === total ? 'success' : 'warning'
+        );
+
+        broadcastMessage.value = '';
+        selectedRole.value = null;
+        selectedUsers.value = [];
+
     } catch (error) {
-        swal.fire('Error', 'Broadcast failed', 'error');
         console.error(error);
+        swal.fire('Error', 'Broadcast failed unexpectedly', 'error');
     } finally {
         sending.value = false;
     }
 }
 
-watch(selectedMenu, (roleAccessId) => {
+
+watch(selectedRole, (roleAccessId) => {
     if (roleAccessId) {
         filteredUsers.value = usersOptions.value.filter(
             user => user.role_access === roleAccessId
@@ -99,7 +130,7 @@ watch(selectedMenu, (roleAccessId) => {
 });
 
 function clearAll() {
-    selectedMenu.value = null;
+    selectedRole.value = null;
     selectedUsers.value = [];
     broadcastMessage.value = '';
 }
@@ -117,7 +148,7 @@ onMounted(() => {
             <div class="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-4">
                 <div class="mb-4">
                     <Label for="menuSelect" class="block text-gray-700 font-medium mb-1">Role Access</Label>
-                    <Select v-model="selectedMenu" :options="roleAccessOptions" show-clear option-label="name"
+                    <Select v-model="selectedRole" :options="roleAccessOptions" show-clear option-label="name"
                         option-value="id" filter placeholder="Select a role access" class="w-full" />
                 </div>
 
